@@ -55,8 +55,6 @@ public class ReplaceGen {
 		
 		  while(it.hasNext() )
 		  {
-			  if(true)
-				  continue;
 			Map.Entry<BlockPos, TileEntity> pair = it.next();
 			BlockPos pos = pair.getKey();
 			TileEntity tile = pair.getValue();

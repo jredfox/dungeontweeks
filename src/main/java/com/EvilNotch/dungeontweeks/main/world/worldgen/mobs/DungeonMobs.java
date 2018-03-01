@@ -32,9 +32,7 @@ public class DungeonMobs {
 		
 		//sets forge to default list for per entity compatibility detection
 		ArrayList default_forge = new ArrayList();
-		default_forge.add(new DungeonMob(100, new ResourceLocation("minecraft:skeleton")));
-		default_forge.add(new DungeonMob(200, new ResourceLocation("minecraft:zombie")));
-		default_forge.add(new DungeonMob(100, new ResourceLocation("minecraft:spider")));
+		default_forge.add(new DungeonMob(100, new ResourceLocation("minecraft:blank")));
 		ReflectionUtil.setObject(null, default_forge, DungeonHooks.class, "dungeonMobs");//empties forges list as it's no longer needed
 		
 		//vanilla support

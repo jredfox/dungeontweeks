@@ -1,5 +1,6 @@
 package com.EvilNotch.dungeontweeks.main.EventHandlers;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
@@ -16,6 +17,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.tileentity.TileEntityMobSpawner;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.ChunkGeneratorHell;
@@ -40,16 +42,21 @@ public class ReplaceGen {
 		if(w.isRemote || !w.provider.isNether())
 			return;
 		Chunk chunk = w.getChunkFromChunkCoords(e.getChunkX(), e.getChunkZ() );
-		Map<BlockPos, TileEntity> map = chunk.getTileEntityMap();
-		IChunkGenerator gen = e.getGenerator();
-		if(map == null)
-		{
-			System.out.println(e.getChunkX() + ", " + e.getChunkZ());
-		}
-		Iterator<Map.Entry<BlockPos, TileEntity>> it = map.entrySet().iterator();
 		
-		while(it.hasNext() )
+		IChunkGenerator gen = e.getGenerator();
+		ArrayList<Chunk> chunks = getRadiusChunks(w,e.getChunkX(),e.getChunkZ(),1);
+		for(Chunk c : chunks)
 		{
+		  Map<BlockPos, TileEntity> map = c.getTileEntityMap();
+		  if(map == null)
+			return;
+//		  System.out.println("C:" + chunks.size());
+		  Iterator<Map.Entry<BlockPos, TileEntity>> it = map.entrySet().iterator();
+		
+		  while(it.hasNext() )
+		  {
+			  if(true)
+				  continue;
 			Map.Entry<BlockPos, TileEntity> pair = it.next();
 			BlockPos pos = pair.getKey();
 			TileEntity tile = pair.getValue();
@@ -57,7 +64,25 @@ public class ReplaceGen {
 				System.out.println("Spawner:" + pos);
 			EventDungeon d = new EventDungeon.Post(tile,pos, Type.NETHERFORTRESS);
 			MinecraftForge.EVENT_BUS.post(d);
+		  }
 		}
+	}
+	/**
+	 * Get chunks from center radius
+	 */
+	public static ArrayList<Chunk> getRadiusChunks(World w, int chunkPosX, int chunkPosZ,int radius) {
+		ArrayList<Chunk> chunks = new ArrayList();
+		int index = 0;
+		  for (int x = chunkPosX - radius; x <= chunkPosX + radius; x++) {
+	            for (int z = chunkPosZ - radius; z <= chunkPosZ + radius; z++) {
+	            	index++;
+	            	if(w.isChunkGeneratedAt(x, z))
+	            		chunks.add(w.getChunkFromChunkCoords(x, z));
+	            }
+		  }
+		  if(index != 9)
+			  System.out.println("Index != 9");
+		return chunks;
 	}
 	/**
 	 * For everything except default dungeon and nether

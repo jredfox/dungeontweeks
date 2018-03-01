@@ -37,62 +37,40 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 public class ReplaceGen {
 	
-	@SubscribeEvent
-	public void dungeonDetectNether(PopulateChunkEvent.Post e)
-	{
-		World w = e.getWorld();
-		if(w.isRemote || !w.provider.isNether())
-			return;
-		Chunk chunk = w.getChunkFromChunkCoords(e.getChunkX(), e.getChunkZ() );
-		
-		IChunkGenerator gen = e.getGenerator();
-		ArrayList<Chunk> chunks = getRadiusChunks(w,e.getChunkX(),e.getChunkZ(),1);
-		for(Chunk c : chunks)
-		{
-		  Map<BlockPos, TileEntity> map = c.getTileEntityMap();
-		  if(map == null)
-			return;
-//		  System.out.println("C:" + chunks.size());
-		  Iterator<Map.Entry<BlockPos, TileEntity>> it = map.entrySet().iterator();
-		
-		  while(it.hasNext() )
-		  {
-			Map.Entry<BlockPos, TileEntity> pair = it.next();
-			BlockPos pos = pair.getKey();
-			TileEntity tile = pair.getValue();
-			if(tile instanceof TileEntityMobSpawner)
-			{
-				System.out.println("Spawner:" + pos);
-				EventDungeon d = new EventDungeon.Post(tile,pos, Type.NETHERFORTRESS);
-				MinecraftForge.EVENT_BUS.post(d);
-			}
-		  }
-		}
-	}
-	/**
-	 * Get chunks from center radius
+	 /**
+	 * Get chunks from center radius without loading them dormant chunk support
 	 */
-	public static ArrayList<Chunk> getRadiusChunks(World w, int chunkPosX, int chunkPosZ,int radius) {
-		ArrayList<Chunk> chunks = new ArrayList();
-		int index = 0;
-		chunks.add(w.getChunkFromChunkCoords(chunkPosX, chunkPosZ));//adds default unpopulated chunks
-		  for (int x = chunkPosX - radius; x <= chunkPosX + radius; x++) {
-	            for (int z = chunkPosZ - radius; z <= chunkPosZ + radius; z++) {
-	            	index++;
-	            	if(w.isChunkGeneratedAt(x, z))
-	            	{
-	            		Chunk c = getPopulatedChunk(w,x,z);
-	            		if(c != null)
-	            			chunks.add(c);
-	            	}
-	            }
-		  }
-		  if(index != 9)
-			  System.out.println("Index != 9");
-		return chunks;
-	}
-	public static Chunk getPopulatedChunk(World w, int x, int z) {
+    public static ArrayList<Chunk> getRadiusChunks(World w, int chunkPosX, int chunkPosZ,int radius) 
+    {
+	  ArrayList<Chunk> chunks = new ArrayList();
+	  if(radius == 0)
+	  {
+		 chunks.add(w.getChunkFromChunkCoords(chunkPosX, chunkPosZ));
+		 return chunks;
+	  }
+	  for (int x = chunkPosX - radius; x <= chunkPosX + radius; x++) {
+            for (int z = chunkPosZ - radius; z <= chunkPosZ + radius; z++) {
+            	if(w.isChunkGeneratedAt(x, z))
+            	{
+            		Chunk c = getLoadedOrPopulatedChunk(w,x,z);
+            		if(c != null)
+            			chunks.add(c);
+            	}
+            }
+	  }
+	  return chunks;
+    }
+	public static Chunk getLoadedOrPopulatedChunk(World w, int x, int z)
+	{
 		Chunk c = w.getChunkProvider().getLoadedChunk(x, z);
+		if(c == null)
+			c = getPopulatedChunk(w,x,z,true);
+		return c;
+	}
+	public static Chunk getPopulatedChunk(World w, int x, int z,boolean dormant) {
+		Chunk c = null;
+		if(!dormant)
+			w.getChunkProvider().getLoadedChunk(x, z);
 		if(c == null)
 		{
 			 long pos = ChunkPos.asLong(x, z);
@@ -112,48 +90,49 @@ public class ReplaceGen {
 	public void dungeonDetect(PopulateChunkEvent.Post e)
 	{
 		World w = e.getWorld();
-		if(w.isRemote || true)
+		if(w.isRemote)
 			return;
-		Chunk chunk = w.getChunkFromChunkCoords(e.getChunkX(), e.getChunkZ() );
-		Map<BlockPos, TileEntity> map = chunk.getTileEntityMap();
 		IChunkGenerator gen = e.getGenerator();
-		if(map == null)
-			return;
-		Iterator<Map.Entry<BlockPos, TileEntity>> it = map.entrySet().iterator();
-		while(it.hasNext() )
+		ArrayList<Chunk> chunks = getRadiusChunks(w, e.getChunkX(), e.getChunkZ(), w.provider.isNether() ? 1 : 0);
+		for(Chunk c : chunks)
 		{
-			Map.Entry<BlockPos, TileEntity> pair = it.next();
-			BlockPos pos = pair.getKey();
-			TileEntity tile = pair.getValue();
-//			if(tile instanceof TileEntityMobSpawner)
+		  Map<BlockPos, TileEntity> map = c.getTileEntityMap();
+		  if(map == null)
+			  return;
+		  Iterator<Map.Entry<BlockPos, TileEntity>> it = map.entrySet().iterator();
+		  while(it.hasNext() )
+		  {
+			  Map.Entry<BlockPos, TileEntity> pair = it.next();
+			  BlockPos pos = pair.getKey();
+			  TileEntity tile = pair.getValue();
 			
-			boolean mineshaft = false;
-			boolean stronghold = false;
-			boolean netherfortress = false;
-			boolean mansion = false;//has spawner in secret room here
+			  boolean mineshaft = false;
+			  boolean stronghold = false;
+			  boolean netherfortress = false;
+			  boolean mansion = false;//has spawner in secret room here
 			
-			if(gen instanceof ChunkGeneratorOverworld)
-			{
-				ChunkGeneratorOverworld gen2 = (ChunkGeneratorOverworld)gen;
-				mineshaft = gen2.isInsideStructure(w, "Mineshaft", pos);
-				stronghold = gen2.isInsideStructure(w, "Stronghold", pos);
-				mansion = gen2.isInsideStructure(w, "Mansion", pos);
-			}
-			else if(gen instanceof ChunkGeneratorHell)
-			{
-				ChunkGeneratorHell gen3 = (ChunkGeneratorHell)gen;
-				netherfortress = true;//gen3.isInsideStructure(w, "Fortress", pos);
-			}
-			if(!mineshaft && !stronghold && !mansion &&!netherfortress)
-				return;
-			if(tile instanceof TileEntityMobSpawner)
-			{				
-				EventDungeon.Type type = mineshaft ? EventDungeon.Type.MINESHAFT : stronghold ? EventDungeon.Type.STRONGHOLD : mansion ? EventDungeon.Type.MANSION : null;
-//				System.out.println(type + " " + pos);
-				EventDungeon.Post d = new EventDungeon.Post(tile,pos,type);
-				MinecraftForge.EVENT_BUS.post(d);
-			}
-		}
+			  if(gen instanceof ChunkGeneratorOverworld)
+			  {
+			  	  ChunkGeneratorOverworld gen2 = (ChunkGeneratorOverworld)gen;
+				  mineshaft = gen2.isInsideStructure(w, "Mineshaft", pos);
+				  stronghold = gen2.isInsideStructure(w, "Stronghold", pos);
+				  mansion = gen2.isInsideStructure(w, "Mansion", pos);
+			  }
+			  else if(gen instanceof ChunkGeneratorHell)
+			  {
+			    ChunkGeneratorHell gen3 = (ChunkGeneratorHell)gen;
+			    netherfortress = gen3.isInsideStructure(w, "Fortress", pos);
+			  }
+			  if(!mineshaft && !stronghold && !mansion)
+				  return;
+			  if(tile instanceof TileEntityMobSpawner)
+			  {				
+				  EventDungeon.Type type = mineshaft ? EventDungeon.Type.MINESHAFT : stronghold ? EventDungeon.Type.STRONGHOLD : mansion ? EventDungeon.Type.MANSION : null;
+				  EventDungeon.Post d = new EventDungeon.Post(tile,pos,type);
+				  MinecraftForge.EVENT_BUS.post(d);
+			  }
+		   }
+	    }
 	}
 	
 	/**
@@ -181,51 +160,6 @@ public class ReplaceGen {
             (new DungeonMain()).generate(w, rand, blockpos.add(i3, l3, l1));
         }
 		e.setResult(Event.Result.DENY);
-		
-		/*
-		Chunk chunk = w.getChunkFromChunkCoords(e.getChunkX(), e.getChunkZ() );
-		Map<BlockPos, TileEntity> map = chunk.getTileEntityMap();
-		if(map == null)
-			return;
-		Iterator<Map.Entry<BlockPos, TileEntity>> it = map.entrySet().iterator();
-		while(it.hasNext() )
-		{
-			Map.Entry<BlockPos, TileEntity> pair = it.next();
-			BlockPos pos = pair.getKey();
-			TileEntity tile = pair.getValue();
-			if(tile instanceof TileEntityChest)
-				continue;
-			if(e.getGenerator() instanceof ChunkGeneratorOverworld)
-			{
-				ChunkGeneratorOverworld gen = (ChunkGeneratorOverworld)e.getGenerator();
-				if(gen.isInsideStructure(w, "Mineshaft", pos) || gen.isInsideStructure(w, "Stronghold", pos) || gen.isInsideStructure(w, "Mansion", pos))
-					return;
-			}
-			if(e.getGenerator() instanceof ChunkGeneratorHell)
-			{
-				ChunkGeneratorHell gen = (ChunkGeneratorHell)e.getGenerator();
-				if(gen.isInsideStructure(w, "Fortress", pos))
-					return;
-			}
-			System.out.println("VDUNGEON:" + pos);
-			
-//			if(true)
-//				continue;
-			if(tile instanceof TileEntityMobSpawner)
-			{
-				IBlockState old = w.getBlockState(pos);
-				NBTTagCompound compound = new NBTTagCompound();
-				tile.writeToNBT(compound);
-				NBTTagCompound data = new NBTTagCompound();
-				data.setString("id", "minecraft:creeper");
-				data.setInteger("powered", 100);
-				compound.setTag("SpawnData", data);
-				compound.removeTag("SpawnPotentials");
-				tile.readFromNBT(compound);
-				tile.markDirty();
-				dungeon = false;
-			}
-		}*/
 	}
 
 }

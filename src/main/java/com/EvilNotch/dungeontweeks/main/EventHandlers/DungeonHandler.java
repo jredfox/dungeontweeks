@@ -41,7 +41,6 @@ public class DungeonHandler {
 		if(e.type == Type.NETHERFORTRESS)
 		{
 			data.setString("id", "wither_skeleton");
-			System.out.println(nbt);
 		}
 		
 		nbt.removeTag("SpawnPotentials");

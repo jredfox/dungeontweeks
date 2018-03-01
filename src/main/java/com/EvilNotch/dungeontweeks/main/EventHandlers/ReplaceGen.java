@@ -36,7 +36,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 public class ReplaceGen {
-	
 	 /**
 	 * Get chunks from center radius without loading them dormant chunk support
 	 */
@@ -63,13 +62,13 @@ public class ReplaceGen {
 	public static Chunk getLoadedOrPopulatedChunk(World w, int x, int z)
 	{
 		Chunk c = w.getChunkProvider().getLoadedChunk(x, z);
-		if(c == null)
-			c = getPopulatedChunk(w,x,z,true);
+//		if(c == null)
+//			c = getPopulatedChunk(w,x,z,true);
 		return c;
 	}
-	public static Chunk getPopulatedChunk(World w, int x, int z,boolean dormant) {
+	public static Chunk getPopulatedChunk(World w, int x, int z,boolean isLoaded) {
 		Chunk c = null;
-		if(!dormant)
+		if(!isLoaded)
 			w.getChunkProvider().getLoadedChunk(x, z);
 		if(c == null)
 		{
@@ -84,7 +83,7 @@ public class ReplaceGen {
     		return null;
 	}
 	/**
-	 * For everything except default dungeon and nether
+	 * For everything except default dungeon this includes modded definitions support
 	 */
 	@SubscribeEvent
 	public void dungeonDetect(PopulateChunkEvent.Post e)
@@ -93,7 +92,7 @@ public class ReplaceGen {
 		if(w.isRemote)
 			return;
 		IChunkGenerator gen = e.getGenerator();
-		ArrayList<Chunk> chunks = getRadiusChunks(w, e.getChunkX(), e.getChunkZ(), w.provider.isNether() ? 1 : 0);
+		ArrayList<Chunk> chunks = getRadiusChunks(w, e.getChunkX(), e.getChunkZ(), 1);
 		for(Chunk c : chunks)
 		{
 		  Map<BlockPos, TileEntity> map = c.getTileEntityMap();
@@ -123,20 +122,23 @@ public class ReplaceGen {
 			    ChunkGeneratorHell gen3 = (ChunkGeneratorHell)gen;
 			    netherfortress = gen3.isInsideStructure(w, "Fortress", pos);
 			  }
-			  if(!mineshaft && !stronghold && !mansion)
+			  if(!mineshaft && !stronghold && !mansion && !netherfortress)
 				  return;
 			  if(tile instanceof TileEntityMobSpawner)
 			  {				
-				  EventDungeon.Type type = mineshaft ? EventDungeon.Type.MINESHAFT : stronghold ? EventDungeon.Type.STRONGHOLD : mansion ? EventDungeon.Type.MANSION : null;
-				  EventDungeon.Post d = new EventDungeon.Post(tile,pos,type);
-				  MinecraftForge.EVENT_BUS.post(d);
+				  EventDungeon.Type type = mineshaft ? EventDungeon.Type.MINESHAFT : stronghold ? EventDungeon.Type.STRONGHOLD : mansion ? EventDungeon.Type.MANSION : netherfortress ? EventDungeon.Type.NETHERFORTRESS : EventDungeon.Type.MODED;
+				  if(type != null)
+				  {
+				    EventDungeon.Post d = new EventDungeon.Post(tile,pos,type);
+				    MinecraftForge.EVENT_BUS.post(d);
+				  }
 			  }
 		   }
 	    }
 	}
 	
 	/**
-	 * ability for any dimension any biome
+	 * replaces vanilla dugeon
 	 */
 	@SubscribeEvent
 	public void dungeonReplace(PopulateChunkEvent.Populate e)

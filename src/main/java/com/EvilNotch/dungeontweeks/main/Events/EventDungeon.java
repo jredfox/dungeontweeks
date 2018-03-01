@@ -41,10 +41,9 @@ public class EventDungeon extends Event{
 		DUNGEON("dungeon"),
 	    MINESHAFT("mineshaft"),
 	    STRONGHOLD("stronghold"),
-	    NETHERFORTRESS("nether_fortress"),
-	    BATTLETOWER("battletowers"),
-	    OTHER("other"), 
-	    MANSION("mansion");
+	    NETHERFORTRESS("nether_fortress"), 
+	    MANSION("mansion"),
+	    MODED("blank_");
 		
 		public final String type;
 		

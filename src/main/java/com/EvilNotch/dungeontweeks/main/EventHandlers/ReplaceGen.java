@@ -1,5 +1,6 @@
 package com.EvilNotch.dungeontweeks.main.EventHandlers;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -32,6 +33,7 @@ import net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 public class ReplaceGen {
 	
@@ -59,9 +61,11 @@ public class ReplaceGen {
 			BlockPos pos = pair.getKey();
 			TileEntity tile = pair.getValue();
 			if(tile instanceof TileEntityMobSpawner)
+			{
 				System.out.println("Spawner:" + pos);
-			EventDungeon d = new EventDungeon.Post(tile,pos, Type.NETHERFORTRESS);
-			MinecraftForge.EVENT_BUS.post(d);
+				EventDungeon d = new EventDungeon.Post(tile,pos, Type.NETHERFORTRESS);
+				MinecraftForge.EVENT_BUS.post(d);
+			}
 		  }
 		}
 	}
@@ -75,12 +79,30 @@ public class ReplaceGen {
 	            for (int z = chunkPosZ - radius; z <= chunkPosZ + radius; z++) {
 	            	index++;
 	            	if(w.isChunkGeneratedAt(x, z))
-	            		chunks.add(w.getChunkFromChunkCoords(x, z));
+	            	{
+	            		Chunk c = getPopulatedChunk(w,x,z);
+	            		if(c != null)
+	            			chunks.add(c);
+	            	}
 	            }
 		  }
 		  if(index != 9)
 			  System.out.println("Index != 9");
 		return chunks;
+	}
+	public static Chunk getPopulatedChunk(World w, int x, int z) {
+		Chunk c = w.getChunkProvider().getLoadedChunk(x, z);
+		if(c == null)
+		{
+			 long pos = ChunkPos.asLong(x, z);
+	         c = net.minecraftforge.common.ForgeChunkManager.fetchDormantChunk(pos, w);
+	         if(c == null)
+	        	 return null;
+		}
+    	if(c.isPopulated())
+    		return c;
+    	else
+    		return null;
 	}
 	/**
 	 * For everything except default dungeon and nether

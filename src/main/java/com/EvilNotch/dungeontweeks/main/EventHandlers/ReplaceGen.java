@@ -75,6 +75,7 @@ public class ReplaceGen {
 	public static ArrayList<Chunk> getRadiusChunks(World w, int chunkPosX, int chunkPosZ,int radius) {
 		ArrayList<Chunk> chunks = new ArrayList();
 		int index = 0;
+		chunks.add(w.getChunkFromChunkCoords(chunkPosX, chunkPosZ));//adds default unpopulated chunks
 		  for (int x = chunkPosX - radius; x <= chunkPosX + radius; x++) {
 	            for (int z = chunkPosZ - radius; z <= chunkPosZ + radius; z++) {
 	            	index++;

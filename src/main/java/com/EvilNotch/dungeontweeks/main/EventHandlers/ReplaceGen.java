@@ -8,6 +8,8 @@ import java.util.Random;
 
 import com.EvilNotch.dungeontweeks.Api.ReflectionUtil;
 import com.EvilNotch.dungeontweeks.main.MainJava;
+import com.EvilNotch.dungeontweeks.main.Attatchments.CapInterface;
+import com.EvilNotch.dungeontweeks.main.Attatchments.CapProvider;
 import com.EvilNotch.dungeontweeks.main.Events.EventDungeon;
 import com.EvilNotch.dungeontweeks.main.Events.EventDungeon.Type;
 import com.EvilNotch.dungeontweeks.main.world.worldgen.DungeonMain;
@@ -17,6 +19,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.tileentity.TileEntityMobSpawner;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
@@ -123,22 +126,28 @@ public class ReplaceGen {
 			    netherfortress = gen3.isInsideStructure(w, "Fortress", pos);
 			  }
 			  if(!mineshaft && !stronghold && !mansion && !netherfortress)
+			  {
 				  return;
+			  }
 			  if(tile instanceof TileEntityMobSpawner)
-			  {				
-				  EventDungeon.Type type = mineshaft ? EventDungeon.Type.MINESHAFT : stronghold ? EventDungeon.Type.STRONGHOLD : mansion ? EventDungeon.Type.MANSION : netherfortress ? EventDungeon.Type.NETHERFORTRESS : EventDungeon.Type.MODED;
-				  if(type != null)
-				  {
-				    EventDungeon.Post d = new EventDungeon.Post(tile,pos,type);
-				    MinecraftForge.EVENT_BUS.post(d);
-				  }
+			  {
+				   CapInterface cap = tile.getCapability(CapProvider.MANA_CAP, EnumFacing.DOWN);
+				   boolean scanned = cap.getScanned();
+				   if(!scanned)
+				   {
+					  EventDungeon.Type type = mineshaft ? EventDungeon.Type.MINESHAFT : stronghold ? EventDungeon.Type.STRONGHOLD : mansion ? EventDungeon.Type.MANSION : netherfortress ? EventDungeon.Type.NETHERFORTRESS : EventDungeon.Type.MODED;
+					  EventDungeon.Post d = new EventDungeon.Post(tile,pos,type);
+					  MinecraftForge.EVENT_BUS.post(d);
+					  System.out.println(pos);
+				      cap.setScanned(true);
+				   }
 			  }
 		   }
 	    }
 	}
 	
 	/**
-	 * replaces vanilla dugeon
+	 * replaces vanilla dungeon
 	 */
 	@SubscribeEvent
 	public void dungeonReplace(PopulateChunkEvent.Populate e)

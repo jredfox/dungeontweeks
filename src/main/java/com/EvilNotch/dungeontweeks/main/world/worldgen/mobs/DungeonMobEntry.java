@@ -15,7 +15,22 @@ public class DungeonMobEntry extends DungeonHooks.DungeonMob{
 	@Override
 	public String toString()
 	{
-		return this.type.toString();
+		String s = "";
+		if(this.nbt != null)
+			s += this.nbt.toString();
+		return this.type.toString() + " " + this.itemWeight + s;
+	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		if(!(obj instanceof DungeonMobEntry))
+			return false;
+		DungeonMobEntry entry = (DungeonMobEntry)obj;
+		if(this.nbt == null)
+			return entry.nbt == null && this.type.equals(entry.type);
+		
+		return this.nbt.equals(entry.nbt) && this.type.equals(entry.type);
 	}
 
 }

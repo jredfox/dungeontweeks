@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import com.EvilNotch.dungeontweeks.Api.ReflectionUtil;
+import com.EvilNotch.dungeontweeks.main.MainJava;
 import com.EvilNotch.dungeontweeks.main.Events.EventDungeon;
 import com.EvilNotch.dungeontweeks.main.Events.EventDungeon.Type;
 
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.WeightedRandom;
 import net.minecraftforge.common.DungeonHooks;
@@ -27,12 +29,16 @@ public class DungeonMobs {
 		
 		//vanilla and mod support
 		ArrayList<DungeonMob> forgemobs = (ArrayList<DungeonMob>) ReflectionUtil.getObject(null, DungeonHooks.class, "dungeonMobs");
-		for(DungeonMob d : forgemobs)
-			mob_dungeon.add(new DungeonMobEntry(d.itemWeight,d.type,null) );//forge hooks compatibility
+		if(forgemobs == null)
+			for(int i=0;i<20;i++)
+				System.out.println("Forge Dungeon Hooks List Empty Wrong Reflection Name");
+		else
+			for(DungeonMob d : forgemobs)
+				mob_dungeon.add(new DungeonMobEntry(d.itemWeight,d.type,null) );//forge hooks compatibility
 		
 		//sets forge to default list for per entity compatibility detection
 		ArrayList default_forge = new ArrayList();
-		default_forge.add(new DungeonMob(100, new ResourceLocation("minecraft:blank")));
+		default_forge.add(new DungeonMob(100, new ResourceLocation("minecraft:blank_dungeon")));
 		ReflectionUtil.setObject(null, default_forge, DungeonHooks.class, "dungeonMobs");//empties forges list as it's no longer needed
 		
 		//vanilla support
@@ -85,30 +91,32 @@ public class DungeonMobs {
      *        Meaning, Zombies are twice as common as spiders or skeletons.
      * @return The new rarity of the monster,
      */
-    public static float addDungeonMob(ResourceLocation name, int rarity,Type type)
+    public static float addDungeonMob(ResourceLocation name, int rarity,NBTTagCompound nbt,Type type)
     {
         if (rarity <= 0)
             throw new IllegalArgumentException("Rarity must be greater then zero");
+        DungeonMobEntry entry = new DungeonMobEntry(rarity,name,nbt);
+        
         ArrayList<DungeonMobEntry> list = getList(type);
-        for (DungeonMob mob :  list)
+        for (DungeonMobEntry mob :  list)
         {
-            if (name.equals(mob.type))
-            {
+            if (entry.equals(mob))
                 return mob.itemWeight += rarity;
-            }
         }
-        list.add(new DungeonMobEntry(rarity, name,null));
+        list.add(entry);
         return rarity;
     }
     
-    public static int removeDungeonMob(ResourceLocation name,ArrayList<DungeonMob> list)
+    public static int removeDungeonMob(ResourceLocation name,NBTTagCompound nbt,Type type)
     {
-        for (DungeonMob mob : list)
+    	ArrayList<DungeonMobEntry> list = getList(type);
+    	DungeonMobEntry e = new DungeonMobEntry(0,name,nbt);
+        for (DungeonMobEntry mob : list)
         {
-            if (name.equals(mob.type))
+            if (mob.equals(e))
             {
-                list.remove(mob);
-                return mob.itemWeight;
+            	list.remove(mob);
+            	return mob.itemWeight;
             }
         }
         return 0;

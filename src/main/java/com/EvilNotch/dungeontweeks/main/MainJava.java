@@ -6,7 +6,7 @@ import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
 
-import com.EvilNotch.dungeontweeks.Api.FieldAcess;
+import com.EvilNotch.dungeontweeks.Api.MCPMappings;
 import com.EvilNotch.dungeontweeks.main.Attatchments.CapInterface;
 import com.EvilNotch.dungeontweeks.main.Attatchments.CapObj;
 import com.EvilNotch.dungeontweeks.main.Attatchments.Storage;
@@ -16,38 +16,42 @@ import com.EvilNotch.dungeontweeks.main.EventHandlers.TileEntityExtendedProperti
 import com.EvilNotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
 
 import net.minecraft.block.Block;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.tileentity.TileEntityPiston;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
-@Mod(modid = MainJava.MODID,name = "Dungeon Tweeks", version = MainJava.VERSION)
+@Mod(modid = MainJava.MODID,name = "Dungeon Tweeks", version = MainJava.VERSION,acceptableRemoteVersions = "*")
 public class MainJava {
 	public static final String MODID = "dungeontweeks";
-	public static final String VERSION = "1.0";
+	public static final String VERSION = "beta 1.0";
 	public static boolean isDeObfuscated = false;
 	
 	@Mod.EventHandler
-	public void init(FMLPreInitializationEvent e)
+	public void preinit(FMLPreInitializationEvent e)
 	{
-		CapabilityManager.INSTANCE.register(CapInterface.class, new Storage(), CapObj.class);
+		Config.loadConfig(e.getModConfigurationDirectory());
+		MCPMappings.CacheMCP(e.getModConfigurationDirectory());
 		isDeObfuscated = isDeObfucscated();
-//	 	FieldAcess.CacheMCP(e.getModConfigurationDirectory());
+		CapabilityManager.INSTANCE.register(CapInterface.class, new Storage(), CapObj.class);
+//		for(int i=0;i<10;i++)
+//			System.out.println(MCPMappings.getFieldOb(TileEntityPiston.class, "readFromNBT"));
+	}
+	
+	@Mod.EventHandler
+	public void init(FMLInitializationEvent e)
+	{
 		MinecraftForge.TERRAIN_GEN_BUS.register(new ReplaceGen());
 		MinecraftForge.EVENT_BUS.register(new ReplaceGen() );
 		MinecraftForge.EVENT_BUS.register(new DungeonHandler() );
 		MinecraftForge.EVENT_BUS.register(new TileEntityExtendedProperties() );
-//		for(int i=0;i<10;i++)
-//			System.out.println("findTTTTTTTTTTTTXXXXXXXXT__.TXT ");
-		/*
-		 try {
-			 DungeonMobEntry a = new DungeonMobEntry(1,new ResourceLocation("creeper"),JsonToNBT.getTagFromJson("{powered:1}"));
-			 DungeonMobEntry b = new DungeonMobEntry(1,new ResourceLocation("creeper"),JsonToNBT.getTagFromJson("{powered:1}"));
-			System.out.println("a:" + a.equals(b) + " b:" + b.equals(a) );
-		} catch (NBTException e1) {
-		}*/
 	}
 	@Mod.EventHandler
 	public void post(FMLPostInitializationEvent e)
@@ -73,8 +77,8 @@ public class MainJava {
 	public static boolean isDeObfucscated()
     {
     	try{
-    		ReflectionHelper.findField(Block.class, FieldAcess.fieldToOb.get("blockHardness"));
-    		return false;
+    		ReflectionHelper.findField(Block.class, MCPMappings.getFieldOb(Block.class,"blockHardness"));
+    		return false;//return false since obfuscated field had no exceptions
     	}
     	catch(Exception e){return true;}
     }

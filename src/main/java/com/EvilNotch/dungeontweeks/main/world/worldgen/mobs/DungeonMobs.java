@@ -1,13 +1,25 @@
 package com.EvilNotch.dungeontweeks.main.world.worldgen.mobs;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import com.EvilNotch.dungeontweeks.Api.ReflectionUtil;
+import com.EvilNotch.dungeontweeks.main.Config;
 import com.EvilNotch.dungeontweeks.main.MainJava;
 import com.EvilNotch.dungeontweeks.main.Events.EventDungeon;
 import com.EvilNotch.dungeontweeks.main.Events.EventDungeon.Type;
+import com.EvilNotch.dungeontweeks.util.JavaUtil;
+import com.EvilNotch.dungeontweeks.util.Line.ConfigBase;
+import com.EvilNotch.dungeontweeks.util.Line.LineBase;
+import com.EvilNotch.dungeontweeks.util.Line.LineItemStack;
+import com.EvilNotch.dungeontweeks.util.Line.LineItemStackBase;
 
+import net.minecraft.entity.EntityList;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.WeightedRandom;
@@ -19,6 +31,7 @@ public class DungeonMobs {
 	public static ArrayList<DungeonMobEntry> mob_mineshaft = new ArrayList();
 	public static ArrayList<DungeonMobEntry> mob_stronghold = new ArrayList();
 	public static ArrayList<DungeonMobEntry> mob_netherfortress = new ArrayList();
+	public static ArrayList<DungeonMobEntry> mob_mansion = new ArrayList();
 	
 	public static void cacheMobs()
 	{
@@ -26,6 +39,61 @@ public class DungeonMobs {
 		mob_mineshaft.clear();
 		mob_stronghold.clear();
 		mob_netherfortress.clear();
+		
+		try{
+		Set<ResourceLocation> list = EntityList.getEntityNameList();
+		HashMap<File,ConfigBase> configs = new HashMap();
+		File dir = new File(Config.dir,"entries");
+		File dir_dungeon = new File(dir,"dungeon");
+		File dir_mineshaft = new File(dir,"mineshaft");
+		File dir_stronghold = new File(dir,"stronghold");
+		File dir_netherfortess = new File(dir,"netherfortress");
+		File dir_mansion = new File(dir,"mansion");
+		File[] dirs = {dir_dungeon,dir_mineshaft,dir_stronghold,dir_netherfortess,dir_mansion};
+		
+		//cache and/or create config files to disk and memory
+		for(File f : dirs)
+		{
+			if(!f.exists())
+				f.mkdirs();
+			ArrayList<File> files = new ArrayList();
+			getFilesFromDir(f, files, ".txt");
+			for(File file : files)
+			{
+				ConfigBase cfg = new ConfigBase(file, new ArrayList());
+				configs.put(file, cfg);
+			}
+		}
+		//add lines to configs if nessary
+		for(ResourceLocation loc : list)
+		{
+			String modid = loc.getResourceDomain();
+			String name = loc.getResourcePath();
+			//grab intial configed entities
+			
+			for(File f : dirs)
+			{
+				if(!f.exists())
+					f.mkdirs();
+				File mod = new File(f,JavaUtil.toFileCharacters(modid) + ".txt");
+				ConfigBase cfg = configs.get(mod);
+				if(cfg == null)
+					cfg = new ConfigBase(mod,new ArrayList());
+				LineBase line = new LineItemStackBase("\"" + loc.toString() + "\"");
+				if(!cfg.containsLine(line))
+					cfg.appendLine(new LineItemStack("\"" + loc.toString() + "\"" +  " = " + Config.default_weight) );
+			}
+		 }
+		//save configs and parse to lists
+		Iterator<Map.Entry<File,ConfigBase> > it = configs.entrySet().iterator();
+		while(it.hasNext())
+		{
+			ConfigBase cfg = it.next().getValue();
+			cfg.alphabetize();
+			cfg.updateConfig();
+		}
+		
+		}catch(Exception ex){ex.printStackTrace();}
 		
 		//vanilla and mod support
 		ArrayList<DungeonMob> forgemobs = (ArrayList<DungeonMob>) ReflectionUtil.getObject(null, DungeonHooks.class, "dungeonMobs");
@@ -45,6 +113,19 @@ public class DungeonMobs {
 		mob_mineshaft.add(new DungeonMobEntry(470,new ResourceLocation("minecraft:cave_spider"), null ) );
 		mob_stronghold.add(new DungeonMobEntry(370,new ResourceLocation("minecraft:silverfish"), null ) );
 		mob_netherfortress.add(new DungeonMobEntry(470, new ResourceLocation("minecraft:blaze"),null ) );
+	}
+	
+	public static void getFilesFromDir(File directory, ArrayList<File> files,String extension) 
+	{
+	    // get all the files from a directory
+	    File[] fList = directory.listFiles();
+	    for (File file : fList) 
+	    {
+	        if (file.isFile() && !files.contains(file) && file.getName().endsWith(extension)) 
+	        {
+	            files.add(file);
+	        }
+	    }
 	}
 	
 	/**

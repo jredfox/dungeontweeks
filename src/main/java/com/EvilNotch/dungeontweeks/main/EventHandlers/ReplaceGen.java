@@ -6,7 +6,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 
+import com.EvilNotch.dungeontweeks.Api.MCPMappings;
 import com.EvilNotch.dungeontweeks.Api.ReflectionUtil;
+import com.EvilNotch.dungeontweeks.main.Config;
 import com.EvilNotch.dungeontweeks.main.MainJava;
 import com.EvilNotch.dungeontweeks.main.Attatchments.CapInterface;
 import com.EvilNotch.dungeontweeks.main.Attatchments.CapProvider;
@@ -95,7 +97,12 @@ public class ReplaceGen {
 		if(w.isRemote)
 			return;
 		IChunkGenerator gen = e.getGenerator();
-		ArrayList<Chunk> chunks = getRadiusChunks(w, e.getChunkX(), e.getChunkZ(), 1);
+		int radius = Config.radius;
+		if(w.provider.getDimension() == -1)
+			radius = Config.radius_nether;
+		if(w.provider.getDimension() == 1)
+			radius = Config.radius_end;
+		ArrayList<Chunk> chunks = getRadiusChunks(w, e.getChunkX(), e.getChunkZ(), radius);
 		for(Chunk c : chunks)
 		{
 		  Map<BlockPos, TileEntity> map = c.getTileEntityMap();
@@ -155,14 +162,14 @@ public class ReplaceGen {
 		if(e.getType() != EventType.DUNGEON)
 			return;
 		World w = e.getWorld();
-		if(w.isRemote)
+		if(w.isRemote || !(e.getGenerator() instanceof ChunkGeneratorOverworld) )
 			return;
 		IChunkGenerator gen = e.getGenerator();
 		int i = e.getChunkX() * 16;
         int j = e.getChunkZ() * 16;
 		BlockPos blockpos = new BlockPos(i, 0, j);
-		Random rand = (Random) ReflectionUtil.getObject(gen, ChunkGeneratorOverworld.class, MainJava.isDeObfuscated ? "rand" : null );
-		ChunkGeneratorSettings settings = (ChunkGeneratorSettings)ReflectionUtil.getObject(gen, ChunkGeneratorOverworld.class, "settings");
+		Random rand = (Random) ReflectionUtil.getObject(gen, ChunkGeneratorOverworld.class, MCPMappings.getField(ChunkGeneratorOverworld.class, "rand") );
+		ChunkGeneratorSettings settings = (ChunkGeneratorSettings)ReflectionUtil.getObject(gen, ChunkGeneratorOverworld.class, MCPMappings.getField(ChunkGeneratorOverworld.class, "settings") );
 		for (int j2 = 0; j2 < settings.dungeonChance; ++j2)
         {
             int i3 = rand.nextInt(16) + 8;

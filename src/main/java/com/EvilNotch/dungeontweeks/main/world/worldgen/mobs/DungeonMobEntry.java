@@ -18,7 +18,7 @@ public class DungeonMobEntry extends DungeonHooks.DungeonMob{
 		String s = "";
 		if(this.nbt != null)
 			s += this.nbt.toString();
-		return this.type.toString() + " " + this.itemWeight + s;
+		return "\"" + this.type.toString() + " " + this.itemWeight + s + "\"";
 	}
 	
 	@Override

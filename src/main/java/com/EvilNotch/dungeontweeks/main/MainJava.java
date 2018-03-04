@@ -14,14 +14,14 @@ import com.EvilNotch.dungeontweeks.main.EventHandlers.DungeonHandler;
 import com.EvilNotch.dungeontweeks.main.EventHandlers.ReplaceGen;
 import com.EvilNotch.dungeontweeks.main.EventHandlers.TileEntityExtendedProperties;
 import com.EvilNotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
+import com.EvilNotch.dungeontweeks.util.Line.LineBase;
 
 import net.minecraft.block.Block;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityChest;
-import net.minecraft.tileentity.TileEntityPiston;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.DungeonHooks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -41,8 +41,9 @@ public class MainJava {
 		MCPMappings.CacheMCP(e.getModConfigurationDirectory());
 		isDeObfuscated = isDeObfucscated();
 		CapabilityManager.INSTANCE.register(CapInterface.class, new Storage(), CapObj.class);
+		
 //		for(int i=0;i<10;i++)
-//			System.out.println(MCPMappings.getFieldOb(TileEntityPiston.class, "readFromNBT"));
+//			System.out.println(MCPMappings.getField(ChunkGeneratorOverworld.class, "settings"));
 	}
 	
 	@Mod.EventHandler
@@ -56,8 +57,16 @@ public class MainJava {
 	@Mod.EventHandler
 	public void post(FMLPostInitializationEvent e)
 	{
+		DungeonHooks.addDungeonMob(new ResourceLocation("mobspawner:tst"), 100000);
 		DungeonMobs.cacheMobs();
-		System.out.println(DungeonMobs.mob_dungeon);
+		LineBase line = new LineBase("minecraft:block:tst");
+		for(int i=0;i<10;i++)
+			System.out.println("Line:" + line.modid + ":" + line.name);
+		System.out.println("Dungeon:" + DungeonMobs.mob_dungeon);
+		System.out.println("MineShaft:" + DungeonMobs.mob_mineshaft);
+		System.out.println("Mansion:" + DungeonMobs.mob_mansion);
+		System.out.println("Nether Fortress:" + DungeonMobs.mob_netherfortress);
+		System.out.println("Stronghold: " + DungeonMobs.mob_stronghold);
 	}
 	
 	@SuppressWarnings("rawtypes")

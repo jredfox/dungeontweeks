@@ -133,9 +133,7 @@ public class ReplaceGen {
 			    netherfortress = gen3.isInsideStructure(w, "Fortress", pos);
 			  }
 			  if(!mineshaft && !stronghold && !mansion && !netherfortress)
-			  {
 				  return;
-			  }
 			  if(tile instanceof TileEntityMobSpawner)
 			  {
 				   CapInterface cap = tile.getCapability(CapProvider.MANA_CAP, EnumFacing.DOWN);
@@ -170,6 +168,7 @@ public class ReplaceGen {
 		BlockPos blockpos = new BlockPos(i, 0, j);
 		Random rand = (Random) ReflectionUtil.getObject(gen, ChunkGeneratorOverworld.class, MCPMappings.getField(ChunkGeneratorOverworld.class, "rand") );
 		ChunkGeneratorSettings settings = (ChunkGeneratorSettings)ReflectionUtil.getObject(gen, ChunkGeneratorOverworld.class, MCPMappings.getField(ChunkGeneratorOverworld.class, "settings") );
+
 		for (int j2 = 0; j2 < settings.dungeonChance; ++j2)
         {
             int i3 = rand.nextInt(16) + 8;

@@ -176,7 +176,7 @@ public class ConfigBase {
 	    this.setList(list, index);
 	}
 	/**
-	 * Deletes Firs Line instance ~ call update only on a need to basis
+	 * Deletes First Line instance ~ call update only on a need to basis
 	 * @param strline
 	 */
 	public void deleteLineString(String strline)
@@ -226,6 +226,7 @@ public class ConfigBase {
 	public void appendLine(LineBase line)
 	{
 		this.file_lines.add(line.getString());
+		this.lines.add(line);
 	}
 	/**
 	 * Appends Line To index of file
@@ -234,6 +235,7 @@ public class ConfigBase {
 	public void appendLine(LineBase line,int index)
 	{
 		this.file_lines.add(index,line.toString());
+		this.lines.add(index,line);
 	}
 	/**
 	 * Append List of lines
@@ -242,7 +244,11 @@ public class ConfigBase {
 	public void appendLineList(ArrayList<LineBase> list)
 	{
 		for(LineBase line : list)
+		{
 			this.file_lines.add(line.toString());
+			this.lines.add(line);
+		}
+		
 	}
 	/**
 	 * Append List of lines at starting index
@@ -252,7 +258,10 @@ public class ConfigBase {
 	public void appendLineList(ArrayList<LineBase> list, int index)
 	{
 		for(LineBase line : list)
+		{
 			this.file_lines.add(index,line.toString());
+			this.lines.add(index,line);
+		}
 	}
 	/**
 	 * Sets line to index
@@ -262,6 +271,7 @@ public class ConfigBase {
 	public void setLine(LineBase line, int index)
 	{
 		this.file_lines.set(index,line.toString());
+		this.lines.set(index,line);
 	}
 	/**
 	 * Take line objects and convert set them to the file
@@ -272,7 +282,10 @@ public class ConfigBase {
 	{
 		ArrayList<String> lineString = new ArrayList<String>();
 		for(LineBase line : list)
+		{
 			lineString.add(line.toString());//Convert to array of strings then set them
+			this.lines.add(line);
+		}
 		
 		this.setList(lineString, index);
 	}
@@ -329,6 +342,7 @@ public class ConfigBase {
 	 */
 	public boolean containsLine(LineBase line)
 	{
+		line = LineDynamicLogic.getLineFromString(line.getString() );
 		for(int i=0;i<this.file_lines.size();i++)
 		{
 			String str = this.file_lines.get(i);

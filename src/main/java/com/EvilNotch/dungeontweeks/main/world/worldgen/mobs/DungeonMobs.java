@@ -25,6 +25,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.WeightedRandom;
 import net.minecraftforge.common.DungeonHooks;
 import net.minecraftforge.common.DungeonHooks.DungeonMob;
+import net.minecraftforge.fml.common.Loader;
 
 public class DungeonMobs {
 	public static ArrayList<DungeonMobEntry> mob_dungeon = new ArrayList();
@@ -58,32 +59,113 @@ public class DungeonMobs {
 				f.mkdirs();
 			ArrayList<File> files = new ArrayList();
 			getFilesFromDir(f, files, ".txt");
+			if(!files.isEmpty())
 			for(File file : files)
 			{
+				String strname = getFileTrueDisplayName(file);
+				if(!Loader.isModLoaded(strname))
+				{
+					System.out.println("Skipping:" + strname + ".txt as mod isn't loaded");
+					continue;//do not load configs into memory that don't exist
+				}
 				ConfigBase cfg = new ConfigBase(file, new ArrayList());
 				configs.put(file, cfg);
 			}
+			if(getFileTrueDisplayName(f).equals("dungeon"))
+			{
+				ArrayList<DungeonMob> forgemobs = (ArrayList<DungeonMob>) ReflectionUtil.getObject(null, DungeonHooks.class, "dungeonMobs");
+				if(forgemobs == null)
+					for(int i=0;i<20;i++)
+						System.out.println("Forge Dungeon Hooks List Empty Wrong Reflection Name");
+				else{
+					//import modded weights if added before considering default weight to be whatever user configured
+					for(DungeonMob d : forgemobs)
+					{
+						if(!Loader.isModLoaded(d.type.getResourceDomain()))
+						{
+							System.out.println("Skipping ForgeHooks Entity:" + d.type + " as mod isn't loaded");
+							continue;//don't create config into memory for mods that are in the game
+						}
+						File mod = new File(f,JavaUtil.toFileCharacters(d.type.getResourceDomain()) + ".txt");
+						ConfigBase cfg = configs.get(mod);
+						if(cfg == null)
+						{
+							configs.put(mod , new ConfigBase(mod,new ArrayList() ) );
+							cfg = configs.get(mod);
+						}
+						String str = "\"" + d.type.toString() + "\" + = " + d.itemWeight;
+						LineBase line = new LineItemStackBase(str);
+					
+						if(!cfg.containsLine(line))
+							cfg.appendLine(new LineItemStack(str + " = " + d.itemWeight));
+					}
+				 }
+			 }
 		}
-		//add lines to configs if nessary
+		
+		//add lines to configs if necessary from entity list
 		for(ResourceLocation loc : list)
 		{
 			String modid = loc.getResourceDomain();
 			String name = loc.getResourcePath();
-			//grab intial configed entities
-			
 			for(File f : dirs)
 			{
 				if(!f.exists())
 					f.mkdirs();
 				File mod = new File(f,JavaUtil.toFileCharacters(modid) + ".txt");
+				String dungeontype = getFileTrueDisplayName(mod.getParentFile() );
 				ConfigBase cfg = configs.get(mod);
 				if(cfg == null)
-					cfg = new ConfigBase(mod,new ArrayList());
+				{
+					configs.put(mod, new ConfigBase(mod,new ArrayList()) );
+					cfg = configs.get(mod);
+				}
+
 				LineBase line = new LineItemStackBase("\"" + loc.toString() + "\"");
+				int weight = Config.default_weight;
+				if(modid.equals("minecraft"))
+				{
+					if(name.equals("cave_spider") && dungeontype.equals("mineshaft"))
+						weight = 300;
+					if(name.equals("silverfish") &&  dungeontype.equals("stronghold"))
+						weight = 150;
+					if(name.equals("blaze") &&  dungeontype.equals("netherfortress"))
+						weight = 300;
+					if(name.equals("spider") && dungeontype.equals("mansion"))
+						weight = 150;
+				}
 				if(!cfg.containsLine(line))
-					cfg.appendLine(new LineItemStack("\"" + loc.toString() + "\"" +  " = " + Config.default_weight) );
+					cfg.appendLine(new LineItemStack("\"" + loc.toString() + "\"" +  " = " + weight) );
 			}
 		 }
+		//validate
+		if(Config.validateGeneratedEntries)
+		for(ConfigBase cfg : configs.values())
+		{
+			for(LineBase line : cfg.lines)
+				if(!list.contains(new ResourceLocation(line.modid + ":" + line.name) ) || !line.modid.equals(getFileTrueDisplayName(cfg.cfgfile) ) )
+				{
+					cfg.deleteLine(line);
+					System.out.println("Not Valid Entry! LineBase Removed:" + line + " " + cfg.cfgfile);
+					System.out.println("Domanin Not Valid:" + (!line.modid.equals(getFileTrueDisplayName(cfg.cfgfile)) ) );
+				}
+		}
+		//Populate arrayLists
+		for(ConfigBase cfg : configs.values())
+		{
+			String name = getFileTrueDisplayName(cfg.cfgfile.getParentFile());
+			if(name.equals("dungeon"))
+				applyDungeonMobs(cfg,DungeonMobs.mob_dungeon);
+			else if(name.equals("mineshaft"))
+				applyDungeonMobs(cfg,DungeonMobs.mob_mineshaft);
+			else if(name.equals("mansion"))
+				applyDungeonMobs(cfg,DungeonMobs.mob_mansion);
+			else if(name.equals("netherfortress"))
+				applyDungeonMobs(cfg,DungeonMobs.mob_netherfortress);
+			else if(name.equals("stronghold"))
+				applyDungeonMobs(cfg,DungeonMobs.mob_stronghold);
+		}
+		
 		//save configs and parse to lists
 		Iterator<Map.Entry<File,ConfigBase> > it = configs.entrySet().iterator();
 		while(it.hasNext())
@@ -95,26 +177,37 @@ public class DungeonMobs {
 		
 		}catch(Exception ex){ex.printStackTrace();}
 		
-		//vanilla and mod support
-		ArrayList<DungeonMob> forgemobs = (ArrayList<DungeonMob>) ReflectionUtil.getObject(null, DungeonHooks.class, "dungeonMobs");
-		if(forgemobs == null)
-			for(int i=0;i<20;i++)
-				System.out.println("Forge Dungeon Hooks List Empty Wrong Reflection Name");
-		else
-			for(DungeonMob d : forgemobs)
-				mob_dungeon.add(new DungeonMobEntry(d.itemWeight,d.type,null) );//forge hooks compatibility
 		
 		//sets forge to default list for per entity compatibility detection
 		ArrayList default_forge = new ArrayList();
 		default_forge.add(new DungeonMob(100, new ResourceLocation("minecraft:blank_dungeon")));
 		ReflectionUtil.setObject(null, default_forge, DungeonHooks.class, "dungeonMobs");//empties forges list as it's no longer needed
-		
-		//vanilla support
-		mob_mineshaft.add(new DungeonMobEntry(470,new ResourceLocation("minecraft:cave_spider"), null ) );
-		mob_stronghold.add(new DungeonMobEntry(370,new ResourceLocation("minecraft:silverfish"), null ) );
-		mob_netherfortress.add(new DungeonMobEntry(470, new ResourceLocation("minecraft:blaze"),null ) );
+
 	}
-	
+	/**
+	 * populate arraylists
+	 */
+	public static void applyDungeonMobs(ConfigBase cfg, ArrayList<DungeonMobEntry> list) {
+		for(LineBase lineobj : cfg.lines)
+		{
+			LineItemStack line = null;
+			if(lineobj instanceof LineItemStack)
+				line = (LineItemStack)lineobj;
+			if(line == null || line.head <= 0)
+				continue;//skip invalid lines
+				list.add(new DungeonMobEntry(line.head,new ResourceLocation(line.modid + ":" + line.name),line.NBT) );	
+		}
+	}
+
+	/**
+	 * returns name from first index till it disovers a dot
+	 * @param file
+	 * @return
+	 */
+	private static String getFileTrueDisplayName(File file) {
+		return file.getName().split("\\.")[0];
+	}
+
 	public static void getFilesFromDir(File directory, ArrayList<File> files,String extension) 
 	{
 	    // get all the files from a directory
@@ -142,8 +235,10 @@ public class DungeonMobs {
     		return WeightedRandom.getRandomItem(rand,list).type;
     	if(type == Type.NETHERFORTRESS)
     		return WeightedRandom.getRandomItem(rand, list).type;
+    	if(type == type.MANSION)
+    		return WeightedRandom.getRandomItem(rand, list).type;
     	
-    	return null;
+    	return new ResourceLocation("blank_" + type.toString().toLowerCase());
     }
     
     public static ArrayList<DungeonMobEntry> getList(Type t){
@@ -155,6 +250,8 @@ public class DungeonMobs {
     		return mob_stronghold;
     	if(t == Type.NETHERFORTRESS)
     		return mob_netherfortress;
+    	if(t == Type.MANSION)
+    		return mob_mansion;
     	return null;
     }
     

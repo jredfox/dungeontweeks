@@ -41,9 +41,9 @@ public class MainJava {
 		MCPMappings.CacheMCP(e.getModConfigurationDirectory());
 		isDeObfuscated = isDeObfucscated();
 		CapabilityManager.INSTANCE.register(CapInterface.class, new Storage(), CapObj.class);
-		
-//		for(int i=0;i<10;i++)
-//			System.out.println(MCPMappings.getField(ChunkGeneratorOverworld.class, "settings"));
+		LineBase line = new LineBase("\"" + "minecraft:block:tst" + "\"");
+		for(int i=0;i<10;i++)
+			System.out.println(line.modid);
 	}
 	
 	@Mod.EventHandler
@@ -58,10 +58,10 @@ public class MainJava {
 	public void post(FMLPostInitializationEvent e)
 	{
 		DungeonHooks.addDungeonMob(new ResourceLocation("mobspawner:tst"), 100000);
+		System.out.println("Dungeon Tweeks Cache Staring:");
 		DungeonMobs.cacheMobs();
-		LineBase line = new LineBase("minecraft:block:tst");
-		for(int i=0;i<10;i++)
-			System.out.println("Line:" + line.modid + ":" + line.name);
+		System.out.println("Dungeon Tweeks Finished Cache:");
+		
 		System.out.println("Dungeon:" + DungeonMobs.mob_dungeon);
 		System.out.println("MineShaft:" + DungeonMobs.mob_mineshaft);
 		System.out.println("Mansion:" + DungeonMobs.mob_mansion);

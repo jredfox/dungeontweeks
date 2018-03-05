@@ -141,9 +141,9 @@ public class ReplaceGen {
 				   if(!scanned)
 				   {
 					  EventDungeon.Type type = mineshaft ? EventDungeon.Type.MINESHAFT : stronghold ? EventDungeon.Type.STRONGHOLD : mansion ? EventDungeon.Type.MANSION : netherfortress ? EventDungeon.Type.NETHERFORTRESS : EventDungeon.Type.MODED;
-					  EventDungeon.Post d = new EventDungeon.Post(tile,pos,type);
+					  EventDungeon.Post d = new EventDungeon.Post(tile,pos,type,e.getRand());
 					  MinecraftForge.EVENT_BUS.post(d);
-					  System.out.println(pos);
+//					  System.out.println(pos);
 				      cap.setScanned(true);
 				   }
 			  }
@@ -166,7 +166,7 @@ public class ReplaceGen {
 		int i = e.getChunkX() * 16;
         int j = e.getChunkZ() * 16;
 		BlockPos blockpos = new BlockPos(i, 0, j);
-		Random rand = (Random) ReflectionUtil.getObject(gen, ChunkGeneratorOverworld.class, MCPMappings.getField(ChunkGeneratorOverworld.class, "rand") );
+		Random rand = e.getRand();
 		ChunkGeneratorSettings settings = (ChunkGeneratorSettings)ReflectionUtil.getObject(gen, ChunkGeneratorOverworld.class, MCPMappings.getField(ChunkGeneratorOverworld.class, "settings") );
 
 		for (int j2 = 0; j2 < settings.dungeonChance; ++j2)

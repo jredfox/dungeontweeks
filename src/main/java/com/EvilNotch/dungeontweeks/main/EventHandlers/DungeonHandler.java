@@ -1,7 +1,8 @@
 package com.EvilNotch.dungeontweeks.main.EventHandlers;
 
 import com.EvilNotch.dungeontweeks.main.Events.EventDungeon;
-import com.EvilNotch.dungeontweeks.main.Events.EventDungeon.Type;
+import com.EvilNotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobEntry;
+import com.EvilNotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
@@ -18,31 +19,16 @@ public class DungeonHandler {
 		NBTTagCompound nbt = new NBTTagCompound();
 		e.tile.writeToNBT(nbt);
 		NBTTagCompound data = nbt.getCompoundTag("SpawnData");
-		if(e.type == Type.DUNGEON)
+		DungeonMobEntry entry = DungeonMobs.pickMobSpawner(e.rnd, e.type);
+		ResourceLocation loc = entry.type;
+		data.setString("id",loc.toString());
+		//NBT Support in spawndata
+		if(entry.nbt != null)
 		{
-			data.setString("id", "sheep");
-			data.setInteger("Color", 1);
+			for(String s : entry.nbt.getKeySet() )
+				data.setTag(s, entry.nbt.getTag(s));
 		}
-		if(e.type == Type.MINESHAFT)
-		{
-			data.setString("id", "sheep");
-			data.setInteger("Color", 2);
-		}
-		if(e.type == Type.STRONGHOLD)
-		{
-			data.setString("id", "sheep");
-			data.setInteger("Color", 3);
-		}
-		if(e.type == Type.MANSION)
-		{
-			data.setString("id", "sheep");
-			data.setInteger("Color", 6);
-		}
-		if(e.type == Type.NETHERFORTRESS)
-		{
-			data.setString("id", "wither_skeleton");
-		}
-		
+		System.out.println(loc + " " + e.pos);
 		nbt.removeTag("SpawnPotentials");
 		e.tile.readFromNBT(nbt);
 		e.tile.markDirty();

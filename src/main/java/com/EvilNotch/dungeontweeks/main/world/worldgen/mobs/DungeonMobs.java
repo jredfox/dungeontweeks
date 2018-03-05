@@ -224,21 +224,21 @@ public class DungeonMobs {
 	/**
      * Randomly decides which spawner to use in a dungeon
      */
-    public static ResourceLocation pickMobSpawner(Random rand,EventDungeon.Type type)
+    public static DungeonMobEntry pickMobSpawner(Random rand,EventDungeon.Type type)
     {
     	ArrayList<DungeonMobEntry> list = getList(type);
     	if(type == Type.DUNGEON)
-    		return WeightedRandom.getRandomItem(rand, list).type;
+    		return WeightedRandom.getRandomItem(rand, list);
     	if(type == Type.MINESHAFT)
-    		return WeightedRandom.getRandomItem(rand, list).type;
+    		return WeightedRandom.getRandomItem(rand, list);
     	if(type == Type.STRONGHOLD)
-    		return WeightedRandom.getRandomItem(rand,list).type;
+    		return WeightedRandom.getRandomItem(rand,list);
     	if(type == Type.NETHERFORTRESS)
-    		return WeightedRandom.getRandomItem(rand, list).type;
+    		return WeightedRandom.getRandomItem(rand, list);
     	if(type == type.MANSION)
-    		return WeightedRandom.getRandomItem(rand, list).type;
+    		return WeightedRandom.getRandomItem(rand, list);
     	
-    	return new ResourceLocation("blank_" + type.toString().toLowerCase());
+    	return new DungeonMobEntry(1,new ResourceLocation("blank_" + type.toString().toLowerCase()),null);
     }
     
     public static ArrayList<DungeonMobEntry> getList(Type t){

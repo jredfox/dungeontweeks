@@ -342,7 +342,6 @@ public class ConfigBase {
 	 */
 	public boolean containsLine(LineBase line)
 	{
-		line = LineDynamicLogic.getLineFromString(line.getString() );
 		for(int i=0;i<this.file_lines.size();i++)
 		{
 			String str = this.file_lines.get(i);

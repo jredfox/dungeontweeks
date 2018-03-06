@@ -12,6 +12,7 @@ public class Config {
 	public static File dir = null;
 	public static int default_weight = 0;
 	public static boolean validateGeneratedEntries = true;
+	public static boolean Debug = false;
 	
 	public static void loadConfig(File moddir)
 	{
@@ -27,6 +28,7 @@ public class Config {
 		radius_end = config.get("general", "radius_end", radius_end).getInt(radius_end);
 		default_weight = config.get("general", "default_weight", default_weight).getInt(default_weight);
 		validateGeneratedEntries = config.get("general", "validateGeneratedEntries", validateGeneratedEntries).getBoolean(validateGeneratedEntries);
+		Debug = config.get("general", "debug", false).getBoolean(false);
 		config.save();
 	}
 

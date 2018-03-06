@@ -14,14 +14,10 @@ import com.EvilNotch.dungeontweeks.main.EventHandlers.DungeonHandler;
 import com.EvilNotch.dungeontweeks.main.EventHandlers.ReplaceGen;
 import com.EvilNotch.dungeontweeks.main.EventHandlers.TileEntityExtendedProperties;
 import com.EvilNotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
-import com.EvilNotch.dungeontweeks.util.Line.LineBase;
 
 import net.minecraft.block.Block;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.DungeonHooks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -31,7 +27,7 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 @Mod(modid = MainJava.MODID,name = "Dungeon Tweeks", version = MainJava.VERSION,acceptableRemoteVersions = "*")
 public class MainJava {
 	public static final String MODID = "dungeontweeks";
-	public static final String VERSION = "beta 1.0";
+	public static final String VERSION = "beta 1.1";
 	public static boolean isDeObfuscated = false;
 	
 	@Mod.EventHandler
@@ -41,9 +37,6 @@ public class MainJava {
 		MCPMappings.CacheMCP(e.getModConfigurationDirectory());
 		isDeObfuscated = isDeObfucscated();
 		CapabilityManager.INSTANCE.register(CapInterface.class, new Storage(), CapObj.class);
-		LineBase line = new LineBase("\"" + "minecraft:block:tst" + "\"");
-		for(int i=0;i<10;i++)
-			System.out.println(line.modid);
 	}
 	
 	@Mod.EventHandler
@@ -53,11 +46,12 @@ public class MainJava {
 		MinecraftForge.EVENT_BUS.register(new ReplaceGen() );
 		MinecraftForge.EVENT_BUS.register(new DungeonHandler() );
 		MinecraftForge.EVENT_BUS.register(new TileEntityExtendedProperties() );
+		
 	}
 	@Mod.EventHandler
 	public void post(FMLPostInitializationEvent e)
 	{
-		DungeonHooks.addDungeonMob(new ResourceLocation("mobspawner:tst"), 100000);
+//		DungeonHooks.addDungeonMob(new ResourceLocation("mobspawner:tst"), 100000);
 		System.out.println("Dungeon Tweeks Cache Staring:");
 		DungeonMobs.cacheMobs();
 		System.out.println("Dungeon Tweeks Finished Cache:");

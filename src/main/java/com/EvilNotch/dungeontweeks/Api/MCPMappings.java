@@ -36,10 +36,10 @@ public class MCPMappings {
 			String name = e.name;
 			if(name.equals(strname))
 			{
-				ArrayList<String> clazzes = e.classes;
-				for(String s : clazzes)
+				ArrayList<Class> clazzes = e.classes;
+				for(Class c : clazzes)
 				{
-					if(s.replaceAll("/", ".").equals(clazz.getName()))
+					if(c.isAssignableFrom(clazz) )
 						return e.srg;
 				}
 			}
@@ -53,10 +53,10 @@ public class MCPMappings {
 			String name = e.name;
 			if(name.equals(strname))
 			{
-				ArrayList<String> clazzes = e.classes;
-				for(String s : clazzes)
+				ArrayList<Class> clazzes = e.classes;
+				for(Class c : clazzes)
 				{
-					if(s.replaceAll("/", ".").equals(clazz.getName()))
+					if(c.isAssignableFrom(clazz) )
 						return e.srg;
 				}
 			}

@@ -10,7 +10,6 @@ import java.util.Set;
 
 import com.EvilNotch.dungeontweeks.Api.ReflectionUtil;
 import com.EvilNotch.dungeontweeks.main.Config;
-import com.EvilNotch.dungeontweeks.main.MainJava;
 import com.EvilNotch.dungeontweeks.main.Events.EventDungeon;
 import com.EvilNotch.dungeontweeks.main.Events.EventDungeon.Type;
 import com.EvilNotch.dungeontweeks.util.JavaUtil;
@@ -20,6 +19,7 @@ import com.EvilNotch.dungeontweeks.util.Line.LineItemStack;
 import com.EvilNotch.dungeontweeks.util.Line.LineItemStackBase;
 
 import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.WeightedRandom;
@@ -86,6 +86,7 @@ public class DungeonMobs {
 							System.out.println("Skipping ForgeHooks Entity:" + d.type + " as mod isn't loaded");
 							continue;//don't create config into memory for mods that are in the game
 						}
+						
 						File mod = new File(f,JavaUtil.toFileCharacters(d.type.getResourceDomain()) + ".txt");
 						ConfigBase cfg = configs.get(mod);
 						if(cfg == null)
@@ -106,6 +107,21 @@ public class DungeonMobs {
 		//add lines to configs if necessary from entity list
 		for(ResourceLocation loc : list)
 		{
+			try{
+				Class c = EntityList.getClass(loc);
+				if(c == null)
+				{
+					System.out.println("CLASS Null Ask Mod Author To Have Default World Constructor:" + loc);
+					continue;
+				}
+				if(!EntityLiving.class.isAssignableFrom(c) )
+				{
+					if(Config.Debug)
+						System.out.println("nonliving:" + loc);
+					continue;
+				}
+			}catch(Throwable t){t.printStackTrace(); continue;}
+			
 			String modid = loc.getResourceDomain();
 			String name = loc.getResourcePath();
 			for(File f : dirs)

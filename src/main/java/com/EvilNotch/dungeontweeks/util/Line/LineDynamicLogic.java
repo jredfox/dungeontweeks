@@ -1,13 +1,15 @@
 package com.EvilNotch.dungeontweeks.util.Line;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class LineDynamicLogic {
-	public ArrayList<LineBase> lineLogic;
+	public HashMap<Integer,ArrayList<LineBase> > lineLogic = new HashMap();
+	public LineBase base = null;
 	
 	public LineDynamicLogic()
 	{
-		this.lineLogic = new ArrayList<LineBase>();
+		this.lineLogic = new HashMap();
 	}
 	/**
 	 * Breaks up string into seperate lines and each index is one && || logic Doesn't need to extend line since it's an array of lines
@@ -15,45 +17,65 @@ public class LineDynamicLogic {
 	 */
 	public LineDynamicLogic(String s)
 	{
-		this.lineLogic = new ArrayList<LineBase>();//Initiates the array
-		seperateLines(s);//Separates lines into parts based on || being each index
+		this.lineLogic = new HashMap();//Initiates the array
+		
+		//instantiate base line if has one
+		String[] parts = new String[2];
+		if(s.contains("="))
+		{
+			this.base = new LineBase("\"" + LineBase.parseQuotes(s, 0) + "\"");//instantiate line base if contains it
+			parts = s.split("=");
+		}
+		else
+			parts[1] = s;
+		//parse all lines
+		seperateLines(parts[1]);//Separates lines into parts based on || being each index
 	}
 
 	/**
 	 * Breaks lines up based on && || logic where each index in the array represents one line{Current use is only for silk spawners}
 	 */
-	private void seperateLines(String str) 
+	protected void seperateLines(String str) 
 	{
-
 		if(str.contains("\\|\\|") || str.contains("||"))
 		{
 			String[] parts = str.split("\\|\\|"); // split from the value of ||
+			int index = 0;
 			for(String s : parts)
-				this.lineLogic.add(getLineFromString(s));
+			{
+				String[] subs = s.split(",");
+				ArrayList<LineBase> lines = new ArrayList();
+				for(String sub : subs)
+				{
+					if(!LineBase.toWhiteSpaced(sub).equals(""))
+						lines.add(getLineFromString(sub));
+				}
+				this.lineLogic.put(index,lines);
+				index++;
+			}
 		}
-		else
-			lineLogic.add(getLineFromString(str));
+		else{
+			ArrayList<LineBase> lines = new ArrayList();
+			lines.add(getLineFromString(str));
+			lineLogic.put(0,lines);
+		}
 	}
-	
 	/**
 	 * Returns the line from a string that is a line to be parsed
+	 * Doesn't check if line is possible string check that before expecting no exceptions
 	 * @param s
 	 * @return
 	 */
 	public static LineBase getLineFromString(String s) 
 	{
-		if(s.contains("=") && !s.contains(",") && !s.contains("{") && !s.contains("}") && !s.contains("<") && !s.contains(">"))
-			return new LineItemStack(s);
-		if(!s.contains("=") && s.contains("{") && s.contains("}") && !s.contains(",") ||!s.contains("=") && s.contains("<") && s.contains(">")  && !s.contains(","))
+		LineItemStack stack = new LineItemStack(s);
+		if(stack.getHead() != null)
+			return stack;
+		if(stack.getHead() == null && stack.NBT != null || stack.getHead() == null && stack.meta != -1)
 			return new LineItemStackBase(s);
-		if(s.contains("=") && s.contains("{") && s.contains("}")  && !s.contains(",") || s.contains("=") && s.contains("<") && s.contains(">") && !s.contains(","))
-			return new LineItemStack(s);
-		if(s.contains(",") && !s.contains("=") || s.indexOf(",") < s.indexOf("=") )
-			return new LineDWNF(s);
-		if(s.contains(",") && s.contains("="))
-			return new LineDynamic(s);
-		else
+		if(stack.getHead() == null && stack.NBT == null && stack.meta == -1)
 			return new LineBase(s);
+		return null;
 	}
 	public static boolean isStringPossibleLine(String strline)
 	{
@@ -67,53 +89,66 @@ public class LineDynamicLogic {
 		return isLine && strline.contains("\\|\\|") || isLine && strline.contains("||");
 	}
 	/**
-	 * Used for accurate representation of the line
+	 * Used for display
 	 * @return
 	 */
 	public String getString()
 	{
 		String str = "";
-		for(LineBase line : this.lineLogic)
+		if(this.base != null)
+			str += this.base.getString() + " = ";
+		for(ArrayList<LineBase> list : this.lineLogic.values())
 		{
-			if(this.lineLogic.size() > 1)
-				str +=  line.toString() + " || ";
-			else
-				str +=  line.toString();
+			for(LineBase line : list)
+					str += line.getString() + " || ";
 		}
-		try{
-			if(this.lineLogic.size() > 1)
-				str = str.substring(0, str.length()-4);
-			}catch(Exception e){e.printStackTrace();}
-		return str;
+		return str.substring(0, str.length()-4);
 	}
 	@Override
 	public boolean equals(Object obj)
 	{
 		if(!(obj instanceof LineDynamicLogic))
 			return false;
-		ArrayList<LineBase> thislines = this.lineLogic;
-		ArrayList<LineBase> objlines = ((LineDynamicLogic)obj).lineLogic;
-		if(thislines.size() != objlines.size())
+		LineDynamicLogic dynamic = (LineDynamicLogic)obj;
+		if(this.lineLogic.size() != dynamic.lineLogic.size() )
 			return false;//If not same length return so no stressfull for loops
-		for(int i=0;i<thislines.size();i++)
+		boolean bbase = true;
+		if(this.base == null)
+			bbase = dynamic.base == null;
+		else if(!this.base.equals(dynamic.base))
+			bbase = false;
+		
+		for(int i=0;i<this.lineLogic.size();i++)
 		{
-			if(!thislines.get(i).equals(objlines.get(i)))
-				return false;//If lines args are not equal return false else it has to be true
+			ArrayList<LineBase> lines1 = this.lineLogic.get(i);
+			ArrayList<LineBase> lines2 = dynamic.lineLogic.get(i);
+			if(lines1.size() != lines2.size())
+				return false;
+			for(int j=0;j<lines1.size();j++)
+			{
+				LineBase line1 = lines1.get(j);
+				LineBase line2 = lines2.get(j);
+				if(!line1.equals(line2))
+					return false;
+			}
 		}
-		return true;
+		return true && bbase;
 	}
 
 	/**
-	 * Used for readability 
+	 * Used for printing out everything
 	 */
 	@Override
 	public String toString()
 	{
 		String str = "";
-		for(LineBase line : this.lineLogic)
-			str += "<" + line.toString() + ">,";
-		str = str.substring(0, str.length()-1);
-		return str;
+		str += this.base + " = ";
+		for(ArrayList<LineBase> list : this.lineLogic.values())
+		{
+			for(LineBase line : list)
+					str += line.toString() + " || ";
+		}
+		return str.substring(0, str.length()-4);
 	}
 
 }

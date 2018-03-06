@@ -43,15 +43,6 @@ public class MainJava {
 		chunkSettings = MCPMappings.getField(ChunkGeneratorOverworld.class, "settings");//cache variables from mcp-api as it's a heavy process
 		CapabilityManager.INSTANCE.register(CapInterface.class, new Storage(), CapObj.class);
 	}
-	
-	public Class getClassFromString(String string) {
-		string = string.replaceAll("/", ".");
-		try{
-			Class c = Class.forName(string);
-			return c;
-		}catch(Throwable t){}
-		return null;
-	}
 
 	@Mod.EventHandler
 	public void init(FMLInitializationEvent e)

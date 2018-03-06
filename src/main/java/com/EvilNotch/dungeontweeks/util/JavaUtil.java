@@ -15,8 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.io.IOUtils;
-
 import com.EvilNotch.dungeontweeks.util.Line.LineBase;
 import com.EvilNotch.dungeontweeks.util.Line.LineItemStackBase;
 
@@ -306,17 +304,6 @@ public class JavaUtil {
 	{
 		List<String> sub = filelist.subList(index1, index2);
 		sub.clear();
-	}
-	public static void moveFileFromJar(Class clazz,String input,File output) {
-		try {
-			InputStream inputstream =  clazz.getResourceAsStream(input);
-			FileOutputStream outputstream = new FileOutputStream(output);
-			output.createNewFile();
-			IOUtils.copy(inputstream,outputstream);
-			inputstream.close();
-			outputstream.close();
-		} catch (IOException io) {io.printStackTrace();}
-		
 	}
 	public static boolean ArrayhasEqualString(String[] list, String strhead) 
 	{

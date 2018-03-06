@@ -106,16 +106,24 @@ public class LineItemStack extends LineItemStackBase{
 		this.lhead = Long.parseLong(str);
 		}catch(Exception e){e.printStackTrace();}
 	}
-	
 	@Override
 	public boolean equals(Object obj)
 	{
+		return super.equals(obj);
+	}
+	@Override
+	public boolean equals(Object obj,boolean compareHead)
+	{
+		if(!compareHead)
+			return this.equals(obj);
+		
 		if(!(obj instanceof LineItemStack))
-			return false;
+			return this.getHead() == null && super.equals(obj);
 		Object head = this.getHead();
 		Object otherhead = ((LineItemStack)obj).getHead();
 		if(head == null || otherhead == null)
 			return super.equals(obj) && head == null && otherhead == null;
+		
 		return super.equals(obj) && head.equals(otherhead);
 	}
 	

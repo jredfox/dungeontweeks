@@ -39,21 +39,7 @@ public class LineBase
 	 */
 	protected String[] getStrId(String s) 
 	{
-		String strid = "";
-		int quote = 0;
-		for(int i=0;i<s.length();i++)
-		{
-			if(quote == 2)
-				break; //if end of parsing object stop loop and return getParts(strid,":");
-			
-			if(s.substring(i,i+1).equals("\""))
-				quote++;
-			if(!s.substring(i,i+1).equals("\"") && quote > 0)
-			{
-					if(!s.substring(i, i+1).equals(" ") || s.substring(i, i+1).equals(" ") && quote > 0)
-						strid += s.substring(i, i+1);
-			}
-		}
+		String strid = parseQuotes(s,0);
 		return getParts(strid, ":");
 	}
 
@@ -139,11 +125,17 @@ public class LineBase
 		if(!(obj instanceof LineBase))
 			return false;
 		LineBase line = (LineBase)obj;
-		if(this.name == null && line.name == null)
-			return this.modid == line.modid;
-		if(this.name == null || line.name == null)
-			return false;//if hasn't returned already it and if that it means one is null and the other isn't causing a crash without this
-		return (this.modid + this.name).equals(line.modid + line.name);
+		String line1 = "" + this.modid + ":" + this.name;
+		String line2 =  "" + line.modid + ":" + line.name;
+		return line1.equals(line2);
+	}
+	/**
+	 * if head != null should line compare head? Used for ConfigBase
+	 * @return
+	 */
+	public boolean equals(Object obj,boolean compareHead)
+	{
+		return this.equals(obj);
 	}
 	
 	@Override
@@ -175,23 +167,19 @@ public class LineBase
 	}
 	public static String parseQuotes(String s, int index) 
 	{
-		String quotes = "";
+		String strid = "";
 		int quote = 0;
 		for(int i=index;i<s.length();i++)
 		{
-			String strindex = s.substring(i, i+1);
-			if(strindex.equals("\""))
-				quote++;
-			if(!strindex.equals("\""))
-				quotes += strindex;
 			if(quote == 2)
-				break;
+				break; //if end of parsing object stop loop and return getParts(strid,":");
+			
+			if(s.substring(i,i+1).equals("\""))
+				quote++;
+			if(!s.substring(i,i+1).equals("\"") && quote > 0)
+				strid += s.substring(i, i+1);
 		}
-		return quotes;
+		return strid;
 	}
-	
-	
-	
-	
 
 }

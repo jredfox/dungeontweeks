@@ -32,7 +32,7 @@ public class LineItemStackBase extends LineBase
 		else
 			return null;
 		
-		NBTTagCompound nbt;
+		NBTTagCompound nbt = null;
 		try {
 			nbt = (NBTTagCompound)JsonToNBT.getTagFromJson(strnbt);
 		} 
@@ -98,13 +98,13 @@ public class LineItemStackBase extends LineBase
 	public boolean equals(Object obj)
 	{
 		if(!(obj instanceof LineItemStackBase))
-			return false;
+			return this.NBT == null && this.meta == -1 && super.equals(obj);
 		LineItemStackBase line = (LineItemStackBase)obj;
 		boolean nbt = false;
 		if(this.NBT != null && line.NBT != null)
 			nbt = this.NBT.equals(line.NBT);
-		if(this.NBT == null && line.NBT == null)
-			nbt = true;
+		if(this.NBT == null)
+			nbt = line.NBT == null;
 		return super.equals(obj) && this.meta == line.meta && nbt;
 	}
 

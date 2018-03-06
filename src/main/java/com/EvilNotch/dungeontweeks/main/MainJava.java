@@ -3,9 +3,11 @@ package com.EvilNotch.dungeontweeks.main;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import org.apache.commons.io.IOUtils;
 
+import com.EvilNotch.dungeontweeks.Api.MCPEntry;
 import com.EvilNotch.dungeontweeks.Api.MCPMappings;
 import com.EvilNotch.dungeontweeks.main.Attatchments.CapInterface;
 import com.EvilNotch.dungeontweeks.main.Attatchments.CapObj;
@@ -16,6 +18,7 @@ import com.EvilNotch.dungeontweeks.main.EventHandlers.TileEntityExtendedProperti
 import com.EvilNotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
 
 import net.minecraft.block.Block;
+import net.minecraft.world.gen.ChunkGeneratorOverworld;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.fml.common.Mod;
@@ -29,6 +32,7 @@ public class MainJava {
 	public static final String MODID = "dungeontweeks";
 	public static final String VERSION = "beta 1.1";
 	public static boolean isDeObfuscated = false;
+	public static String chunkSettings = null;
 	
 	@Mod.EventHandler
 	public void preinit(FMLPreInitializationEvent e)
@@ -36,9 +40,19 @@ public class MainJava {
 		Config.loadConfig(e.getModConfigurationDirectory());
 		MCPMappings.CacheMCP(e.getModConfigurationDirectory());
 		isDeObfuscated = isDeObfucscated();
+		chunkSettings = MCPMappings.getField(ChunkGeneratorOverworld.class, "settings");//cache variables from mcp-api as it's a heavy process
 		CapabilityManager.INSTANCE.register(CapInterface.class, new Storage(), CapObj.class);
 	}
 	
+	public Class getClassFromString(String string) {
+		string = string.replaceAll("/", ".");
+		try{
+			Class c = Class.forName(string);
+			return c;
+		}catch(Throwable t){}
+		return null;
+	}
+
 	@Mod.EventHandler
 	public void init(FMLInitializationEvent e)
 	{

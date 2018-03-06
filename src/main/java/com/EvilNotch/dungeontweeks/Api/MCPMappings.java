@@ -31,33 +31,39 @@ public class MCPMappings {
 	
 	public static String getFieldOb(Class clazz, String strname)
 	{
-		for(MCPEntry e : methods)
-		{
-			String name = e.name;
-			if(name.equals(strname))
-			{
-				ArrayList<Class> clazzes = e.classes;
-				for(Class c : clazzes)
-				{
-					if(c.isAssignableFrom(clazz) )
-						return e.srg;
-				}
-			}
-		}
+		MCPEntry e = getEntry(clazz,strname, fields);
+		if(e != null)
+			return e.srg;
 		return null;
 	}
 	public static String getMethodOb(Class clazz, String strname)
 	{
-		for(MCPEntry e : methods)
+		MCPEntry e = getEntry(clazz,strname, methods);
+		if(e != null)
+			return e.srg;
+		return null;
+	}
+	public static MCPEntry getEntryFromOb(String ob,ArrayList<MCPEntry> list)
+	{
+		for(MCPEntry e : list)
+		{
+			if(e.srg.equals(ob))
+				return e;
+		}
+		return null;
+	}
+	public static MCPEntry getEntry(Class clazz,String field,ArrayList<MCPEntry> list)
+	{
+		for(MCPEntry e : list)
 		{
 			String name = e.name;
-			if(name.equals(strname))
+			if(name.equals(field))
 			{
 				ArrayList<Class> clazzes = e.classes;
 				for(Class c : clazzes)
 				{
 					if(c.isAssignableFrom(clazz) )
-						return e.srg;
+						return e;
 				}
 			}
 		}

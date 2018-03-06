@@ -167,7 +167,7 @@ public class ReplaceGen {
         int j = e.getChunkZ() * 16;
 		BlockPos blockpos = new BlockPos(i, 0, j);
 		Random rand = e.getRand();
-		ChunkGeneratorSettings settings = (ChunkGeneratorSettings)ReflectionUtil.getObject(gen, ChunkGeneratorOverworld.class, MCPMappings.getField(ChunkGeneratorOverworld.class, "settings") );
+		ChunkGeneratorSettings settings = (ChunkGeneratorSettings)ReflectionUtil.getObject(gen, ChunkGeneratorOverworld.class, MainJava.chunkSettings );
 
 		for (int j2 = 0; j2 < settings.dungeonChance; ++j2)
         {

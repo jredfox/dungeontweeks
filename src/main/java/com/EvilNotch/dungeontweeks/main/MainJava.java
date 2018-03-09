@@ -15,6 +15,7 @@ import com.EvilNotch.dungeontweeks.main.Attatchments.Storage;
 import com.EvilNotch.dungeontweeks.main.EventHandlers.DungeonHandler;
 import com.EvilNotch.dungeontweeks.main.EventHandlers.ReplaceGen;
 import com.EvilNotch.dungeontweeks.main.EventHandlers.TileEntityExtendedProperties;
+import com.EvilNotch.dungeontweeks.main.commands.CmdReload;
 import com.EvilNotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
 
 import net.minecraft.block.Block;
@@ -25,11 +26,12 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 @Mod(modid = MainJava.MODID,name = "Dungeon Tweeks", version = MainJava.VERSION,acceptableRemoteVersions = "*")
 public class MainJava {
-	public static final String MODID = "dungeontweeks";
+	public static final String MODID = "dungeontweaks";
 	public static final String VERSION = "beta 1.1";
 	public static boolean isDeObfuscated = false;
 	public static String chunkSettings = null;
@@ -60,12 +62,12 @@ public class MainJava {
 		System.out.println("Dungeon Tweeks Cache Staring:");
 		DungeonMobs.cacheMobs();
 		System.out.println("Dungeon Tweeks Finished Cache:");
-		
-		System.out.println("Dungeon:" + DungeonMobs.mob_dungeon);
-		System.out.println("MineShaft:" + DungeonMobs.mob_mineshaft);
-		System.out.println("Mansion:" + DungeonMobs.mob_mansion);
-		System.out.println("Nether Fortress:" + DungeonMobs.mob_netherfortress);
-		System.out.println("Stronghold: " + DungeonMobs.mob_stronghold);
+		DungeonMobs.printDungeonMobs();
+	}
+	@Mod.EventHandler
+	public void commandRegister(FMLServerStartingEvent e)
+	{
+		e.registerServerCommand(new CmdReload() );
 	}
 	
 	@SuppressWarnings("rawtypes")

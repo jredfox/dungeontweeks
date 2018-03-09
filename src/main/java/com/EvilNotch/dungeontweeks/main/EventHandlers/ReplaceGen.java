@@ -1,27 +1,24 @@
 package com.EvilNotch.dungeontweeks.main.EventHandlers;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 
-import com.EvilNotch.dungeontweeks.Api.MCPMappings;
 import com.EvilNotch.dungeontweeks.Api.ReflectionUtil;
 import com.EvilNotch.dungeontweeks.main.Config;
 import com.EvilNotch.dungeontweeks.main.MainJava;
 import com.EvilNotch.dungeontweeks.main.Attatchments.CapInterface;
 import com.EvilNotch.dungeontweeks.main.Attatchments.CapProvider;
 import com.EvilNotch.dungeontweeks.main.Events.EventDungeon;
-import com.EvilNotch.dungeontweeks.main.Events.EventDungeon.Type;
 import com.EvilNotch.dungeontweeks.main.world.worldgen.DungeonMain;
+import com.EvilNotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
 
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.tileentity.TileEntityMobSpawner;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
@@ -31,14 +28,10 @@ import net.minecraft.world.gen.ChunkGeneratorOverworld;
 import net.minecraft.world.gen.ChunkGeneratorSettings;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.terraingen.DecorateBiomeEvent;
-import net.minecraftforge.event.terraingen.InitMapGenEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
-import net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 public class ReplaceGen {
 	 /**
@@ -132,16 +125,21 @@ public class ReplaceGen {
 			    ChunkGeneratorHell gen3 = (ChunkGeneratorHell)gen;
 			    netherfortress = gen3.isInsideStructure(w, "Fortress", pos);
 			  }
-			  if(!mineshaft && !stronghold && !mansion && !netherfortress)
-				  return;
+			  
 			  if(tile instanceof TileEntityMobSpawner)
 			  {
+				  NBTTagCompound nbt = new NBTTagCompound();
+				  tile.writeToNBT(nbt);
+				  String name = nbt.getCompoundTag("SpawnData").getString("id");
+				  ResourceLocation loc = new ResourceLocation(name);
+				  if(!mineshaft && !stronghold && !mansion && !netherfortress && DungeonMobs.getMappingEntry(loc, w.provider.getDimension()) == null)
+					  continue;
 				   CapInterface cap = tile.getCapability(CapProvider.MANA_CAP, EnumFacing.DOWN);
 				   boolean scanned = cap.getScanned();
 				   if(!scanned)
 				   {
 					  EventDungeon.Type type = mineshaft ? EventDungeon.Type.MINESHAFT : stronghold ? EventDungeon.Type.STRONGHOLD : mansion ? EventDungeon.Type.MANSION : netherfortress ? EventDungeon.Type.NETHERFORTRESS : EventDungeon.Type.MODED;
-					  EventDungeon.Post d = new EventDungeon.Post(tile,pos,type,e.getRand());
+					  EventDungeon.Post d = new EventDungeon.Post(tile,pos,type,e.getRand(),loc,e.getWorld());
 					  MinecraftForge.EVENT_BUS.post(d);
 //					  System.out.println(pos);
 				      cap.setScanned(true);

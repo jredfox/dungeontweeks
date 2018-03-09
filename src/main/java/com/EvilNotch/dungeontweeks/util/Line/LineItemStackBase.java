@@ -124,7 +124,7 @@ public class LineItemStackBase extends LineBase
 		if(this.NBT != null && meta != -1)
 			str += " " + this.NBT.toString();
 		if(this.NBT != null && meta == -1)
-			str += this.NBT.toString();
+			str += " " + this.NBT.toString();
 		return str;
 	}
 

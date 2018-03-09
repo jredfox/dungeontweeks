@@ -1,13 +1,27 @@
 package com.EvilNotch.dungeontweeks.util.Line;
 
+import java.util.ArrayList;
+
 public class LineBase
 {
+	public static final String lineLibraryVersion = "1.0";
 	public String strLineBase;
 	public String modid;
 	public String name;
+	public static final ArrayList<String> invalidParsingChars = new ArrayList<String>(10);
+	public boolean legacyParsed = false;
 	
 	public LineBase(String s) 
 	{
+		//invalid chars for line base as = doesn't do anything for the base class
+		if(!invalidParsingChars.contains("<"))
+			invalidParsingChars.add("<");
+		
+		if(!invalidParsingChars.contains("{"))
+			invalidParsingChars.add("{");
+		
+		if(!invalidParsingChars.contains("="))
+			invalidParsingChars.add("=");
 	try{
 		  this.strLineBase = s;
 		  String[] stack = getStrId(s);
@@ -39,10 +53,36 @@ public class LineBase
 	 */
 	protected String[] getStrId(String s) 
 	{
-		String strid = parseQuotes(s,0);
+		String compare = s;
+		if(s.contains("="))
+			compare = LineBase.toWhiteSpaced(s.split("=")[0]);//ensures it is to the left of the = sign
+		
+		String strid = null;
+		if(compare.contains("\""))
+			strid = parseQuotes(s,0);
+		else{
+			legacyParsed = true;
+			return getParts(parseLoosly(compare),":");//old format supports no spacing however is easy to edit and create
+		}
+		
 		return getParts(strid, ":");
 	}
 
+	public String parseLoosly(String s) {
+		String str = "";
+		for(int i=0;i<s.length();i++)
+		{
+			String charstr = s.substring(i, i+1);
+			//check for chars that stop parsing before the = sign
+			for(String invalid : invalidParsingChars)
+			{
+				if(charstr.equals(invalid))
+					return str;
+			}
+			str += charstr;
+		}
+		return str;
+	}
 	/**
 	 * Separates a string dynamically supports vanilla format
 	 * @param s
@@ -141,7 +181,8 @@ public class LineBase
 	@Override
 	public String toString()
 	{
-		return "\"" + this.modid + ":" + this.name + "\"";	
+		String quote = this.legacyParsed ? "" : "\"";
+		return  quote + this.modid + ":" + this.name + quote;	
 	}
 	/**
 	 * Gets lines string for configuration files overridden in LineItemStackBase

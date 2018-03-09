@@ -140,10 +140,10 @@ public class DungeonMain extends WorldGenDungeons{
 
             if (tileentity instanceof TileEntityMobSpawner)
             {
-            	EventDungeon pre = new EventDungeon.Pre(tileentity, position, EventDungeon.Type.DUNGEON,rand);
+            	EventDungeon pre = new EventDungeon.Pre(tileentity, position, EventDungeon.Type.DUNGEON,rand,null,worldIn);
             	MinecraftForge.EVENT_BUS.post(pre);
             	
-                EventDungeon post = new EventDungeon.Post(tileentity, position, EventDungeon.Type.DUNGEON,rand);
+                EventDungeon post = new EventDungeon.Post(tileentity, position, EventDungeon.Type.DUNGEON,rand,null,worldIn);
             	MinecraftForge.EVENT_BUS.post(post);
             }
 

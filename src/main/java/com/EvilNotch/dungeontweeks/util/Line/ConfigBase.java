@@ -16,15 +16,21 @@ public class ConfigBase {
 	public ArrayList<LineDynamicLogic> logic; //for config files that use dynamic logic which contains array of lines for one statement
 	public final File cfgfile;
 	private ArrayList<String> init;
-	public String end = "";
+	public String header = "";
 	public boolean first_launch = false;
 	
-	public ConfigBase(File file, ArrayList<String> list)
+	public ConfigBase(File file, ArrayList<String> filedocs)
+	{
+		this(file,filedocs,"");
+	}
+	
+	public ConfigBase(File file, ArrayList<String> filedocs, String header)
 	{
 		this.cfgfile = file;
 		this.lines = new ArrayList();
 		this.logic = new ArrayList();
-		this.init = list;
+		this.init = filedocs;
+		this.header = header;
 		boolean exsists = file.exists();
 		
 		if(!exsists)
@@ -35,7 +41,7 @@ public class ConfigBase {
 				
 			} catch (IOException e) {e.printStackTrace();}
 			
-			this.writeFile(list);
+			this.writeFile(new ArrayList());
 		}
 		this.readFile();//cache arrays
 	}
@@ -43,9 +49,21 @@ public class ConfigBase {
 	public void writeFile(ArrayList<String> list) 
 	{
 		try {
+			//header and init
 			FileWriter out = new FileWriter(this.cfgfile);
+			for(String s : this.init)
+				out.write(s + "\r\n");
+			if(this.init.size() > 0)
+				out.write("\r\n");//create new line if has header
+			if(!this.header.equals(""))	
+				out.write("<" + this.header + ">\r\n\r\n");
+			
 			for(String s : list)
 				out.write(s + "\r\n");
+			
+			//end of header
+			if(!this.header.equals(""))
+				out.write("\r\n" + "</" + this.header + ">\r\n");
 			out.close();
 		} catch (Exception e) {e.printStackTrace();}
 	}
@@ -58,13 +76,9 @@ public class ConfigBase {
 			while(scan.hasNextLine())
 			{
 				String strline = scan.nextLine();
-				
 				if(!LineDynamicLogic.isStringPossibleLine(strline))
-				{
-					if(LineBase.toWhiteSpaced(strline).indexOf("</") == 0)
-						this.end = LineBase.toWhiteSpaced(strline);
 					continue;//If it is Comment/Invalid/Old Parsing format Leave
-				}
+				
 				if(LineBase.isDynamicLogic(strline))
 					logic.add(new LineDynamicLogic(strline));
 				else
@@ -105,6 +119,36 @@ public class ConfigBase {
 				flag = true;
 			}
 		}
+	}
+	public void addLine(LineBase line){
+		if(this.containsLine(line))
+			return;
+		this.appendLine(line);
+	}
+	public void addLine(LineBase line, int index){
+		if(this.containsLine(line))
+			return;
+		this.appendLine(line,index);
+	}
+	/**
+	 * Append List of lines
+	 * @param list
+	 */
+	public void addLineList(ArrayList<LineBase> list)
+	{
+		for(LineBase line : list)
+			if(!this.containsLine(line))
+				this.lines.add(line);
+	}
+	
+	/**
+	 * Append List of lines at starting index
+	 */
+	public void addLineList(ArrayList<LineBase> list, int index)
+	{
+		for(LineBase line : list)
+			if(!this.containsLine(line))
+				this.lines.add(index++,line);
 	}
 	
 	/**

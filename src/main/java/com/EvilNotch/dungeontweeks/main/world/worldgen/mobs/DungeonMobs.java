@@ -33,6 +33,9 @@ public class DungeonMobs {
 	public static ArrayList<DungeonMobEntry> mob_stronghold = new ArrayList();
 	public static ArrayList<DungeonMobEntry> mob_netherfortress = new ArrayList();
 	public static ArrayList<DungeonMobEntry> mob_mansion = new ArrayList();
+
+	public static ArrayList<File> dirs = new ArrayList();
+	public static ArrayList<MappingEntry> entries = new ArrayList();//modded definitions of mob entries
 	
 	public static void cacheMobs()
 	{
@@ -40,17 +43,37 @@ public class DungeonMobs {
 		mob_mineshaft.clear();
 		mob_stronghold.clear();
 		mob_netherfortress.clear();
+		mob_mansion.clear();
+		//clear other stuff that is in use
+		dirs.clear();
+		Config.cfgdefinitions.clear();
+		
+		File dir = new File(Config.dir,"entries");
+		Config.loadDefinitionsDir(Config.dir);
+		
+		//populate defined dungeon directories
+		for(LineItemStackBase line : Config.cfgdefinitions)
+		{
+			int dim = line.meta;
+			File file = new File(dir,"definitions/" + dim  + "/" + line.modid + "/" + line.name.replaceAll(":", "/"));
+			dirs.add(file);
+			entries.add(new MappingEntry(new ResourceLocation(line.modid + ":" + line.name),new ArrayList(),dim,file) );
+		}
 		
 		try{
 		Set<ResourceLocation> list = EntityList.getEntityNameList();
 		HashMap<File,ConfigBase> configs = new HashMap();
-		File dir = new File(Config.dir,"entries");
+		
 		File dir_dungeon = new File(dir,"dungeon");
 		File dir_mineshaft = new File(dir,"mineshaft");
 		File dir_stronghold = new File(dir,"stronghold");
 		File dir_netherfortess = new File(dir,"netherfortress");
 		File dir_mansion = new File(dir,"mansion");
-		File[] dirs = {dir_dungeon,dir_mineshaft,dir_stronghold,dir_netherfortess,dir_mansion};
+		dirs.add(dir_dungeon);
+		dirs.add(dir_mineshaft);
+		dirs.add(dir_stronghold);
+		dirs.add(dir_netherfortess);
+		dirs.add(dir_mansion);
 		
 		//cache and/or create config files to disk and memory
 		for(File f : dirs)
@@ -71,7 +94,7 @@ public class DungeonMobs {
 				ConfigBase cfg = new ConfigBase(file, new ArrayList());
 				configs.put(file, cfg);
 			}
-			if(getFileTrueDisplayName(f).equals("dungeon"))
+			if(f.equals(dir_dungeon))
 			{
 				ArrayList<DungeonMob> forgemobs = (ArrayList<DungeonMob>) ReflectionUtil.getObject(null, DungeonHooks.class, "dungeonMobs");
 				if(forgemobs == null)
@@ -81,6 +104,8 @@ public class DungeonMobs {
 					//import modded weights if added before considering default weight to be whatever user configured
 					for(DungeonMob d : forgemobs)
 					{
+						if(d.type.equals(new ResourceLocation("minecraft:blank_dungeon")))
+								continue;
 						if(!Loader.isModLoaded(d.type.getResourceDomain()))
 						{
 							System.out.println("Skipping ForgeHooks Entity:" + d.type + " as mod isn't loaded");
@@ -129,7 +154,10 @@ public class DungeonMobs {
 				if(!f.exists())
 					f.mkdirs();
 				File mod = new File(f,JavaUtil.toFileCharacters(modid) + ".txt");
-				String dungeontype = getFileTrueDisplayName(mod.getParentFile() );
+				MappingEntry entry = getMappingEntry(f);
+				String dungeontype = null;
+				if(entry != null)
+					dungeontype = entry.loc.toString();
 				ConfigBase cfg = configs.get(mod);
 				if(cfg == null)
 				{
@@ -169,7 +197,8 @@ public class DungeonMobs {
 		//Populate arrayLists
 		for(ConfigBase cfg : configs.values())
 		{
-			String name = getFileTrueDisplayName(cfg.cfgfile.getParentFile());
+			File f = cfg.cfgfile.getParentFile();
+			String name = f.equals(dir_dungeon) || f.equals(dir_mansion) || f.equals(dir_mineshaft) || f.equals(dir_netherfortess) || f.equals(dir_stronghold) ? getFileTrueDisplayName(f) : "";
 			if(name.equals("dungeon"))
 				applyDungeonMobs(cfg,DungeonMobs.mob_dungeon);
 			else if(name.equals("mineshaft"))
@@ -180,6 +209,11 @@ public class DungeonMobs {
 				applyDungeonMobs(cfg,DungeonMobs.mob_netherfortress);
 			else if(name.equals("stronghold"))
 				applyDungeonMobs(cfg,DungeonMobs.mob_stronghold);
+			else
+			{
+				MappingEntry entry = getMappingEntry(f);
+				applyDungeonMobs(cfg,entry.list);
+			}
 		}
 		
 		//save configs and parse to lists
@@ -199,6 +233,26 @@ public class DungeonMobs {
 		default_forge.add(new DungeonMob(100, new ResourceLocation("minecraft:blank_dungeon")));
 		ReflectionUtil.setObject(null, default_forge, DungeonHooks.class, "dungeonMobs");//empties forges list as it's no longer needed
 
+	}
+	public static MappingEntry getMappingEntry(File f) {
+		if(f == null)
+			return null;
+		for(MappingEntry entry : entries)
+		{
+			if(entry.file.equals(f) )
+				return entry;
+		}
+		return null;
+	}
+	public static MappingEntry getMappingEntry(ResourceLocation loc, int dimension) {
+		if(loc == null)
+			return null;
+		for(MappingEntry entry : entries)
+		{
+			if(entry.loc.equals(loc) )
+				return entry;
+		}
+		return null;
 	}
 	/**
 	 * populate arraylists
@@ -240,7 +294,7 @@ public class DungeonMobs {
 	/**
      * Randomly decides which spawner to use in a dungeon
      */
-    public static DungeonMobEntry pickMobSpawner(Random rand,EventDungeon.Type type)
+    public static DungeonMobEntry pickMobSpawner(Random rand,EventDungeon.Type type,ResourceLocation loc,int dimension)
     {
     	ArrayList<DungeonMobEntry> list = getList(type);
     	if(type == Type.DUNGEON)
@@ -253,6 +307,12 @@ public class DungeonMobs {
     		return WeightedRandom.getRandomItem(rand, list);
     	if(type == type.MANSION)
     		return WeightedRandom.getRandomItem(rand, list);
+    	if(type == type.MODED && loc != null)
+    	{
+    		MappingEntry e = DungeonMobs.getMappingEntry(loc,dimension);
+    		if(e != null)
+    			return WeightedRandom.getRandomItem(rand, e.list );
+    	}
     	
     	return new DungeonMobEntry(1,new ResourceLocation("blank_" + type.toString().toLowerCase()),null);
     }
@@ -315,5 +375,14 @@ public class DungeonMobs {
         }
         return 0;
     }
+	public static void printDungeonMobs() {
+		System.out.println("Dungeon:" + DungeonMobs.mob_dungeon);
+		System.out.println("MineShaft:" + DungeonMobs.mob_mineshaft);
+		System.out.println("Mansion:" + DungeonMobs.mob_mansion);
+		System.out.println("Nether Fortress:" + DungeonMobs.mob_netherfortress);
+		System.out.println("Stronghold: " + DungeonMobs.mob_stronghold);
+		for(MappingEntry e : entries)
+			System.out.println(e.loc + ":" + e.list);
+	}
 
 }

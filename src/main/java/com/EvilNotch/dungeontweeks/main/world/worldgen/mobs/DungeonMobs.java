@@ -47,6 +47,7 @@ public class DungeonMobs {
 		//clear other stuff that is in use
 		dirs.clear();
 		Config.cfgdefinitions.clear();
+		entries.clear();
 		
 		File dir = new File(Config.dir,"entries");
 		Config.loadDefinitionsDir(Config.dir);
@@ -82,7 +83,6 @@ public class DungeonMobs {
 				f.mkdirs();
 			ArrayList<File> files = new ArrayList();
 			getFilesFromDir(f, files, ".txt");
-			if(!files.isEmpty())
 			for(File file : files)
 			{
 				String strname = getFileTrueDisplayName(file);
@@ -155,7 +155,7 @@ public class DungeonMobs {
 					f.mkdirs();
 				File mod = new File(f,JavaUtil.toFileCharacters(modid) + ".txt");
 				MappingEntry entry = getMappingEntry(f);
-				String dungeontype = null;
+				String dungeontype = getFileTrueDisplayName(f);
 				if(entry != null)
 					dungeontype = entry.loc.toString();
 				ConfigBase cfg = configs.get(mod);
@@ -212,7 +212,8 @@ public class DungeonMobs {
 			else
 			{
 				MappingEntry entry = getMappingEntry(f);
-				applyDungeonMobs(cfg,entry.list);
+				if(entry != null)
+					applyDungeonMobs(cfg,entry.list);
 			}
 		}
 		

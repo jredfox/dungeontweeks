@@ -27,5 +27,7 @@ public class MappingEntry {
 		MappingEntry e = (MappingEntry)obj;
 		return this.list.equals(e.list) && this.loc.equals(e.loc);
 	}
+	@Override
+	public String toString(){return this.list.toString();}
 
 }

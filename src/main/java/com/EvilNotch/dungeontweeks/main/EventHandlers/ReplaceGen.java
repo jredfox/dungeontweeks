@@ -31,6 +31,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType;
 import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class ReplaceGen {
@@ -83,7 +84,7 @@ public class ReplaceGen {
 	/**
 	 * For everything except default dungeon this includes modded definitions support
 	 */
-	@SubscribeEvent
+	@SubscribeEvent(priority=EventPriority.LOWEST)
 	public void dungeonDetect(PopulateChunkEvent.Post e)
 	{
 		World w = e.getWorld();
@@ -132,8 +133,12 @@ public class ReplaceGen {
 				  tile.writeToNBT(nbt);
 				  String name = nbt.getCompoundTag("SpawnData").getString("id");
 				  ResourceLocation loc = new ResourceLocation(name);
-				  if(!mineshaft && !stronghold && !mansion && !netherfortress && DungeonMobs.getMappingEntry(loc, w.provider.getDimension()) == null)
+				 
+				  if(!mineshaft && !stronghold && !mansion && !netherfortress)
+				  {
+					  System.out.println("loc:" + loc + " List:" + DungeonMobs.getMappingEntry(loc, w.provider.getDimension()) + " ");
 					  continue;
+				  }
 				   CapInterface cap = tile.getCapability(CapProvider.MANA_CAP, EnumFacing.DOWN);
 				   boolean scanned = cap.getScanned();
 				   if(!scanned)
@@ -141,7 +146,6 @@ public class ReplaceGen {
 					  EventDungeon.Type type = mineshaft ? EventDungeon.Type.MINESHAFT : stronghold ? EventDungeon.Type.STRONGHOLD : mansion ? EventDungeon.Type.MANSION : netherfortress ? EventDungeon.Type.NETHERFORTRESS : EventDungeon.Type.MODED;
 					  EventDungeon.Post d = new EventDungeon.Post(tile,pos,type,e.getRand(),loc,e.getWorld());
 					  MinecraftForge.EVENT_BUS.post(d);
-//					  System.out.println(pos);
 				      cap.setScanned(true);
 				   }
 			  }
@@ -172,7 +176,7 @@ public class ReplaceGen {
             int i3 = rand.nextInt(16) + 8;
             int l3 = rand.nextInt(256);
             int l1 = rand.nextInt(16) + 8;
-            (new DungeonMain()).generate(w, rand, blockpos.add(i3, l3, l1));
+//            (new DungeonMain()).generate(w, rand, blockpos.add(i3, l3, l1));
         }
 		e.setResult(Event.Result.DENY);
 	}

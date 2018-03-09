@@ -20,15 +20,13 @@ public class DungeonHandler {
 		e.tile.writeToNBT(nbt);
 		NBTTagCompound data = nbt.getCompoundTag("SpawnData");
 		DungeonMobEntry entry = DungeonMobs.pickMobSpawner(e.rnd, e.type,e.loc,e.w.provider.getDimension());
-		ResourceLocation loc = entry.type;
-		data.setString("id",loc.toString());
+		data.setString("id",entry.type.toString());
 		//NBT Support in spawndata
 		if(entry.nbt != null)
 		{
 			for(String s : entry.nbt.getKeySet() )
 				data.setTag(s, entry.nbt.getTag(s));
 		}
-		System.out.println(loc + " " + e.pos);
 		nbt.removeTag("SpawnPotentials");
 		e.tile.readFromNBT(nbt);
 		e.tile.markDirty();

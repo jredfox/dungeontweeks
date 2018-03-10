@@ -20,6 +20,7 @@ public class Config {
 	public static ArrayList<LineItemStack> cfgdefinitions = new ArrayList();
 	public static boolean blankSpawnerWhenBlank = true;
 	public static boolean legacyHooks = true;
+    public static boolean fancyConfig = true;
 	
 	public static void loadConfig(File moddir)
 	{
@@ -38,6 +39,7 @@ public class Config {
 		Debug = config.get("general", "debug", false).getBoolean(false);
 		blankSpawnerWhenBlank = config.get("general","blankSpawnerWhenBlank",true).getBoolean(true);
 		legacyHooks = config.get("general","legacyHooksSupport",true).getBoolean(true);
+		fancyConfig = config.get("general","fancyConfig",true).getBoolean(true);
 		config.save();
 	}
 	public static void loadDefinitionsDir(File dir){

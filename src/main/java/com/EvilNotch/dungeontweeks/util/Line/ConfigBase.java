@@ -45,6 +45,7 @@ public class ConfigBase {
 		}
 		this.readFile();//cache arrays
 	}
+	public void setInit(ArrayList<String> list){this.init = list;}
 
 	public void writeFile(ArrayList<String> list) 
 	{

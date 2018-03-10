@@ -228,6 +228,14 @@ public class DungeonMobs {
 		{
 			ConfigBase cfg = it.next().getValue();
 			cfg.alphabetize();
+			if(Config.fancyConfig)
+			{
+			    ArrayList<String> init = new ArrayList();
+			    init.add("#DungeonTweaks For" + getFileTrueDisplayName(cfg.cfgfile));
+			    init.add("#To Add NBT Entry make sure your in the right file then add a line in this format \"modid:mobid\" { } = weight");
+			    cfg.setInit(init);
+			    cfg.header = "DungeonMobs";
+			}
 			cfg.updateConfig();
 		}
 		

@@ -306,16 +306,11 @@ public class DungeonMobs {
     public static DungeonMobEntry pickMobSpawner(Random rand,EventDungeon.Type type,ResourceLocation loc,int dimension)
     {
     	ArrayList<DungeonMobEntry> list = getList(type);
-    	if(type == Type.DUNGEON)
-    		return WeightedRandom.getRandomItem(rand, list);
-    	if(type == Type.MINESHAFT)
-    		return WeightedRandom.getRandomItem(rand, list);
-    	if(type == Type.STRONGHOLD)
-    		return WeightedRandom.getRandomItem(rand,list);
-    	if(type == Type.NETHERFORTRESS)
-    		return WeightedRandom.getRandomItem(rand, list);
-    	if(type == type.MANSION)
-    		return WeightedRandom.getRandomItem(rand, list);
+    	if(type != type.MODED)
+    	{
+    	    if(list.size() != 0)
+    	        return WeightedRandom.getRandomItem(rand, list);
+    	}
     	if(type == type.MODED && loc != null)
     	{
     		MappingEntry e = DungeonMobs.getMappingEntry(loc,dimension);
@@ -326,7 +321,7 @@ public class DungeonMobs {
     		}
     	}
     	
-    	return Config.blankSpawnerWhenBlank ? new DungeonMobEntry(1,new ResourceLocation("minecraft:dungeon:blank"),null) : new DungeonMobEntry(1,new ResourceLocation("pig"),null);
+    	return Config.blankSpawnerWhenBlank ? new DungeonMobEntry(1,new ResourceLocation("minecraft:dungeon:" + type.toString().toLowerCase() ),null) : new DungeonMobEntry(1,new ResourceLocation("pig"),null);
     }
     
     public static ArrayList<DungeonMobEntry> getList(Type t){

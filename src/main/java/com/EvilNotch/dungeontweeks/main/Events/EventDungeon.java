@@ -42,6 +42,10 @@ public class EventDungeon extends Event{
 			super(tile, pos, type,rnd,loc,w);
 			this.type = type;
 		}
+		//this is for battle towers they have retro generation so a simple chunk scan override wouldn't do they had to post the event
+		public Post(TileEntity tile, BlockPos pos,Random rnd,ResourceLocation loc,World w){
+			super(tile,pos,Type.MODED,rnd,loc,w);
+		}
 	}
 	
 	public static enum Type{

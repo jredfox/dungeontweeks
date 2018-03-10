@@ -13,6 +13,7 @@ import com.EvilNotch.dungeontweeks.main.Attatchments.CapProvider;
 import com.EvilNotch.dungeontweeks.main.Events.EventDungeon;
 import com.EvilNotch.dungeontweeks.main.world.worldgen.DungeonMain;
 import com.EvilNotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
+import com.EvilNotch.dungeontweeks.main.world.worldgen.mobs.MappingEntry;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -133,12 +134,10 @@ public class ReplaceGen {
 				  tile.writeToNBT(nbt);
 				  String name = nbt.getCompoundTag("SpawnData").getString("id");
 				  ResourceLocation loc = new ResourceLocation(name);
-				 
-				  if(!mineshaft && !stronghold && !mansion && !netherfortress)
-				  {
-					  System.out.println("loc:" + loc + " List:" + DungeonMobs.getMappingEntry(loc, w.provider.getDimension()) + " ");
+				  MappingEntry entry =  DungeonMobs.getMappingEntry(loc, w.provider.getDimension());
+				  //if entry isn't null it means it's a defined spawner for this dimension fire the event
+				  if(!mineshaft && !stronghold && !mansion && !netherfortress && entry == null)
 					  continue;
-				  }
 				   CapInterface cap = tile.getCapability(CapProvider.MANA_CAP, EnumFacing.DOWN);
 				   boolean scanned = cap.getScanned();
 				   if(!scanned)
@@ -176,7 +175,7 @@ public class ReplaceGen {
             int i3 = rand.nextInt(16) + 8;
             int l3 = rand.nextInt(256);
             int l1 = rand.nextInt(16) + 8;
-//            (new DungeonMain()).generate(w, rand, blockpos.add(i3, l3, l1));
+            (new DungeonMain()).generate(w, rand, blockpos.add(i3, l3, l1));
         }
 		e.setResult(Event.Result.DENY);
 	}

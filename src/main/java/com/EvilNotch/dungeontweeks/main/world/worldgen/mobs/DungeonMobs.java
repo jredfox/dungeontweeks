@@ -53,12 +53,14 @@ public class DungeonMobs {
 		Config.loadDefinitionsDir(Config.dir);
 		
 		//populate defined dungeon directories
-		for(LineItemStackBase line : Config.cfgdefinitions)
+		for(LineItemStack line : Config.cfgdefinitions)
 		{
+		    if(!Loader.isModLoaded(line.modid))
+		        continue;//skip mods that are not loaded
 			int dim = line.meta;
-			File file = new File(dir,"definitions/" + dim  + "/" + line.modid + "/" + line.name.replaceAll(":", "/"));
+			File file = new File(dir,"definitions/" + "DIM" + dim  + "/" + line.modid + "/" + line.name.replaceAll(":", "/"));
 			dirs.add(file);
-			entries.add(new MappingEntry(new ResourceLocation(line.modid + ":" + line.name),new ArrayList(),dim,file) );
+			entries.add(new MappingEntry(new ResourceLocation(line.modid + ":" + line.name),new ArrayList(),dim,file,line.bhead) );
 		}
 		
 		try{
@@ -250,7 +252,7 @@ public class DungeonMobs {
 			return null;
 		for(MappingEntry entry : entries)
 		{
-			if(entry.loc.equals(loc) )
+			if(entry.loc.equals(loc) && dimension == entry.dimension || entry.loc.equals(loc) && entry.anyDim)
 				return entry;
 		}
 		return null;
@@ -312,10 +314,13 @@ public class DungeonMobs {
     	{
     		MappingEntry e = DungeonMobs.getMappingEntry(loc,dimension);
     		if(e != null)
-    			return WeightedRandom.getRandomItem(rand, e.list );
+    		{
+    			if(e.list.size() > 0)
+    				return WeightedRandom.getRandomItem(rand, e.list );
+    		}
     	}
     	
-    	return new DungeonMobEntry(1,new ResourceLocation("blank_" + type.toString().toLowerCase()),null);
+    	return new DungeonMobEntry(1,new ResourceLocation("minecraft:dungeon:" + type.toString().toLowerCase()),null);
     }
     
     public static ArrayList<DungeonMobEntry> getList(Type t){
@@ -383,7 +388,7 @@ public class DungeonMobs {
 		System.out.println("Nether Fortress:" + DungeonMobs.mob_netherfortress);
 		System.out.println("Stronghold: " + DungeonMobs.mob_stronghold);
 		for(MappingEntry e : entries)
-			System.out.println(e.loc + ":" + e.list);
+			System.out.println(e);
 	}
 
 }

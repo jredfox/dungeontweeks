@@ -6,17 +6,19 @@ import java.util.ArrayList;
 import net.minecraft.util.ResourceLocation;
 
 public class MappingEntry {
-	public ArrayList<DungeonMobEntry> list;
-	public ResourceLocation loc;
-	public int dimension;
-	public File file;
+	public ArrayList<DungeonMobEntry> list = null;
+	public ResourceLocation loc = null;
+	public int dimension = 0;
+	public File file = null;
+	public boolean anyDim = false;
 	
-	public MappingEntry(ResourceLocation loc, ArrayList<DungeonMobEntry> list,int dimension,File f)
+	public MappingEntry(ResourceLocation loc, ArrayList<DungeonMobEntry> list,int dimension,File f,boolean anyDim)
 	{
 		this.list = list;
 		this.loc = loc;
 		this.dimension = dimension;
 		this.file = f;
+		this.anyDim = anyDim;
 	}
 	
 	@Override
@@ -28,6 +30,6 @@ public class MappingEntry {
 		return this.list.equals(e.list) && this.loc.equals(e.loc);
 	}
 	@Override
-	public String toString(){return this.list.toString();}
+	public String toString(){return this.loc.toString() + "<" + this.dimension + "> " + this.list.toString(); }
 
 }

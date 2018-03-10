@@ -3,7 +3,9 @@ package com.EvilNotch.dungeontweeks.main;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Random;
 
 import org.apache.commons.io.IOUtils;
 
@@ -19,6 +21,10 @@ import com.EvilNotch.dungeontweeks.main.commands.CmdReload;
 import com.EvilNotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
 
 import net.minecraft.block.Block;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraft.world.gen.ChunkGeneratorOverworld;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -53,15 +59,12 @@ public class MainJava {
 		MinecraftForge.EVENT_BUS.register(new ReplaceGen() );
 		MinecraftForge.EVENT_BUS.register(new DungeonHandler() );
 		MinecraftForge.EVENT_BUS.register(new TileEntityExtendedProperties() );
-		
 	}
 	@Mod.EventHandler
 	public void post(FMLPostInitializationEvent e)
 	{
 //		DungeonHooks.addDungeonMob(new ResourceLocation("mobspawner:tst"), 100000);
-		System.out.println("Dungeon Tweeks Cache Staring:");
 		DungeonMobs.cacheMobs();
-		System.out.println("Dungeon Tweeks Finished Cache:");
 		DungeonMobs.printDungeonMobs();
 	}
 	@Mod.EventHandler

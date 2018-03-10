@@ -1,6 +1,7 @@
 package com.EvilNotch.dungeontweeks.main.EventHandlers;
 
 import com.EvilNotch.dungeontweeks.main.Events.EventDungeon;
+import com.EvilNotch.dungeontweeks.main.Events.EventDungeon.Type;
 import com.EvilNotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobEntry;
 import com.EvilNotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
 
@@ -16,6 +17,8 @@ public class DungeonHandler {
 	@SubscribeEvent
 	public void dungeonHandler(EventDungeon.Post e)
 	{
+//		if(e.type == Type.MODED)
+//			System.out.println(e.pos + " " + e.loc);
 		NBTTagCompound nbt = new NBTTagCompound();
 		e.tile.writeToNBT(nbt);
 		NBTTagCompound data = nbt.getCompoundTag("SpawnData");

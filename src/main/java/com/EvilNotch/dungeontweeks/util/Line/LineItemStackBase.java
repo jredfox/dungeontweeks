@@ -8,6 +8,7 @@ public class LineItemStackBase extends LineBase
 {
 	public int meta;
 	public NBTTagCompound NBT;
+	protected boolean hasMeta = true;
 
 	public LineItemStackBase(String s)
 	{
@@ -91,6 +92,7 @@ public class LineItemStackBase extends LineBase
 		}
 		if(!strmeta.equals(""))
 			return Integer.parseInt(strmeta);
+		this.hasMeta = false;
 		return -1;
 	}
 	
@@ -98,14 +100,14 @@ public class LineItemStackBase extends LineBase
 	public boolean equals(Object obj)
 	{
 		if(!(obj instanceof LineItemStackBase))
-			return this.NBT == null && this.meta == -1 && super.equals(obj);
+			return this.NBT == null && !this.hasMeta && super.equals(obj);
 		LineItemStackBase line = (LineItemStackBase)obj;
 		boolean nbt = false;
 		if(this.NBT != null && line.NBT != null)
 			nbt = this.NBT.equals(line.NBT);
 		if(this.NBT == null)
 			nbt = line.NBT == null;
-		return super.equals(obj) && this.meta == line.meta && nbt;
+		return super.equals(obj) && this.meta == line.meta && nbt && this.hasMeta == line.hasMeta;
 	}
 
 	@Override
@@ -119,7 +121,7 @@ public class LineItemStackBase extends LineBase
 	public String getString()
 	{
 		String str = "\"" + this.modid + ":" + this.name + "\"";
-		if(this.meta != -1)
+		if(this.hasMeta )
 			str += " <" + this.meta + ">";
 		if(this.NBT != null && meta != -1)
 			str += " " + this.NBT.toString();

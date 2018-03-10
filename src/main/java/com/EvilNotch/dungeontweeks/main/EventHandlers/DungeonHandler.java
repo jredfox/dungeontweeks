@@ -21,6 +21,9 @@ public class DungeonHandler {
 //			System.out.println(e.pos + " " + e.loc);
 		NBTTagCompound nbt = new NBTTagCompound();
 		e.tile.writeToNBT(nbt);
+		nbt.removeTag("SpawnData");
+		nbt.removeTag("SpawnPotentials");
+		
 		NBTTagCompound data = nbt.getCompoundTag("SpawnData");
 		DungeonMobEntry entry = DungeonMobs.pickMobSpawner(e.rnd, e.type,e.loc,e.w.provider.getDimension());
 		data.setString("id",entry.type.toString());
@@ -30,7 +33,6 @@ public class DungeonHandler {
 			for(String s : entry.nbt.getKeySet() )
 				data.setTag(s, entry.nbt.getTag(s));
 		}
-		nbt.removeTag("SpawnPotentials");
 		e.tile.readFromNBT(nbt);
 		e.tile.markDirty();
 	}

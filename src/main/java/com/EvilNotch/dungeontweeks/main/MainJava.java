@@ -3,13 +3,9 @@ package com.EvilNotch.dungeontweeks.main;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Random;
 
 import org.apache.commons.io.IOUtils;
 
-import com.EvilNotch.dungeontweeks.Api.MCPEntry;
 import com.EvilNotch.dungeontweeks.Api.MCPMappings;
 import com.EvilNotch.dungeontweeks.main.Attatchments.CapInterface;
 import com.EvilNotch.dungeontweeks.main.Attatchments.CapObj;
@@ -21,10 +17,7 @@ import com.EvilNotch.dungeontweeks.main.commands.CmdReload;
 import com.EvilNotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
 
 import net.minecraft.block.Block;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.gen.ChunkGeneratorOverworld;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;

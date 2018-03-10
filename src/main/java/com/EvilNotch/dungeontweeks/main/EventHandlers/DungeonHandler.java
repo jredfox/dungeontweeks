@@ -33,6 +33,8 @@ public class DungeonHandler {
 			for(String s : entry.nbt.getKeySet() )
 				data.setTag(s, entry.nbt.getTag(s));
 		}
+		if(!nbt.hasKey("SpawnData"))
+		    nbt.setTag("SpawnData", data);
 		e.tile.readFromNBT(nbt);
 		e.tile.markDirty();
 	}

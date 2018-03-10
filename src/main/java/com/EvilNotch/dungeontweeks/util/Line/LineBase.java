@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class LineBase
 {
-	public static final String lineLibraryVersion = "1.0";
+	public static final String lineLibraryVersion = "1.01";
 	public String strLineBase;
 	public String modid;
 	public String name;

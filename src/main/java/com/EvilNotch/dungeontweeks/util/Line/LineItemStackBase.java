@@ -8,7 +8,7 @@ public class LineItemStackBase extends LineBase
 {
 	public int meta;
 	public NBTTagCompound NBT;
-	protected boolean hasMeta = true;
+	public boolean hasMeta = true;
 
 	public LineItemStackBase(String s)
 	{
@@ -97,37 +97,37 @@ public class LineItemStackBase extends LineBase
 	}
 	
 	@Override
-	public boolean equals(Object obj)
-	{
-		if(!(obj instanceof LineItemStackBase))
-			return this.NBT == null && !this.hasMeta && super.equals(obj);
-		LineItemStackBase line = (LineItemStackBase)obj;
-		boolean nbt = false;
-		if(this.NBT != null && line.NBT != null)
-			nbt = this.NBT.equals(line.NBT);
-		if(this.NBT == null)
-			nbt = line.NBT == null;
-		return super.equals(obj) && this.meta == line.meta && nbt && this.hasMeta == line.hasMeta;
-	}
+    public boolean equals(Object obj)
+    {
+        if(!(obj instanceof LineItemStackBase))
+            return this.NBT == null && !this.hasMeta && super.equals(obj);
+        LineItemStackBase line = (LineItemStackBase)obj;
+        boolean nbt = false;
+        if(this.NBT != null && line.NBT != null)
+            nbt = this.NBT.equals(line.NBT);
+        if(this.NBT == null)
+            nbt = line.NBT == null;
+        return super.equals(obj) && this.meta == line.meta && nbt && this.hasMeta == line.hasMeta;
+    }
 
-	@Override
-	public String toString()
-	{
-		String strid = super.toString();
-		return strid + " <" + this.meta + "> " + this.NBT;	
-	}
-	
-	@Override
-	public String getString()
-	{
-		String str = "\"" + this.modid + ":" + this.name + "\"";
-		if(this.hasMeta )
-			str += " <" + this.meta + ">";
-		if(this.NBT != null && meta != -1)
-			str += " " + this.NBT.toString();
-		if(this.NBT != null && meta == -1)
-			str += " " + this.NBT.toString();
-		return str;
-	}
+    @Override
+    public String toString()
+    {
+        String strid = super.toString();
+        if(this.hasMeta)
+            strid += " <" + this.meta + ">";
+        return strid + " " + this.NBT;  
+    }
+    
+    @Override
+    public String getString()
+    {
+        String str = "\"" + this.modid + ":" + this.name + "\"";
+        if(this.hasMeta)
+            str += " <" + this.meta + ">";
+        if(this.NBT != null)
+            str += " " + this.NBT.toString();
+        return str;
+    }
 
 }

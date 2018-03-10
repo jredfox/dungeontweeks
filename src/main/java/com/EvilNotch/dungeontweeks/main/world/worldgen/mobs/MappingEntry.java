@@ -30,6 +30,14 @@ public class MappingEntry {
 		return this.list.equals(e.list) && this.loc.equals(e.loc);
 	}
 	@Override
-	public String toString(){return this.loc.toString() + "<" + this.dimension + "> " + this.list.toString(); }
+	public String toString()
+	{
+	    String str = "";
+	    if(!anyDim)
+	        str = "<" + this.dimension + ">";
+	    else
+	        str = "<" + "*" + ">";
+	    return this.loc.toString() + str + this.list.toString(); 
+	}
 
 }

@@ -58,7 +58,10 @@ public class DungeonMobs {
 		    if(!Loader.isModLoaded(line.modid))
 		        continue;//skip mods that are not loaded
 			int dim = line.meta;
-			File file = new File(dir,"definitions/" + "DIM" + dim  + "/" + line.modid + "/" + line.name.replaceAll(":", "/"));
+			String strdim = "DIM" + dim;
+			if(!line.hasMeta)
+			    strdim = "ANYDIM";
+			File file = new File(dir,"definitions/" + strdim  + "/" + line.modid + "/" + line.name.replaceAll(":", "/"));
 			dirs.add(file);
 			entries.add(new MappingEntry(new ResourceLocation(line.modid + ":" + line.name),new ArrayList(),dim,file,line.bhead) );
 		}
@@ -320,7 +323,7 @@ public class DungeonMobs {
     		}
     	}
     	
-    	return new DungeonMobEntry(1,new ResourceLocation("minecraft:dungeon:" + type.toString().toLowerCase()),null);
+    	return new DungeonMobEntry(1,new ResourceLocation("minecraft:dungeon:blank"),null);
     }
     
     public static ArrayList<DungeonMobEntry> getList(Type t){

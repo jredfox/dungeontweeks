@@ -39,13 +39,15 @@ public class Config {
 	public static void loadDefinitionsDir(File dir){
 		Configuration config = new Configuration(new File(dir,"config.cfg"));
 		config.load();
-		String[] list = config.getStringList("definitions", "userdefinitions", new String[]{"\"battletowers:cobblestone\" <0> = true","\"battletowers:cobblestonemossy\" <0> = true","\"battletowers:sandstone\" <0> = true","\"battletowers:ice\" <0> = true","\"battletowers:smoothstone\" <0> = true","\"battletowers:netherrack\" <0> = true","\"battletowers:jungle\" <0> = true","\"quark:dungeon\" <0>"}, "define dungeons based on mobid and dimension in this format \"modid:dungeonname\" <dimensiondid> = boolean where boolean is any dimension not nessary to have the = boolean");
+		String[] list = config.getStringList("definitions", "userdefinitions", new String[]{"\"battletowers:cobblestone\"","\"battletowers:cobblestonemossy\"","\"battletowers:sandstone\"","\"battletowers:ice\"","\"battletowers:smoothstone\"","\"battletowers:netherrack\"","\"battletowers:jungle\"","\"quark:dungeon\" <0>"}, "define dungeons based on mobid and dimension in this format \"modid:dungeonname\" <dimensiondid> = boolean where boolean is any dimension not nessary to have the = boolean");
 		for(String s : list)
 		{
 			if(LineBase.toWhiteSpaced(s).equals("") || LineBase.toWhiteSpaced(s).indexOf("#") == 0)
 				continue;
 			else{
 				LineItemStack line = new LineItemStack(s);
+				if(!line.hasMeta)
+				    line.bhead = true;//if doesn't specify meta aka dimension assume any dimension
 				if(!cfgdefinitions.contains(line))
 					cfgdefinitions.add(line);
 			}

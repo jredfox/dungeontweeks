@@ -233,12 +233,15 @@ public class DungeonMobs {
 		
 		}catch(Exception ex){ex.printStackTrace();}
 		
+		//Don't empty lists if legacy forge dungeon hooks ovrride isn't enabled
+		if(!Config.legacyHooks)
+		    return;
 		
-		//sets forge to default list for per entity compatibility detection
-		ArrayList default_forge = new ArrayList();
-		default_forge.add(new DungeonMob(100, new ResourceLocation("minecraft:blank_dungeon")));
-		ReflectionUtil.setObject(null, default_forge, DungeonHooks.class, "dungeonMobs");//empties forges list as it's no longer needed
-
+	        ArrayList default_forge = new ArrayList();
+	        for(DungeonMobEntry entry : mob_dungeon)
+	            default_forge.add(new DungeonMob(entry.itemWeight,entry.type));
+	        
+	        ReflectionUtil.setObject(null, default_forge, DungeonHooks.class, "dungeonMobs");//empties forges list as it's no longer needed
 	}
 	public static MappingEntry getMappingEntry(File f) {
 		if(f == null)
@@ -323,7 +326,7 @@ public class DungeonMobs {
     		}
     	}
     	
-    	return new DungeonMobEntry(1,new ResourceLocation("minecraft:dungeon:blank"),null);
+    	return Config.blankSpawnerWhenBlank ? new DungeonMobEntry(1,new ResourceLocation("minecraft:dungeon:blank"),null) : new DungeonMobEntry(1,new ResourceLocation("pig"),null);
     }
     
     public static ArrayList<DungeonMobEntry> getList(Type t){

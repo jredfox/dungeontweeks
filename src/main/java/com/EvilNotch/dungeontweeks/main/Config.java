@@ -18,6 +18,8 @@ public class Config {
 	public static boolean validateGeneratedEntries = true;
 	public static boolean Debug = false;
 	public static ArrayList<LineItemStack> cfgdefinitions = new ArrayList();
+	public static boolean blankSpawnerWhenBlank = true;
+	public static boolean legacyHooks = true;
 	
 	public static void loadConfig(File moddir)
 	{
@@ -34,12 +36,14 @@ public class Config {
 		default_weight = config.get("general", "default_weight", default_weight).getInt(default_weight);
 		validateGeneratedEntries = config.get("general", "validateGeneratedEntries", validateGeneratedEntries).getBoolean(validateGeneratedEntries);
 		Debug = config.get("general", "debug", false).getBoolean(false);
+		blankSpawnerWhenBlank = config.get("general","blankSpawnerWhenBlank",true).getBoolean(true);
+		legacyHooks = config.get("general","legacyHooksSupport",true).getBoolean(true);
 		config.save();
 	}
 	public static void loadDefinitionsDir(File dir){
 		Configuration config = new Configuration(new File(dir,"config.cfg"));
 		config.load();
-		String[] list = config.getStringList("definitions", "userdefinitions", new String[]{"\"battletowers:cobblestone\"","\"battletowers:cobblestonemossy\"","\"battletowers:sandstone\"","\"battletowers:ice\"","\"battletowers:smoothstone\"","\"battletowers:netherrack\"","\"battletowers:jungle\"","\"quark:dungeon\" <0>"}, "define dungeons based on mobid and dimension in this format \"modid:dungeonname\" <dimensiondid> = boolean where boolean is any dimension not nessary to have the = boolean");
+		String[] list = config.getStringList("definitions", "userdefinitions", new String[]{"\"battletowers:cobblestone\"","\"battletowers:cobblestonemossy\"","\"battletowers:sandstone\"","\"battletowers:ice\"","\"battletowers:smoothstone\"","\"battletowers:netherrack\"","\"battletowers:jungle\"","\"quark:dungeon\" <0>"}, "define dungeons based on mobid and dimension in this format \"modid:dungeonname\" <dimensiondid> dimension is optional without it it will work in any dimension");
 		for(String s : list)
 		{
 			if(LineBase.toWhiteSpaced(s).equals("") || LineBase.toWhiteSpaced(s).indexOf("#") == 0)

@@ -88,14 +88,14 @@ public class ConfigBase {
             if(this.init.size() > 0)
                 out.write("\r\n");//create new line if has header
             if(!this.header.equals("")) 
-                out.write(getLWrap() + this.header + this.headerRWrap + "\r\n\r\n");
+                out.write(this.getWrapper(true) + "\r\n\r\n");
             
             for(String s : list)
                 out.write(s + "\r\n");
             
             //end of header
             if(!this.header.equals(""))
-                out.write("\r\n" + getLWrap() + this.headerSlash + this.header + this.headerRWrap + "\r\n");
+                out.write("\r\n" + this.getWrapper(false) + "\r\n");
             out.close();
         } catch (Exception e) {e.printStackTrace();}
     }
@@ -106,6 +106,8 @@ public class ConfigBase {
         
         try {
             List<String> filelist = Files.readAllLines(this.cfgfile.toPath());
+            String wrapperHead = getWrapper(true);
+            String wrapperTail = getWrapper(false);
             int index = 0;
             int cindex = 0;
             int actualIndex = 0;
@@ -119,7 +121,7 @@ public class ConfigBase {
             for(String s : filelist)
             {
                 String whitespaced = LineBase.toWhiteSpaced(s);
-                if(whitespaced.equals(this.getLWrap() + this.header + this.headerRWrap) && !this.header.equals("") || whitespaced.equals(""))
+                if(whitespaced.equals(wrapperHead) && !this.header.equals("") || whitespaced.equals(""))
                 {
                     headerIndex = count;
                     break;
@@ -131,7 +133,7 @@ public class ConfigBase {
                 String whitespaced = LineBase.toWhiteSpaced(strline);
                 initPassed = actualIndex > headerIndex;
                 actualIndex++;//since only used for boolean at beginging no need to copy ten other places
-                if(!LineDynamicLogic.isStringPossibleLine(strline,"" + this.commentStart))
+                if(!LineDynamicLogic.isStringPossibleLine(strline,"" + this.commentStart,wrapperHead,wrapperTail) )
                 {
                     if(!enableComments)
                         continue;
@@ -167,6 +169,13 @@ public class ConfigBase {
         
     }
     
+    protected String getWrapper(boolean head)
+    {
+        if(head)
+            return this.getLWrap() + this.header + this.headerRWrap;
+        else
+            return this.getLWrap() + this.headerSlash + this.header + this.headerRWrap;
+    }
     protected String getLWrap() {
         return LineBase.toWhiteSpaced("" + this.headerLWrap);
     }

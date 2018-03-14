@@ -128,18 +128,17 @@ public class LineItemStack extends LineItemStackBase{
 		String valid = "1234567890.";
 		String valid_endings = "bslfdi";//byte,short,long,float,double,int
 		String num = "";
-		boolean hasEnded = false;
 		for(int i=0;i<str.length();i++)
 		{
 			String char1 = str.substring(i, i+1).toLowerCase();
 			boolean isEnding = valid_endings.contains(char1);
-			if(valid.contains(char1) || isEnding && !hasEnded)
+			if(valid.contains(char1) || isEnding)
 				num += char1;
 			else
 				break;
 			
 			if(isEnding)
-				hasEnded = true;
+				break;
 		}
 		if(num.endsWith("."))
 			num = num.substring(0, num.length()-1);

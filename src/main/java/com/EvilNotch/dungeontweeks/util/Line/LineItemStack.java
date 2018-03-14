@@ -35,15 +35,30 @@ public class LineItemStack extends LineItemStackBase{
 	{
 		try
 		{
-		String[] parts = LineBase.getParts(LineBase.toWhiteSpaced(this.strLineBase), "=");
+		String[] parts = LineBase.getParts(LineBase.toWhiteSpaced(s), "=");
 		String str = parts[1];
 		if(str == null || str.equals("null"))
 			return;
 		boolean isnum = LineBase.isStringNum(str);
-		boolean isboolean = str.toLowerCase().equals("true") || str.toLowerCase().equals("false");
+		boolean isboolean = str.toLowerCase().contains("true") || str.toLowerCase().contains("false");
+		if(isboolean)
+		{
+			if(str.contains("true"))
+				str = "true";
+			else if(str.contains("false"))
+				str = "false";
+		}
+		else if(!isnum)
+		{
+			String valid = "1234567890";
+			String num = str.substring(0,1);
+			if(valid.contains(num))
+				str = parseNum(str);
+			isnum = LineBase.isStringNum(str);
+		}
 		if(!isnum && !isboolean && str.contains("\""))
 		{
-			String[] parts_unspaced = LineBase.getParts(this.strLineBase, "=");
+			String[] parts_unspaced = LineBase.getParts(s, "=");
 			String stringlinehead = parts_unspaced[1];
 			this.strhead = LineBase.parseQuotes(stringlinehead,stringlinehead.indexOf("\""));//if all other possibilities are canceled it must simply be a string
 			this.hasStringHead = true;
@@ -105,6 +120,30 @@ public class LineItemStack extends LineItemStackBase{
 		this.shorthead = (short)value;
 		this.lhead = Long.parseLong(str);
 		}catch(Exception e){e.printStackTrace();}
+	}
+	/**
+	 * no checking just do it exceptions may occur to a check before parsing this
+	 */
+	public String parseNum(String str) {
+		String valid = "1234567890.";
+		String valid_endings = "bslfdi";//byte,short,long,float,double,int
+		String num = "";
+		boolean hasEnded = false;
+		for(int i=0;i<str.length();i++)
+		{
+			String char1 = str.substring(i, i+1).toLowerCase();
+			boolean isEnding = valid_endings.contains(char1);
+			if(valid.contains(char1) || isEnding && !hasEnded)
+				num += char1;
+			else
+				break;
+			
+			if(isEnding)
+				hasEnded = true;
+		}
+		if(num.endsWith("."))
+			num = num.substring(0, num.length()-1);
+		return num;
 	}
 	@Override
 	public boolean equals(Object obj)

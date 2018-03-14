@@ -38,8 +38,9 @@ public class CmdReload extends CommandBase{
 
    @Override
 	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+       long time = System.currentTimeMillis();
 	   DungeonMobs.cacheMobs();
-	   sender.sendMessage(new TextComponentString("Dungeon Tweaks Confgurations Reloaded") );
+	   sender.sendMessage(new TextComponentString("Dungeon Tweaks Confgurations Reloaded " + (System.currentTimeMillis()-time) + "ms" ) );
 	   DungeonMobs.printDungeonMobs();
 	}
 

@@ -11,6 +11,7 @@ import net.minecraftforge.common.config.Configuration;
 
 public class Config {
 	public static int radius = 0;
+	public static int radius_overWorld = 0;
 	public static int radius_nether = 1;
 	public static int radius_end = 0;
 	public static File dir = null;
@@ -32,6 +33,7 @@ public class Config {
 		Configuration config = new Configuration(new File(dir,"config.cfg"));
 		config.load();
 		radius = config.get("general", "radius", radius).getInt(radius);
+		radius_overWorld = config.get("general", "radiusOverworld", 0).getInt(0);
 		radius_nether = config.get("general", "radius_nether", radius_nether).getInt(radius_nether);
 		radius_end = config.get("general", "radius_end", radius_end).getInt(radius_end);
 		default_weight = config.get("general", "default_weight", default_weight).getInt(default_weight);

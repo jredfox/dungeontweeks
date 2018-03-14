@@ -6,294 +6,458 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 
 
 public class ConfigBase {
-	
-	public ArrayList<LineBase> lines; //If lines
-	public ArrayList<LineDynamicLogic> logic; //for config files that use dynamic logic which contains array of lines for one statement
-	public final File cfgfile;
-	private ArrayList<String> init;
-	public String header = "";
-	public boolean first_launch = false;
-	
-	public ConfigBase(File file, ArrayList<String> filedocs)
-	{
-		this(file,filedocs,"");
-	}
-	
-	public ConfigBase(File file, ArrayList<String> filedocs, String header)
-	{
-		this.cfgfile = file;
-		this.lines = new ArrayList();
-		this.logic = new ArrayList();
-		this.init = filedocs;
-		this.header = header;
-		boolean exsists = file.exists();
-		
-		if(!exsists)
-		{
-			try {
-				file.createNewFile();
-				this.first_launch = true;
-				
-			} catch (IOException e) {e.printStackTrace();}
-			
-			this.writeFile(new ArrayList());
-		}
-		this.readFile();//cache arrays
-	}
-	public void setInit(ArrayList<String> list){this.init = list;}
+    
+    public ArrayList<LineBase> lines; //lines of the file main point
+    public final File cfgfile;
+    public String header = "";
+    public boolean first_launch = false;
+    
+    //comments and wrappers
+    protected ArrayList<Comment> init;
+    protected ArrayList<Comment> comments;
+    protected char commentStart = '#';
+    protected char headerLWrap = '<';
+    protected char headerRWrap = '>';
+    protected char headerSlash = '/';
+    public boolean enableComments = true;
+    //version read only
+    public static final String version = "1.1-build-105";
+    
+    public ConfigBase(File file)
+    {
+        this(file,new ArrayList<Comment>() );
+    }
+    public ConfigBase(File file, ArrayList<Comment> initComments)
+    {
+        this(file,initComments,"");
+    }
+    public ConfigBase(File file, ArrayList<Comment> initComments, String header)
+    {
+        this(file,initComments,header,'#');
+    }
+    public ConfigBase(File file, ArrayList<Comment> initComments, String header,char commentStart)
+    {
+        this(file,initComments,header,commentStart,'<','>','/',true);
+    }
+    
+    public ConfigBase(File file, ArrayList<Comment> initComments, String header,char commentStart,char lhwrap,char rhwrap,char hslash,boolean comments)
+    {
+        this.cfgfile = file;
+        this.lines = new ArrayList();
+        for(Comment c : initComments)
+            c.start = commentStart;//fix comments
+        this.init = initComments;
+        this.header = header;
+        this.commentStart  = commentStart;
+        this.headerLWrap = lhwrap;
+        this.headerRWrap = rhwrap;
+        this.headerSlash = hslash;
+        this.enableComments = comments;
+        boolean exsists = file.exists();
+        
+        if(!exsists)
+        {
+            try {
+                file.createNewFile();
+                this.first_launch = true;
+                
+            } catch (IOException e) {e.printStackTrace();}
+            
+            this.writeFile(new ArrayList());
+        }
+        this.readFile();//cache arrays
+    }
+    public void setInit(ArrayList<Comment> list){this.init = list;}
 
-	public void writeFile(ArrayList<String> list) 
-	{
-		try {
-			//header and init
-			FileWriter out = new FileWriter(this.cfgfile);
-			for(String s : this.init)
-				out.write(s + "\r\n");
-			if(this.init.size() > 0)
-				out.write("\r\n");//create new line if has header
-			if(!this.header.equals(""))	
-				out.write("<" + this.header + ">\r\n\r\n");
-			
-			for(String s : list)
-				out.write(s + "\r\n");
-			
-			//end of header
-			if(!this.header.equals(""))
-				out.write("\r\n" + "</" + this.header + ">\r\n");
-			out.close();
-		} catch (Exception e) {e.printStackTrace();}
-	}
-	public void readFile()
-	{
-		this.lines = new ArrayList();
-		this.logic = new ArrayList();
-		try {
-			Scanner scan = new Scanner(this.cfgfile);
-			while(scan.hasNextLine())
-			{
-				String strline = scan.nextLine();
-				if(!LineDynamicLogic.isStringPossibleLine(strline))
-					continue;//If it is Comment/Invalid/Old Parsing format Leave
-				
-				if(LineBase.isDynamicLogic(strline))
-					logic.add(new LineDynamicLogic(strline));
-				else
-					lines.add(LineDynamicLogic.getLineFromString(strline));
-			}
-			scan.close();
-		} catch (Exception e) {e.printStackTrace();}
-	}
-	
-	/**
-	 * sets all from array to indexes if not out of bounds
-	 * basically just replace all from this line on forward based till it runs out of indexes and then adds
-	 */
-	public void setCfgList(ArrayList<LineBase> list, int index)
-	{
-		for(int i=0;i<list.size();i++)
-		{
-			LineBase str = list.get(i);
-			boolean flag = false;
-			if(index + i < this.lines.size() && !flag)
-				this.lines.set(index+i,str);
-			else{
-				this.lines.add(str);
-				flag = true;
-			}
-		}
-	}
-	public void setList(ArrayList<String> list, int index)
-	{
-		for(int i=0;i<list.size();i++)
-		{
-			LineBase line = LineDynamicLogic.getLineFromString(list.get(i));
-			boolean flag = false;
-			if(index + i < this.lines.size() && !flag)
-				this.lines.set(index+i,line);
-			else{
-				this.lines.add(line);
-				flag = true;
-			}
-		}
-	}
-	public void addLine(LineBase line){
-		if(this.containsLine(line))
-			return;
-		this.appendLine(line);
-	}
-	public void addLine(LineBase line, int index){
-		if(this.containsLine(line))
-			return;
-		this.appendLine(line,index);
-	}
-	/**
-	 * Append List of lines
-	 * @param list
-	 */
-	public void addLineList(ArrayList<LineBase> list)
-	{
-		for(LineBase line : list)
-			if(!this.containsLine(line))
-				this.lines.add(line);
-	}
-	
-	/**
-	 * Append List of lines at starting index
-	 */
-	public void addLineList(ArrayList<LineBase> list, int index)
-	{
-		for(LineBase line : list)
-			if(!this.containsLine(line))
-				this.lines.add(index++,line);
-	}
-	
-	/**
-	 * Re-Orders File to be alphabetized
-	 */
-	public void alphabetize()
-	{
-		ArrayList<String> list = getStringLines();
-	    Collections.sort(list);
-	    this.setList(list, 0);
-	}
-	/**
-	 * Appends Line To end of file
-	 * @param str
-	 */
-	public void appendLine(LineBase line)
-	{
-		this.lines.add(line);
-	}
-	/**
-	 * Appends Line To index of file
-	 * @param str
-	 */
-	public void appendLine(LineBase line,int index)
-	{
-		this.lines.add(index,line);
-	}
-	/**
-	 * Append List of lines
-	 * @param list
-	 */
-	public void appendLineList(ArrayList<LineBase> list)
-	{
-		for(LineBase line : list)
-			this.lines.add(line);
-	}
-	/**
-	 * Append List of lines at starting index
-	 * @param list
-	 * @param index
-	 */
-	public void appendLineList(ArrayList<LineBase> list, int index)
-	{
-		for(LineBase line : list)
-			this.lines.add(index++,line);
-	}
-	/**
-	 * Sets line to index
-	 * @param line
-	 * @param index
-	 */
-	public void setLine(LineBase line, int index)
-	{
-		this.lines.set(index,line);
-	}
-	/**
-	 * Take line objects and convert set them to the file
-	 * @param list
-	 * @param index
-	 */
-	public void setLineList(ArrayList<LineBase> list, int index)
-	{
-		this.setCfgList(list, index);
-	}
-	/**
-	 * Deletes first instanceof String
-	 * @param strline
-	 */
-	public void deleteLine(LineBase line)
-	{
-		deleteLineBase(line,false);
-	}
-	public void deleteLineBase(LineBase line, boolean deleteAll)
-	{
-		Iterator<LineBase> it = this.lines.iterator();
-		while(it.hasNext())
-		{
-			LineBase compare = it.next();
-			if(line.equals(compare,false))
-			{
-				it.remove();
-				if(!deleteAll)
-					break;
-			}
-		}
-	}
-	/**
-	 * Delete all instances of list of lines
-	 * @param list
-	 */
-	public void deleteAllLines(ArrayList<LineBase> list)
-	{
-		for(LineBase line : list)
-			deleteLineBase(line,true);
-	}
-	/**
-	 * Does this config contain this line?
-	 * @param line
-	 * @return
-	 */
-	public boolean containsLine(LineBase line)
-	{
-		for(LineBase compare : this.lines)
-			if(line.equals(compare,false))
-				return true;
-		return false;
-	}
-	
-	/**
-	 * Don't Use Unless you want the config defaults people will get pissed
-	 */
-	public void resetConfig()
-	{
-		try {
-			Files.write(this.cfgfile.toPath(), this.init);
-			this.readFile();//makes arrays reset
-		} catch (IOException e) {e.printStackTrace();}
-	}
-	
-	/**
-	 * Since it's un-optimized to re-write the file every single entry is deleted it will have an array to delete and an array for adding
-	 */
-	public void updateConfig()
-	{
-		this.writeFile(getStringLines());
-		this.readFile();
-	}
-	protected ArrayList<String> getStringLines() {
-		ArrayList<String> list = new ArrayList();
-		for(LineBase line : this.lines)
-			list.add(line.getString() );
-		return list;
-	}
+    public void writeFile(ArrayList<String> list) 
+    {
+        try {
+            //header and init
+            FileWriter out = new FileWriter(this.cfgfile);
+            for(Comment c : this.init)
+                out.write("" + c.start + c.comment + "\r\n");
+            if(this.init.size() > 0)
+                out.write("\r\n");//create new line if has header
+            if(!this.header.equals("")) 
+                out.write(getLWrap() + this.header + this.headerRWrap + "\r\n\r\n");
+            
+            for(String s : list)
+                out.write(s + "\r\n");
+            
+            //end of header
+            if(!this.header.equals(""))
+                out.write("\r\n" + getLWrap() + this.headerSlash + this.header + this.headerRWrap + "\r\n");
+            out.close();
+        } catch (Exception e) {e.printStackTrace();}
+    }
+    public void readFile()
+    {
+        this.lines = new ArrayList();
+        this.comments = new ArrayList();
+        
+        try {
+            List<String> filelist = Files.readAllLines(this.cfgfile.toPath());
+            int index = 0;
+            int cindex = 0;
+            int actualIndex = 0;
+            boolean initPassed = false;
+            
+            int initSize = this.init.size();
+            int headerIndex = -1;
+            
+            //scan for header
+            int count = 0;
+            for(String s : filelist)
+            {
+                String whitespaced = LineBase.toWhiteSpaced(s);
+                if(whitespaced.equals(this.getLWrap() + this.header + this.headerRWrap) && !this.header.equals("") || whitespaced.equals(""))
+                {
+                    headerIndex = count;
+                    break;
+                }
+                count++;
+            }
+            for(String strline : filelist)
+            {
+                String whitespaced = LineBase.toWhiteSpaced(strline);
+                initPassed = actualIndex > headerIndex;
+                actualIndex++;//since only used for boolean at beginging no need to copy ten other places
+                if(!LineDynamicLogic.isStringPossibleLine(strline,"" + this.commentStart))
+                {
+                    if(!enableComments)
+                        continue;
+                    //comment handling
+                    if(whitespaced.indexOf(this.commentStart) == 0)
+                    {
+                        if(cindex >= initSize && initPassed)
+                            this.comments.add(new Comment(index,strline,false,this.commentStart) );//if not passed header leave comments to init
+                        
+                        Comment initcomment = new Comment(strline,this.commentStart);
+                        if(!initPassed && !this.init.contains(initcomment) )
+                            this.init.add(initcomment);
+                        cindex++;
+                    }
+                    
+                    continue;
+                }
+                LineBase line = LineDynamicLogic.getLineFromString(strline);
+                lines.add(line);
+                
+                //scan for attached comments on lines
+                if(enableComments)
+                if(strline.contains("" + this.commentStart))
+                {
+                    int hIndex = strline.indexOf(this.commentStart);
+                    if(hIndex >= line.getString().length() )
+                        this.comments.add(new Comment(index,strline.substring(hIndex, strline.length()),true,this.commentStart) );
+                }
+                
+                index++;
+            }
+        } catch (Exception e) {e.printStackTrace();}
+        
+    }
+    
+    protected String getLWrap() {
+        return LineBase.toWhiteSpaced("" + this.headerLWrap);
+    }
+    /**
+     * sets all from array to indexes if not out of bounds
+     * basically just replace all from this line on forward based till it runs out of indexes and then adds
+     */
+    public void setCfgList(ArrayList<LineBase> list, int index)
+    {
+        for(int i=0;i<list.size();i++)
+        {
+            LineBase str = list.get(i);
+            boolean flag = false;
+            if(index + i < this.lines.size() && !flag)
+                this.lines.set(index+i,str);
+            else{
+                this.lines.add(str);
+                flag = true;
+            }
+        }
+    }
+    public void setList(ArrayList<String> list, int index)
+    {
+        for(int i=0;i<list.size();i++)
+        {
+            LineBase line = LineDynamicLogic.getLineFromString(list.get(i));
+            boolean flag = false;
+            if(index + i < this.lines.size() && !flag)
+                this.lines.set(index+i,line);
+            else{
+                this.lines.add(line);
+                flag = true;
+            }
+        }
+    }
+    public void addLine(LineBase line){
+        if(this.containsLine(line))
+            return;
+        this.appendLine(line);
+    }
+    public void addLine(LineBase line, int index){
+        if(this.containsLine(line))
+            return;
+        this.appendLine(line,index);
+    }
+    /**
+     * Append List of lines
+     * @param list
+     */
+    public void addLineList(ArrayList<LineBase> list)
+    {
+        for(LineBase line : list)
+            if(!this.containsLine(line))
+                this.lines.add(line);
+    }
+    
+    /**
+     * Append List of lines at starting index
+     */
+    public void addLineList(ArrayList<LineBase> list, int index)
+    {
+        for(LineBase line : list)
+            if(!this.containsLine(line))
+                this.lines.add(index++,line);
+    }
+    
+    
+    /**
+     * Appends Line To end of file
+     * @param str
+     */
+    public void appendLine(LineBase line)
+    {
+        this.lines.add(line);
+    }
+    /**
+     * Appends Line To index of file
+     * @param str
+     */
+    public void appendLine(LineBase line,int index)
+    {
+        this.lines.add(index,line);
+    }
+    /**
+     * Append List of lines
+     * @param list
+     */
+    public void appendLineList(ArrayList<LineBase> list)
+    {
+        for(LineBase line : list)
+            this.lines.add(line);
+    }
+    /**
+     * Append List of lines at starting index
+     * @param list
+     * @param index
+     */
+    public void appendLineList(ArrayList<LineBase> list, int index)
+    {
+        for(LineBase line : list)
+            this.lines.add(index++,line);
+    }
+    /**
+     * Sets line to index
+     * @param line
+     * @param index
+     */
+    public void setLine(LineBase line, int index)
+    {
+        this.lines.set(index,line);
+    }
+    /**
+     * Take line objects and convert set them to the file
+     * @param list
+     * @param index
+     */
+    public void setLineList(ArrayList<LineBase> list, int index)
+    {
+        this.setCfgList(list, index);
+    }
+    /**
+     * Deletes first instanceof String
+     * @param strline
+     */
+    public void deleteLine(LineBase line)
+    {
+        deleteLineBase(line,false);
+    }
+    public void deleteLineBase(LineBase line, boolean deleteAll)
+    {
+        Iterator<LineBase> it = this.lines.iterator();
+        while(it.hasNext())
+        {
+            LineBase compare = it.next();
+            if(line.equals(compare,false))
+            {
+                it.remove();
+                if(!deleteAll)
+                    break;
+            }
+        }
+    }
+    /**
+     * Delete all instances of list of lines
+     * @param list
+     */
+    public void deleteAllLines(ArrayList<LineBase> list)
+    {
+        for(LineBase line : list)
+            deleteLineBase(line,true);
+    }
+    /**
+     * Does this config contain this line?
+     * @param line
+     * @return
+     */
+    public boolean containsLine(LineBase line)
+    {
+        for(LineBase compare : this.lines)
+            if(line.equals(compare,false))
+                return true;
+        return false;
+    }
+    
+    /**
+     * Don't Use Unless you want the config defaults people will get pissed
+     */
+    public void resetConfig()
+    {
+        try {
+            Files.write(this.cfgfile.toPath(), new ArrayList() );
+            this.readFile();//makes arrays reset
+        } catch (IOException e) {e.printStackTrace();}
+    }
+    
+    /**
+     * Re-Orders File to be alphabetized
+     */
+    public void alphabetize()
+    {
+        //make comments have nearest lines incase it later gets alphabetized
+        if(this.enableComments)
+            updateNearestCLines();
+        
+        ArrayList<String> list = getStringLines();
+        Collections.sort(list);
+        this.setList(list, 0);
+        
+        //re-organize comments to new locations
+        if(this.enableComments)
+        for(Comment c : this.comments)
+        {
+            int index = 0;
+            for(LineBase line : this.lines)
+            {
+                if(line.equals(c.nearestLine,false) && line != null)
+                {
+                    c.lineIndex = index;
+                    break;
+                }
+                index++;
+            }
+        }
+    }
+    
+    protected void updateNearestCLines() {
+        for(Comment c : this.comments)
+            if(c.lineIndex < this.lines.size() )
+                c.nearestLine = this.lines.get(c.lineIndex);
+    }
 
-	@Override
-	public String toString()
-	{
-		String s = "[";
-		for(LineBase line : this.lines)
-			s += "<" + line.toString() + ">";
-		for(LineDynamicLogic logic : this.logic)
-			s += "<" + logic.getString() + ">";
-		return s + "]";
-	}
+    /**
+     * Since it's un-optimized to re-write the file every single entry is deleted/added 
+     * it will only save data when this is called
+     */
+    public void updateConfig()
+    {
+        ArrayList<String> list = getStringLines();
+        //comment handling
+        if(this.enableComments)
+        {
+            try
+            {
+              reorganizeComments();
+              int offset = 0;
+              for(Comment c : this.comments)
+              {
+                  if(!c.isAttactched)
+                  {
+                      list.add(c.lineIndex + offset,c.start + c.comment);
+                      offset++;//only offset it if comment is full line
+                  }
+                  else
+                      list.set(c.lineIndex + offset, list.get(c.lineIndex + offset) + c.start + c.comment);
+              }
+           }
+           catch(Exception e){e.printStackTrace();}
+        }
+        
+        this.writeFile(list);
+    }
+    public void updateConfig(boolean alphabitize)
+    {
+        if(alphabitize)
+            this.alphabetize();
+        this.updateConfig();
+    }
+    /**
+     * organize comments by numeric order
+     */
+    public void reorganizeComments() {
+        ArrayList<Integer> ints = new ArrayList();
+        for(Comment c : this.comments)
+            ints.add(c.lineIndex);
+        
+        //sort then clear any dupes
+        Collections.sort(ints);
+        Set<Integer> ints2 = new HashSet<Integer>(ints);
+        ints.clear();
+        for(Integer i : ints2)
+            ints.add(i);
+        
+        ArrayList<Comment> com = new ArrayList();
+        for(int i=0;i<ints.size();i++)
+        {
+            int value = ints.get(i);
+            for(Comment c : comments)
+            {
+                if(c.lineIndex == value)
+                    com.add(c);
+            }
+        }
+        this.comments = com;
+    }
+    protected ArrayList<String> getStringLines() {
+        ArrayList<String> list = new ArrayList();
+        for(LineBase line : this.lines)
+            list.add(line.getString() );
+        return list;
+    }
 
-	
+    @Override
+    public String toString()
+    {
+        String s = "<ConfigBase>\n";
+        for(Comment c : this.comments)
+            s += c + "\n";
+        for(LineBase line : this.lines)
+            s += line.toString() + "\n";
+        return s + "</ConfigBase>\n";
+    }
+    public ArrayList<Comment> getInit(){return this.init;}
+    
 }

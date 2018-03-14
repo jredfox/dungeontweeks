@@ -13,8 +13,8 @@ public class LineItemStackBase extends LineBase
 	public LineItemStackBase(String s)
 	{
 		super(s);//Initiate modid:block and line string
-		this.meta = parseMeta(this.strLineBase);
-		this.NBT = parseNBT(this.strLineBase);
+		this.meta = parseMeta(s);
+		this.NBT = parseNBT(s);
 	}
 	/**
 	 * Returns nbt via String from line format
@@ -122,7 +122,8 @@ public class LineItemStackBase extends LineBase
     @Override
     public String getString()
     {
-        String str = "\"" + this.modid + ":" + this.name + "\"";
+    	String quote = this.legacyParsed ? "" : "\"";
+        String str = quote + this.modid + ":" + this.name + quote;
         if(this.hasMeta)
             str += " <" + this.meta + ">";
         if(this.NBT != null)

@@ -97,6 +97,9 @@ public class ReplaceGen {
 			radius = Config.radius_nether;
 		if(w.provider.getDimension() == 1)
 			radius = Config.radius_end;
+		if(w.provider.getDimension() == 0)
+		    radius = Config.radius_overWorld;
+		
 		ArrayList<Chunk> chunks = getRadiusChunks(w, e.getChunkX(), e.getChunkZ(), radius);
 		for(Chunk c : chunks)
 		{

@@ -2,10 +2,11 @@ package com.EvilNotch.dungeontweeks.util.Line;
 
 import java.util.ArrayList;
 
+import net.minecraft.util.ResourceLocation;
+
 public class LineBase
 {
-	public static final String lineLibraryVersion = "1.01";
-	public String strLineBase;
+	public static final String lineLibraryVersion = "1.101";
 	public String modid;
 	public String name;
 	public static final ArrayList<String> invalidParsingChars = new ArrayList<String>(10);
@@ -23,7 +24,6 @@ public class LineBase
 		if(!invalidParsingChars.contains("="))
 			invalidParsingChars.add("=");
 	try{
-		  this.strLineBase = s;
 		  String[] stack = getStrId(s);
 		  if(stack != null)
 		  {
@@ -41,11 +41,11 @@ public class LineBase
 		catch(Exception e)
 		{
 			e.printStackTrace();
-			this.strLineBase = null;
 			this.modid = null;
 			this.name = null;
 		}
 	}
+	
 	/**
 	 * Doesn't support Quotes in modid:block! Returnes modid[0] name[1]
 	 * @param s
@@ -222,5 +222,9 @@ public class LineBase
 		}
 		return strid;
 	}
+	public ResourceLocation getModPath()
+    {
+        return new ResourceLocation(this.modid + ":" + this.name);
+    }
 
 }

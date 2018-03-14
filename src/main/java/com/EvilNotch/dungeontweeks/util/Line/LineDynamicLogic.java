@@ -77,11 +77,15 @@ public class LineDynamicLogic {
 			return new LineBase(s);
 		return null;
 	}
-	public static boolean isStringPossibleLine(String strline)
+	public static boolean isStringPossibleLine(String strline,String comment)
 	{
-		if(LineBase.toWhiteSpaced(strline).equals("") || LineBase.toWhiteSpaced(strline).indexOf("#") == 0 || LineBase.toWhiteSpaced(strline).indexOf("<") == 0 || !strline.contains("\"") || !strline.contains(":"))
+		if(LineBase.toWhiteSpaced(strline).equals("") || LineBase.toWhiteSpaced(strline).indexOf(comment) == 0 || LineBase.toWhiteSpaced(strline).indexOf("#") == 0 || LineBase.toWhiteSpaced(strline).indexOf("<") == 0 || !strline.contains(":"))
 			return false;
 		return true;
+	}
+	public static boolean isStringPossibleLine(String strline)
+	{
+		return isStringPossibleLine(strline,"#");
 	}
 	public static boolean isPosibleDynamicLogic(String strline)
 	{

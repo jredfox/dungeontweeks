@@ -17,8 +17,6 @@ public class DungeonHandler {
 	@SubscribeEvent
 	public void dungeonHandler(EventDungeon.Post e)
 	{
-//		if(e.type == Type.MODED)
-//			System.out.println(e.pos + " " + e.loc);
 		NBTTagCompound nbt = new NBTTagCompound();
 		e.tile.writeToNBT(nbt);
 		nbt.removeTag("SpawnData");

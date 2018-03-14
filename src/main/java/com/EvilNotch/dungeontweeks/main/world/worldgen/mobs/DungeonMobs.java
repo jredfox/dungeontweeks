@@ -13,6 +13,7 @@ import com.EvilNotch.dungeontweeks.main.Config;
 import com.EvilNotch.dungeontweeks.main.Events.EventDungeon;
 import com.EvilNotch.dungeontweeks.main.Events.EventDungeon.Type;
 import com.EvilNotch.dungeontweeks.util.JavaUtil;
+import com.EvilNotch.dungeontweeks.util.Line.Comment;
 import com.EvilNotch.dungeontweeks.util.Line.ConfigBase;
 import com.EvilNotch.dungeontweeks.util.Line.LineBase;
 import com.EvilNotch.dungeontweeks.util.Line.LineItemStack;
@@ -96,7 +97,8 @@ public class DungeonMobs {
 					System.out.println("Skipping:" + strname + ".txt as mod isn't loaded");
 					continue;//do not load configs into memory that don't exist
 				}
-				ConfigBase cfg = new ConfigBase(file, new ArrayList());
+				
+				ConfigBase cfg = new ConfigBase(file, new ArrayList(),"DungeonMobs");
 				configs.put(file, cfg);
 			}
 			if(f.equals(dir_dungeon))
@@ -121,7 +123,7 @@ public class DungeonMobs {
 						ConfigBase cfg = configs.get(mod);
 						if(cfg == null)
 						{
-							configs.put(mod , new ConfigBase(mod,new ArrayList() ) );
+							configs.put(mod , new ConfigBase(mod,new ArrayList(),"DungeonMobs" ) );
 							cfg = configs.get(mod);
 						}
 						String str = "\"" + d.type.toString() + "\" + = " + d.itemWeight;
@@ -166,7 +168,7 @@ public class DungeonMobs {
 				ConfigBase cfg = configs.get(mod);
 				if(cfg == null)
 				{
-					configs.put(mod, new ConfigBase(mod,new ArrayList()) );
+					configs.put(mod, new ConfigBase(mod,new ArrayList(),"DungeonMobs") );
 					cfg = configs.get(mod);
 				}
 
@@ -227,16 +229,23 @@ public class DungeonMobs {
 		while(it.hasNext())
 		{
 			ConfigBase cfg = it.next().getValue();
-			cfg.alphabetize();
-			if(Config.fancyConfig)
-			{
-			    ArrayList<String> init = new ArrayList();
-			    init.add("#DungeonTweaks For" + getFileTrueDisplayName(cfg.cfgfile));
-			    init.add("#To Add NBT Entry make sure your in the right file then add a line in this format \"modid:mobid\" { } = weight");
-			    cfg.setInit(init);
-			    cfg.header = "DungeonMobs";
-			}
-			cfg.updateConfig();
+			ArrayList<Comment> strlist = new ArrayList();
+            if(!Config.fancyConfig)
+                cfg.header = "";
+            
+            strlist.add(new Comment("DungeonTweaks For:" + getFileTrueDisplayName(cfg.cfgfile)));
+            strlist.add(new Comment("To Add NBT Entry make sure your in the right file then add a line in this format \"modid:mobid\" { } = weight"));
+            
+            int index = 0;
+            for(Comment c : cfg.getInit())
+            {
+                if(!strlist.contains(c))
+                    strlist.add(c);
+                index++;
+            }
+            
+            cfg.setInit(strlist);
+			cfg.updateConfig(true);
 		}
 		
 		}catch(Exception ex){ex.printStackTrace();}
@@ -264,12 +273,15 @@ public class DungeonMobs {
 	public static MappingEntry getMappingEntry(ResourceLocation loc, int dimension) {
 		if(loc == null)
 			return null;
+		MappingEntry e =  null;
 		for(MappingEntry entry : entries)
 		{
-			if(entry.loc.equals(loc) && dimension == entry.dimension || entry.loc.equals(loc) && entry.anyDim)
+			if(entry.loc.equals(loc) && dimension == entry.dimension && !entry.anyDim)
 				return entry;
+			if(entry.loc.equals(loc) && entry.anyDim)
+			    e = entry;
 		}
-		return null;
+		return e;
 	}
 	/**
 	 * populate arraylists

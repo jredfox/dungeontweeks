@@ -41,7 +41,6 @@ public class Config {
 		Debug = config.get("general", "debug", false).getBoolean(false);
 		blankSpawnerWhenBlank = config.get("general","blankSpawnerWhenBlank",true).getBoolean(true);
 		legacyHooks = config.get("general","legacyHooksSupport",true).getBoolean(true);
-		fancyConfig = config.get("general","fancyConfig",true).getBoolean(true);
 		config.save();
 	}
 	public static void loadDefinitionsDir(File dir){
@@ -60,6 +59,7 @@ public class Config {
 					cfgdefinitions.add(line);
 			}
 		}
+		fancyConfig = config.get("general","fancyConfig",true).getBoolean(true);//so you don't have to keep going back and forth to debug or to look at the differences
 		config.save();
 	}
 

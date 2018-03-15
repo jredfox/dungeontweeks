@@ -2,27 +2,37 @@ package com.EvilNotch.dungeontweeks.util.Line;
 
 import java.util.ArrayList;
 
-import net.minecraft.util.ResourceLocation;
 
 public class LineBase
 {
-	public static final String lineLibraryVersion = "1.107";
+	public static final String lineLibraryVersion = "1.108";
 	public String modid;
 	public String name;
-	public static final ArrayList<String> invalidParsingChars = new ArrayList<String>(10);
+	protected String invalidParsingChars = "";
 	public boolean legacyParsed = false;
+	public char seperator = ':';
+	public char quote = '"';
+	
+	public LineBase(String s,char sep,char q,char... invalid)
+	{
+		this.seperator = sep;
+		this.quote = q;
+		this.invalidParsingChars = getInvChars();
+		for(char c : invalid)
+			this.invalidParsingChars += c;
+		parseBase(s);
+	}
 	
 	public LineBase(String s) 
 	{
-		//invalid chars for line base as = doesn't do anything for the base class
-		if(!invalidParsingChars.contains("<"))
-			invalidParsingChars.add("<");
-		
-		if(!invalidParsingChars.contains("{"))
-			invalidParsingChars.add("{");
-		
-		if(!invalidParsingChars.contains("="))
-			invalidParsingChars.add("=");
+		this.invalidParsingChars = getInvChars();//get invalid chars per object override
+		parseBase(s);
+	}
+	protected String getInvChars(){
+		return "<{=";
+	}
+	
+	protected void parseBase(String s) {
 	try{
 		  String[] stack = getStrId(s);
 		  if(stack != null)
@@ -36,8 +46,8 @@ public class LineBase
 		  else{
 			  this.modid = null;
 			  this.name = null;
-		  }
-	  }
+		    }
+	    }
 		catch(Exception e)
 		{
 			e.printStackTrace();
@@ -45,7 +55,7 @@ public class LineBase
 			this.name = null;
 		}
 	}
-	
+
 	/**
 	 * Doesn't support Quotes in modid:block! Returnes modid[0] name[1]
 	 * @param s
@@ -55,17 +65,18 @@ public class LineBase
 	{
 		String compare = s;
 		if(s.contains("="))
-			compare = LineBase.toWhiteSpaced(s.split("=")[0]);//ensures it is to the left of the = sign
+			compare = s.split("=")[0];//ensures it is to the left of the = sign
 		
 		String strid = null;
-		if(compare.contains("\""))
-			strid = parseQuotes(s,0);
+		if(compare.contains("" + this.quote ))
+		{
+			strid = parseQuotes(compare,0,"" + this.quote);
+			return getParts(strid, "" + this.seperator);
+		}
 		else{
 			legacyParsed = true;
-			return getParts(parseLoosly(compare),":");//old format supports no spacing however is easy to edit and create
+			return getParts(parseLoosly(compare),"" + this.seperator);//old format supports no spacing however is easy to edit and create
 		}
-		
-		return getParts(strid, ":");
 	}
 
 	public String parseLoosly(String s) {
@@ -74,14 +85,12 @@ public class LineBase
 		{
 			String charstr = s.substring(i, i+1);
 			//check for chars that stop parsing before the = sign
-			for(String invalid : invalidParsingChars)
-			{
-				if(charstr.equals(invalid))
-					return str.trim();
-			}
+			if(invalidParsingChars.contains("" + charstr))
+				return str.trim();
+			
 			str += charstr;
 		}
-		return str;
+		return str.trim();
 	}
 	/**
 	 * Separates a string dynamically supports vanilla format
@@ -91,12 +100,10 @@ public class LineBase
 	 */
 	public static String[] getParts(String s, String split)
 	{
-		if(split.equals(":"))
-		{
-			s = s.replaceFirst(":", "\u00A9");
-			return s.split("\u00A9");
-		}
-		return s.split(split);
+		if(split.equals(".") || split.equals("|") )
+			split = "\\" + split;
+		s = s.replaceFirst(split, "\u00A9");
+		return s.split("\u00A9");
 	}
 
 	/**
@@ -146,18 +153,6 @@ public class LineBase
 		}
 		return true;
 	}
-	public static String getStaticIntString(int[] list)
-	{
-		String s = "";
-		for(int i=0;i<list.length;i++)
-		{
-			if(i<list.length-1)
-				s+=list[i] + ",";
-			else
-				s+=list[i] + "";
-		}
-		return s;
-	}
 	
 	@Override
 	public boolean equals(Object obj)
@@ -181,8 +176,8 @@ public class LineBase
 	@Override
 	public String toString()
 	{
-		String quote = this.legacyParsed ? "" : "\"";
-		return  quote + this.modid + ":" + this.name + quote;	
+		String quote = this.legacyParsed ? "" : "" + this.quote;
+		return  quote + this.modid + "" + this.seperator + this.name + quote;	
 	}
 	/**
 	 * Gets lines string for configuration files overridden in LineItemStackBase
@@ -190,24 +185,24 @@ public class LineBase
 	 */
 	public String getString()
 	{
-	    String quote = this.legacyParsed ? "" : "\"";
+	    String quote = this.legacyParsed ? "" : "" + this.quote;
 		return quote + getModPath().toString() + quote;
 	}
 	public static boolean isDynamicLogic(String s)
 	{
 		return s.contains("\\|") || s.contains("|");
 	}
-	public static int findFirstQuote(String s) 
+	public static int findFirstQuote(String s,char q) 
 	{
 		for(int i=0;i<s.length();i++)
 		{
 			String str = s.substring(i, i++);
-			if(str.equals("\""))
+			if(str.equals("" + q))
 				return i;
 		}
 		return -1;
 	}
-	public static String parseQuotes(String s, int index) 
+	public static String parseQuotes(String s, int index,String q) 
 	{
 		String strid = "";
 		int quote = 0;
@@ -216,20 +211,24 @@ public class LineBase
 			if(quote == 2)
 				break; //if end of parsing object stop loop and return getParts(strid,":");
 			
-			if(s.substring(i,i+1).equals("\""))
+			if(s.substring(i,i+1).equals(q))
 				quote++;
-			if(!s.substring(i,i+1).equals("\"") && quote > 0)
+			if(!s.substring(i,i+1).equals(q) && quote > 0)
 				strid += s.substring(i, i+1);
 		}
 		return strid;
 	}
-	public ResourceLocation getModPath()
+	public static String parseQuotes(String s, int index) 
+	{
+		return parseQuotes(s,index,"\"");
+	}
+	public String getModPath()
     {
 		String strname = "";
 		String compare = "" + this.name;
 		if(!compare.equals("null") )
-			strname = ":" + this.name;
-		return  new ResourceLocation(this.modid + strname);
+			strname = "" + this.seperator + this.name;
+		return  new String(this.modid + strname);
     }
 
 }

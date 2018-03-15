@@ -28,6 +28,8 @@ public class ConfigBase {
     protected char headerLWrap = '<';
     protected char headerRWrap = '>';
     protected char headerSlash = '/';
+    protected char lineSeperator = ':';
+    protected char lineQuote = '"';
     public boolean enableComments = true;
     //version read only
     public static final String version = "1.1-build-105";
@@ -46,10 +48,10 @@ public class ConfigBase {
     }
     public ConfigBase(File file, ArrayList<Comment> initComments, String header,char commentStart)
     {
-        this(file,initComments,header,commentStart,'<','>','/',true);
+        this(file,initComments,header,commentStart,'<','>','/',true,':','"');
     }
     
-    public ConfigBase(File file, ArrayList<Comment> initComments, String header,char commentStart,char lhwrap,char rhwrap,char hslash,boolean comments)
+    public ConfigBase(File file, ArrayList<Comment> initComments, String header,char commentStart,char lhwrap,char rhwrap,char hslash,boolean comments,char lsep,char lquote)
     {
         this.cfgfile = file;
         this.lines = new ArrayList();
@@ -62,6 +64,8 @@ public class ConfigBase {
         this.headerRWrap = rhwrap;
         this.headerSlash = hslash;
         this.enableComments = comments;
+        this.lineSeperator = lsep;
+        this.lineQuote = lquote;
         boolean exsists = file.exists();
         
         if(!exsists)
@@ -126,7 +130,7 @@ public class ConfigBase {
                     headerIndex = count;
                     break;
                 }
-                if(LineDynamicLogic.isStringPossibleLine(whitespaced, "" + this.commentStart))
+                if(LineDynamicLogic.isStringPossibleLine(whitespaced, "" + this.commentStart,this.lineSeperator,this.lineQuote))
                 	break;//if is line stop trying to parse the header index
                 count++;
             }
@@ -135,7 +139,7 @@ public class ConfigBase {
                 String whitespaced = LineBase.toWhiteSpaced(strline);
                 initPassed = actualIndex > headerIndex;
                 actualIndex++;//since only used for boolean at beginging no need to copy ten other places
-                if(!LineDynamicLogic.isStringPossibleLine(strline,"" + this.commentStart,wrapperHead,wrapperTail) )
+                if(!LineDynamicLogic.isStringPossibleLine(strline,"" + this.commentStart,wrapperHead,wrapperTail,this.lineSeperator,this.lineQuote) )
                 {
                     if(!enableComments || whitespaced.equals(""))
                         continue;
@@ -155,9 +159,8 @@ public class ConfigBase {
                     
                     continue;
                 }
-                LineBase line = LineDynamicLogic.getLineFromString(strline);
+                LineBase line = LineDynamicLogic.getLineFromString(strline,this.lineSeperator,this.lineQuote,this.commentStart);
                 lines.add(line);
-                
                 //scan for attached comments on lines
                 if(enableComments)
                 if(strline.contains("" + this.commentStart))
@@ -205,7 +208,7 @@ public class ConfigBase {
     {
         for(int i=0;i<list.size();i++)
         {
-            LineBase line = LineDynamicLogic.getLineFromString(list.get(i));
+            LineBase line = LineDynamicLogic.getLineFromString(list.get(i),this.lineSeperator,this.lineQuote,this.commentStart);
             boolean flag = false;
             if(index + i < this.lines.size() && !flag)
                 this.lines.set(index+i,line);

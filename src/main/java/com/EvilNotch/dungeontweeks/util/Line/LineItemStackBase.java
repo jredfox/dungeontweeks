@@ -9,6 +9,13 @@ public class LineItemStackBase extends LineBase
 	public int meta;
 	public NBTTagCompound NBT;
 	public boolean hasMeta = true;
+	
+	public LineItemStackBase(String s,char sep, char q,char... invalid)
+	{
+		super(s,sep,q,invalid);
+		this.meta = parseMeta(s);
+		this.NBT = parseNBT(s);
+	}
 
 	public LineItemStackBase(String s)
 	{

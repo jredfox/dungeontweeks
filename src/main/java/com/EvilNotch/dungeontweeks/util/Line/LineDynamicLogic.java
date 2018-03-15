@@ -7,15 +7,15 @@ public class LineDynamicLogic {
     public HashMap<Integer,ArrayList<LineBase> > lineLogic = new HashMap();
     public LineBase base = null;
     
-    public LineDynamicLogic()
+    public LineDynamicLogic(String s)
     {
-        this.lineLogic = new HashMap();
+    	this(s,':','"','#');
     }
     /**
      * Breaks up string into seperate lines and each index is one && || logic Doesn't need to extend line since it's an array of lines
      * @param s
      */
-    public LineDynamicLogic(String s)
+    public LineDynamicLogic(String s,char sep,char q,char...invalid)
     {
         this.lineLogic = new HashMap();//Initiates the array
         
@@ -23,19 +23,19 @@ public class LineDynamicLogic {
         String[] parts = new String[2];
         if(s.contains("="))
         {
-            this.base = new LineBase("\"" + LineBase.parseQuotes(s, 0) + "\"");//instantiate line base if contains it
-            parts = s.split("=");
+        	parts = s.split("=");
+            this.base = LineDynamicLogic.getLineFromString(parts[0],sep,q,invalid);
         }
         else
             parts[1] = s;
         //parse all lines
-        seperateLines(parts[1]);//Separates lines into parts based on || being each index
+        seperateLines(parts[1],sep,q,invalid);//Separates lines into parts based on || being each index
     }
 
     /**
      * Breaks lines up based on && || logic where each index in the array represents one line{Current use is only for silk spawners}
      */
-    protected void seperateLines(String str) 
+    protected void seperateLines(String str,char sep, char q,char...invalid) 
     {
         if(str.contains("\\|\\|") || str.contains("||"))
         {
@@ -48,7 +48,7 @@ public class LineDynamicLogic {
                 for(String sub : subs)
                 {
                     if(!LineBase.toWhiteSpaced(sub).equals(""))
-                        lines.add(getLineFromString(sub));
+                        lines.add(getLineFromString(sub,sep,q,invalid));
                 }
                 this.lineLogic.put(index,lines);
                 index++;
@@ -56,50 +56,54 @@ public class LineDynamicLogic {
         }
         else{
             ArrayList<LineBase> lines = new ArrayList();
-            lines.add(getLineFromString(str));
+            lines.add(getLineFromString(str,sep,q,invalid));
             lineLogic.put(0,lines);
         }
+    }
+    public static LineBase getLineFromString(String s) 
+    {
+    	return getLineFromString(s,':','"','#');
     }
     /**
      * Returns the line from a string that is a line to be parsed
      * Doesn't check if line is possible string check that before expecting no exceptions
      */
-    public static LineBase getLineFromString(String s) 
+    public static LineBase getLineFromString(String s,char sep,char q, char...invalid) 
     {
-        LineItemStack stack = new LineItemStack(s);
+        LineItemStack stack = new LineItemStack(s,sep,q,invalid);
         if(stack.getHead() != null)
             return stack;
-        if(stack.getHead() == null && stack.NBT != null || stack.getHead() == null && stack.meta != -1)
-            return new LineItemStackBase(s);
-        if(stack.getHead() == null && stack.NBT == null && stack.meta == -1)
-            return new LineBase(s);
+        if(stack.getHead() == null && stack.NBT != null || stack.getHead() == null && stack.hasMeta)
+            return new LineItemStackBase(s,sep,q,invalid);
+        if(stack.getHead() == null && stack.NBT == null && !stack.hasMeta)
+            return new LineBase(s,sep,q,invalid);
         return null;
     }
     /**
      * returns if string is possible line used by configs thus the customized comment and wrapper
      */
-    public static boolean isStringPossibleLine(String strline,String comment)
+    public static boolean isStringPossibleLine(String strline,String comment,char sep,char q)
     {
         String whitespaced = LineBase.toWhiteSpaced(strline);
-        boolean notLine = !whitespaced.contains(":") && !whitespaced.contains("\"");
-        if(notLine || whitespaced.equals("") || whitespaced.indexOf(comment) == 0 || whitespaced.indexOf("#") == 0 || whitespaced.indexOf("<") == 0)
+        boolean notLine = !whitespaced.contains("" + sep) && !whitespaced.contains("" + q);
+        if(notLine || whitespaced.equals("") || whitespaced.indexOf(comment) == 0)
             return false;
         return true;
     }
-    public static boolean isStringPossibleLine(String strline,String comment,String wrapperH, String wrapperT)
+    public static boolean isStringPossibleLine(String strline,String comment,String wrapperH, String wrapperT,char sep,char q)
     {
         String whitespaced = LineBase.toWhiteSpaced(strline);
         if(whitespaced.equals(LineBase.toWhiteSpaced(wrapperH)) || whitespaced.equals(LineBase.toWhiteSpaced(wrapperT)) )
             return false;
         
-        return isStringPossibleLine(strline,comment);
+        return isStringPossibleLine(strline,comment,sep,q);
     }
     /**
      * legacy support
      */
     public static boolean isStringPossibleLine(String strline)
     {
-        return isStringPossibleLine(strline,"#");
+        return isStringPossibleLine(strline,"#",':','"');
     }
     public static boolean isPosibleDynamicLogic(String strline)
     {
@@ -120,8 +124,24 @@ public class LineDynamicLogic {
             for(LineBase line : list)
                     str += line.getString() + " || ";
         }
-        return str.substring(0, str.length()-4);
+        return this.lineLogic.size() > 0 ? str = str.substring(0, str.length()-4) : str;
     }
+    /**
+     * Used for printing out everything
+     */
+    @Override
+    public String toString()
+    {
+        String str = "";
+        str += this.base + " = ";
+        for(ArrayList<LineBase> list : this.lineLogic.values())
+        {
+            for(LineBase line : list)
+                    str += line.toString() + " || ";
+        }
+        return this.lineLogic.size() > 0 ? str = str.substring(0, str.length()-4) : str;
+    }
+    
     @Override
     public boolean equals(Object obj)
     {
@@ -151,22 +171,6 @@ public class LineDynamicLogic {
             }
         }
         return true && bbase;
-    }
-
-    /**
-     * Used for printing out everything
-     */
-    @Override
-    public String toString()
-    {
-        String str = "";
-        str += this.base + " = ";
-        for(ArrayList<LineBase> list : this.lineLogic.values())
-        {
-            for(LineBase line : list)
-                    str += line.toString() + " || ";
-        }
-        return str.substring(0, str.length()-4);
     }
 
 }

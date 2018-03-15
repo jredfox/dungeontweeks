@@ -20,6 +20,13 @@ public class LineItemStack extends LineItemStackBase{
 	public boolean hasshorthead = false;
 	public boolean haslhead = false;
 	
+	public LineItemStack(String s,char sep, char q,char... invalid)
+	{
+		super(s,sep,q,invalid);
+		if(s.contains("="))
+			parseWeight(s);
+	}
+	
 	public LineItemStack(String s) 
 	{
 		super(s);

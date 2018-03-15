@@ -35,12 +35,7 @@ public class Comment {
         if(!(obj instanceof Comment))
             return false;
         Comment c = (Comment)obj;
-        boolean line = false;
-        if(this.nearestLine != null)
-            line = this.nearestLine.equals(c.nearestLine);
-        else
-            line = c.nearestLine == null;
-        return this.lineIndex == c.lineIndex && this.comment.equals(c.comment) && line && this.start == c.start && this.isAttactched == c.isAttactched;
+        return this.lineIndex == c.lineIndex && this.comment.equals(c.comment) && this.start == c.start && this.isAttactched == c.isAttactched;
     }
     
     @Override

@@ -89,7 +89,7 @@ public class LineDynamicLogic {
     public static boolean isStringPossibleLine(String strline,String comment,String wrapperH, String wrapperT)
     {
         String whitespaced = LineBase.toWhiteSpaced(strline);
-        if(whitespaced.equals(wrapperH) || whitespaced.equals(wrapperT))
+        if(whitespaced.equals(LineBase.toWhiteSpaced(wrapperH)) || whitespaced.equals(LineBase.toWhiteSpaced(wrapperT)) )
             return false;
         
         return isStringPossibleLine(strline,comment);

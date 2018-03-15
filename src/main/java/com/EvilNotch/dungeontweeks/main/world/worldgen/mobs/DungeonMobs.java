@@ -236,12 +236,10 @@ public class DungeonMobs {
             strlist.add(new Comment("DungeonTweaks For:" + getFileTrueDisplayName(cfg.cfgfile)));
             strlist.add(new Comment("To Add NBT Entry make sure your in the right file then add a line in this format \"modid:mobid\" { } = weight"));
             
-            int index = 0;
             for(Comment c : cfg.getInit())
             {
                 if(!strlist.contains(c))
                     strlist.add(c);
-                index++;
             }
             
             cfg.setInit(strlist);

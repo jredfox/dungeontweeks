@@ -121,11 +121,13 @@ public class ConfigBase {
             for(String s : filelist)
             {
                 String whitespaced = LineBase.toWhiteSpaced(s);
-                if(whitespaced.equals(wrapperHead) && !this.header.equals("") || whitespaced.equals(""))
+                if(whitespaced.equals(LineBase.toWhiteSpaced(wrapperHead)) && !this.header.equals("") || whitespaced.equals(""))
                 {
                     headerIndex = count;
                     break;
                 }
+                if(LineDynamicLogic.isStringPossibleLine(whitespaced, "" + this.commentStart))
+                	break;//if is line stop trying to parse the header index
                 count++;
             }
             for(String strline : filelist)
@@ -135,17 +137,19 @@ public class ConfigBase {
                 actualIndex++;//since only used for boolean at beginging no need to copy ten other places
                 if(!LineDynamicLogic.isStringPossibleLine(strline,"" + this.commentStart,wrapperHead,wrapperTail) )
                 {
-                    if(!enableComments)
+                    if(!enableComments || whitespaced.equals(""))
                         continue;
                     //comment handling
                     if(whitespaced.indexOf(this.commentStart) == 0)
                     {
-                        if(cindex >= initSize && initPassed)
-                            this.comments.add(new Comment(index,strline,false,this.commentStart) );//if not passed header leave comments to init
-                        
-                        Comment initcomment = new Comment(strline,this.commentStart);
-                        if(!initPassed && !this.init.contains(initcomment) )
-                            this.init.add(initcomment);
+                        if(initPassed)
+                        	this.comments.add(new Comment(index,strline,false,this.commentStart) );//if not passed header leave comments to init
+                        if(!initPassed)
+                        {
+                        	Comment initcomment = new Comment(strline,this.commentStart);
+                        	if(!this.init.contains(initcomment))
+                        		this.init.add(initcomment);
+                        }
                         cindex++;
                     }
                     

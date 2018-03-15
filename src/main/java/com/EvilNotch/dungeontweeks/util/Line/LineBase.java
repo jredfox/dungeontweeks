@@ -6,7 +6,7 @@ import net.minecraft.util.ResourceLocation;
 
 public class LineBase
 {
-	public static final String lineLibraryVersion = "1.101";
+	public static final String lineLibraryVersion = "1.107";
 	public String modid;
 	public String name;
 	public static final ArrayList<String> invalidParsingChars = new ArrayList<String>(10);
@@ -31,7 +31,7 @@ public class LineBase
 			  if(stack.length > 1)
 				  this.name = stack[1];
 			  else
-				  this.name = "null";//For simplistic line parsing line is the line no string
+				  this.name = null;//For simplistic line parsing line is the line no string
 		  }
 		  else{
 			  this.modid = null;
@@ -77,7 +77,7 @@ public class LineBase
 			for(String invalid : invalidParsingChars)
 			{
 				if(charstr.equals(invalid))
-					return str;
+					return str.trim();
 			}
 			str += charstr;
 		}
@@ -190,7 +190,8 @@ public class LineBase
 	 */
 	public String getString()
 	{
-		return this.toString();
+	    String quote = this.legacyParsed ? "" : "\"";
+		return quote + getModPath().toString() + quote;
 	}
 	public static boolean isDynamicLogic(String s)
 	{
@@ -224,7 +225,11 @@ public class LineBase
 	}
 	public ResourceLocation getModPath()
     {
-        return new ResourceLocation(this.modid + ":" + this.name);
+		String strname = "";
+		String compare = "" + this.name;
+		if(!compare.equals("null") )
+			strname = ":" + this.name;
+		return  new ResourceLocation(this.modid + strname);
     }
 
 }

@@ -23,7 +23,7 @@ public class LineItemStackBase extends LineBase
 	 * @throws NBTException 
 	 * @Format "modid:block" <int> {NBT} = int
 	 */
-	private NBTTagCompound parseNBT(String s)
+	protected NBTTagCompound parseNBT(String s)
 	{
 		String strnbt = "";
 		int first = findFirstNBT(s);
@@ -122,8 +122,7 @@ public class LineItemStackBase extends LineBase
     @Override
     public String getString()
     {
-    	String quote = this.legacyParsed ? "" : "\"";
-        String str = quote + this.modid + ":" + this.name + quote;
+    	String str = super.getString();
         if(this.hasMeta)
             str += " <" + this.meta + ">";
         if(this.NBT != null)

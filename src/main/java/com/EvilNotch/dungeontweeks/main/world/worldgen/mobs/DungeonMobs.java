@@ -177,6 +177,7 @@ public class DungeonMobs {
 				int weight = Config.default_weight;
 				if(modid.equals("minecraft"))
 				{
+				    //vanilla
 					if(name.equals("cave_spider") && dungeontype.equals("mineshaft"))
 						weight = 300;
 					if(name.equals("silverfish") &&  dungeontype.equals("stronghold"))
@@ -185,6 +186,16 @@ public class DungeonMobs {
 						weight = 300;
 					if(name.equals("spider") && dungeontype.equals("mansion"))
 						weight = 150;
+					
+					//battletowers support so it's not blank by default however if not vanilla nor battle towers user has to stop being lazy and add it themselves
+					if(name.equals("cave_spider") && dungeontype.indexOf("battletowers:") == 0)
+					    weight = 100;
+					if(name.equals("spider") && dungeontype.indexOf("battletowers:") == 0)
+                        weight = 90;
+					if(name.equals("skeleton") && dungeontype.indexOf("battletowers:") == 0)
+                        weight = 120;
+					if(name.equals("zombie") && dungeontype.indexOf("battletowers:") == 0)
+                        weight = 120;
 				}
 				if(!cfg.containsLine(line))
 					cfg.appendLine(new LineItemStack("\"" + loc.toString() + "\"" +  " = " + weight) );

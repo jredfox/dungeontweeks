@@ -22,6 +22,7 @@ public class Config {
 	public static boolean blankSpawnerWhenBlank = true;
 	public static boolean legacyHooks = true;
     public static boolean fancyConfig = true;
+    public static boolean optimizedFileWriting = true;
 	
 	public static void loadConfig(File moddir)
 	{
@@ -59,6 +60,7 @@ public class Config {
 					cfgdefinitions.add(line);
 			}
 		}
+		optimizedFileWriting = config.get("general", "optimizedFileWriting", true).getBoolean(true);
 		fancyConfig = config.get("general","fancyConfig",true).getBoolean(true);//so you don't have to keep going back and forth to debug or to look at the differences
 		config.save();
 	}

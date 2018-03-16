@@ -16,7 +16,7 @@ import java.util.Set;
 
 public class ConfigBase {
     
-    public ArrayList<LineBase> lines; //lines of the file main point
+    public ArrayList<ILine> lines; //warning check before assuming linebase could be linedynamic logic or modded line that uses this interface
     public final File cfgfile;
     public String header = "";
     public boolean first_launch = false;
@@ -32,7 +32,7 @@ public class ConfigBase {
     protected char lineQuote = '"';
     public boolean enableComments = true;
     //version read only
-    public static final String version = "1.1-build-105";
+    public static final String version = "1.1-build-109";
     
     public ConfigBase(File file)
     {
@@ -159,7 +159,7 @@ public class ConfigBase {
                     
                     continue;
                 }
-                LineBase line = LineDynamicLogic.getLineFromString(strline,this.lineSeperator,this.lineQuote,this.commentStart);
+                ILine line = LineDynamicLogic.getLineFromString(strline,this.lineSeperator,this.lineQuote,this.commentStart);
                 lines.add(line);
                 //scan for attached comments on lines
                 if(enableComments)
@@ -190,11 +190,11 @@ public class ConfigBase {
      * sets all from array to indexes if not out of bounds
      * basically just replace all from this line on forward based till it runs out of indexes and then adds
      */
-    public void setCfgList(ArrayList<LineBase> list, int index)
+    public void setCfgList(ArrayList<ILine> list, int index)
     {
         for(int i=0;i<list.size();i++)
         {
-            LineBase str = list.get(i);
+            ILine str = list.get(i);
             boolean flag = false;
             if(index + i < this.lines.size() && !flag)
                 this.lines.set(index+i,str);
@@ -208,7 +208,7 @@ public class ConfigBase {
     {
         for(int i=0;i<list.size();i++)
         {
-            LineBase line = LineDynamicLogic.getLineFromString(list.get(i),this.lineSeperator,this.lineQuote,this.commentStart);
+            ILine line = LineDynamicLogic.getLineFromString(list.get(i),this.lineSeperator,this.lineQuote,this.commentStart);
             boolean flag = false;
             if(index + i < this.lines.size() && !flag)
                 this.lines.set(index+i,line);
@@ -218,12 +218,12 @@ public class ConfigBase {
             }
         }
     }
-    public void addLine(LineBase line){
+    public void addLine(ILine line){
         if(this.containsLine(line))
             return;
         this.appendLine(line);
     }
-    public void addLine(LineBase line, int index){
+    public void addLine(ILine line, int index){
         if(this.containsLine(line))
             return;
         this.appendLine(line,index);
@@ -232,9 +232,9 @@ public class ConfigBase {
      * Append List of lines
      * @param list
      */
-    public void addLineList(ArrayList<LineBase> list)
+    public void addLineList(ArrayList<ILine> list)
     {
-        for(LineBase line : list)
+        for(ILine line : list)
             if(!this.containsLine(line))
                 this.lines.add(line);
     }
@@ -242,9 +242,9 @@ public class ConfigBase {
     /**
      * Append List of lines at starting index
      */
-    public void addLineList(ArrayList<LineBase> list, int index)
+    public void addLineList(ArrayList<ILine> list, int index)
     {
-        for(LineBase line : list)
+        for(ILine line : list)
             if(!this.containsLine(line))
                 this.lines.add(index++,line);
     }
@@ -254,7 +254,7 @@ public class ConfigBase {
      * Appends Line To end of file
      * @param str
      */
-    public void appendLine(LineBase line)
+    public void appendLine(ILine line)
     {
         this.lines.add(line);
     }
@@ -262,7 +262,7 @@ public class ConfigBase {
      * Appends Line To index of file
      * @param str
      */
-    public void appendLine(LineBase line,int index)
+    public void appendLine(ILine line,int index)
     {
         this.lines.add(index,line);
     }
@@ -270,9 +270,9 @@ public class ConfigBase {
      * Append List of lines
      * @param list
      */
-    public void appendLineList(ArrayList<LineBase> list)
+    public void appendLineList(ArrayList<ILine> list)
     {
-        for(LineBase line : list)
+        for(ILine line : list)
             this.lines.add(line);
     }
     /**
@@ -280,9 +280,9 @@ public class ConfigBase {
      * @param list
      * @param index
      */
-    public void appendLineList(ArrayList<LineBase> list, int index)
+    public void appendLineList(ArrayList<ILine> list, int index)
     {
-        for(LineBase line : list)
+        for(ILine line : list)
             this.lines.add(index++,line);
     }
     /**
@@ -290,7 +290,7 @@ public class ConfigBase {
      * @param line
      * @param index
      */
-    public void setLine(LineBase line, int index)
+    public void setLine(ILine line, int index)
     {
         this.lines.set(index,line);
     }
@@ -299,7 +299,7 @@ public class ConfigBase {
      * @param list
      * @param index
      */
-    public void setLineList(ArrayList<LineBase> list, int index)
+    public void setLineList(ArrayList<ILine> list, int index)
     {
         this.setCfgList(list, index);
     }
@@ -307,16 +307,16 @@ public class ConfigBase {
      * Deletes first instanceof String
      * @param strline
      */
-    public void deleteLine(LineBase line)
+    public void deleteLine(ILine line)
     {
-        deleteLineBase(line,false);
+    	deleteILine(line,false);
     }
-    public void deleteLineBase(LineBase line, boolean deleteAll)
+    public void deleteILine(ILine line, boolean deleteAll)
     {
-        Iterator<LineBase> it = this.lines.iterator();
+        Iterator<ILine> it = this.lines.iterator();
         while(it.hasNext())
         {
-            LineBase compare = it.next();
+            ILine compare = it.next();
             if(line.equals(compare,false))
             {
                 it.remove();
@@ -329,19 +329,19 @@ public class ConfigBase {
      * Delete all instances of list of lines
      * @param list
      */
-    public void deleteAllLines(ArrayList<LineBase> list)
+    public void deleteAllLines(ArrayList<ILine> list)
     {
-        for(LineBase line : list)
-            deleteLineBase(line,true);
+        for(ILine line : list)
+        	deleteILine(line,true);
     }
     /**
      * Does this config contain this line?
      * @param line
      * @return
      */
-    public boolean containsLine(LineBase line)
+    public boolean containsLine(ILine line)
     {
-        for(LineBase compare : this.lines)
+        for(ILine compare : this.lines)
             if(line.equals(compare,false))
                 return true;
         return false;
@@ -376,7 +376,7 @@ public class ConfigBase {
         for(Comment c : this.comments)
         {
             int index = 0;
-            for(LineBase line : this.lines)
+            for(ILine line : this.lines)
             {
                 if(line.equals(c.nearestLine,false) && line != null)
                 {
@@ -459,7 +459,7 @@ public class ConfigBase {
     }
     protected ArrayList<String> getStringLines() {
         ArrayList<String> list = new ArrayList();
-        for(LineBase line : this.lines)
+        for(ILine line : this.lines)
             list.add(line.getString() );
         return list;
     }
@@ -470,7 +470,7 @@ public class ConfigBase {
         String s = "<ConfigBase>\n";
         for(Comment c : this.comments)
             s += c + "\n";
-        for(LineBase line : this.lines)
+        for(ILine line : this.lines)
             s += line.toString() + "\n";
         return s + "</ConfigBase>\n";
     }

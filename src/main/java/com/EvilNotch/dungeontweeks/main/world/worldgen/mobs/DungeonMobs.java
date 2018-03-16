@@ -15,6 +15,7 @@ import com.EvilNotch.dungeontweeks.main.Events.EventDungeon.Type;
 import com.EvilNotch.dungeontweeks.util.JavaUtil;
 import com.EvilNotch.dungeontweeks.util.Line.Comment;
 import com.EvilNotch.dungeontweeks.util.Line.ConfigBase;
+import com.EvilNotch.dungeontweeks.util.Line.ILine;
 import com.EvilNotch.dungeontweeks.util.Line.LineBase;
 import com.EvilNotch.dungeontweeks.util.Line.LineItemStack;
 import com.EvilNotch.dungeontweeks.util.Line.LineItemStackBase;
@@ -205,13 +206,15 @@ public class DungeonMobs {
 		if(Config.validateGeneratedEntries)
 		for(ConfigBase cfg : configs.values())
 		{
-			for(LineBase line : cfg.lines)
-				if(!list.contains(new ResourceLocation(line.modid + ":" + line.name) ) || !line.modid.equals(getFileTrueDisplayName(cfg.cfgfile) ) )
+			for(ILine line : cfg.lines)
+			{
+				if(!list.contains(line.getModPath()) || !line.getModid().equals(getFileTrueDisplayName(cfg.cfgfile) )) 
 				{
 					cfg.deleteLine(line);
 					System.out.println("Not Valid Entry! LineBase Removed:" + line + " " + cfg.cfgfile);
-					System.out.println("Domanin Not Valid:" + (!line.modid.equals(getFileTrueDisplayName(cfg.cfgfile)) ) );
+					System.out.println("Domanin Not Valid:" + (!line.getModid().equals(getFileTrueDisplayName(cfg.cfgfile)) ) );
 				}
+			}
 		}
 		//Populate arrayLists
 		for(ConfigBase cfg : configs.values())
@@ -305,7 +308,7 @@ public class DungeonMobs {
 	 * populate arraylists
 	 */
 	public static void applyDungeonMobs(ConfigBase cfg, ArrayList<DungeonMobEntry> list) {
-		for(LineBase lineobj : cfg.lines)
+		for(ILine lineobj : cfg.lines)
 		{
 			LineItemStack line = null;
 			if(lineobj instanceof LineItemStack)

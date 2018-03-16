@@ -1,11 +1,11 @@
 package com.EvilNotch.dungeontweeks.util.Line;
 
-import java.util.ArrayList;
+import net.minecraft.util.ResourceLocation;
 
 
-public class LineBase
+public class LineBase implements ILine
 {
-	public static final String lineLibraryVersion = "1.108";
+	public static final String lineLibraryVersion = "1.109";
 	public String modid;
 	public String name;
 	protected String invalidParsingChars = "";
@@ -20,7 +20,7 @@ public class LineBase
 		this.invalidParsingChars = getInvChars();
 		for(char c : invalid)
 			this.invalidParsingChars += c;
-		parseBase(s);
+		parse(s,sep,q,invalid);
 	}
 	
 	public LineBase(String s) 
@@ -30,6 +30,10 @@ public class LineBase
 	}
 	protected String getInvChars(){
 		return "<{=";
+	}
+	@Override
+	public void parse(String s,char sep, char q, char...invalid) {
+		parseBase(s);//for linebase this is all you need since the constructor takes care of the rest
 	}
 	
 	protected void parseBase(String s) {
@@ -100,8 +104,10 @@ public class LineBase
 	 */
 	public static String[] getParts(String s, String split)
 	{
-		if(split.equals(".") || split.equals("|") )
+		if(split.equals(".") || split.equals("|"))
 			split = "\\" + split;
+		else if(split.equals("||"))
+			split = "\\|\\|";
 		s = s.replaceFirst(split, "\u00A9");
 		return s.split("\u00A9");
 	}
@@ -222,13 +228,24 @@ public class LineBase
 	{
 		return parseQuotes(s,index,"\"");
 	}
-	public String getModPath()
+	@Override
+	public ResourceLocation getModPath()
     {
 		String strname = "";
 		String compare = "" + this.name;
 		if(!compare.equals("null") )
 			strname = "" + this.seperator + this.name;
-		return  new String(this.modid + strname);
+		return  new ResourceLocation(this.modid + strname);
     }
+
+	@Override
+	public String getModid() {
+		return this.modid;
+	}
+
+	@Override
+	public String getName() {
+		return this.name;
+	}
 
 }

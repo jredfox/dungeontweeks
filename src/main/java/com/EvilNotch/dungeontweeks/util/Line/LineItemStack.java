@@ -19,6 +19,7 @@ public class LineItemStack extends LineItemStackBase{
 	public boolean hasbytehead = false;
 	public boolean hasshorthead = false;
 	public boolean haslhead = false;
+	public boolean strLegacy = false;
 	
 	public LineItemStack(String s,char sep, char q,char... invalid)
 	{
@@ -35,10 +36,8 @@ public class LineItemStack extends LineItemStackBase{
 	}
 	/**
 	 * Returns the head of the line supports [int,boolean,byte,short,long,float,double,String]
-	 * @param s
-	 * @return
 	 */
-	private void parseWeight(String s) 
+	protected void parseWeight(String s) 
 	{
 		try
 		{
@@ -50,31 +49,36 @@ public class LineItemStack extends LineItemStackBase{
 		boolean isboolean = str.toLowerCase().contains("true") || str.toLowerCase().contains("false");
 		if(isboolean)
 		{
-			if(str.contains("true"))
+			if(str.indexOf("true") == 0)
 				str = "true";
-			else if(str.contains("false"))
+			else if(str.indexOf("false") == 0)
 				str = "false";
+			this.bhead = Boolean.parseBoolean(str);
+			this.hasbhead = true;
+			return;
 		}
 		else if(!isnum)
 		{
-			String valid = "1234567890";
-			String num = str.substring(0,1);
-			if(valid.contains(num))
-				str = parseNum(str);
-			isnum = LineBase.isStringNum(str);
+			String numbers = "1234567890";
+			String charCheck = str.substring(0,1);
+			String parsedNum = "";
+			if(numbers.contains(charCheck))
+				parsedNum = parseNum(str);
+			isnum = LineBase.isStringNum(parsedNum) && !str.contains("" + this.seperator) && !str.contains("" + this.quote);
+			if(isnum)
+				str = parsedNum;
 		}
-		if(!isnum && !isboolean && str.contains("\""))
+		if(!isnum && !isboolean)
 		{
 			String[] parts_unspaced = LineBase.getParts(s, "=");
 			String stringlinehead = parts_unspaced[1];
-			this.strhead = LineBase.parseQuotes(stringlinehead,stringlinehead.indexOf("\""));//if all other possibilities are canceled it must simply be a string
+			if(str.contains("" + this.quote))
+				this.strhead =  LineBase.parseQuotes(stringlinehead,stringlinehead.indexOf("" + this.quote),"" + this.quote);//if all other possibilities are canceled it must simply be a string
+			else{
+				this.strhead = stringlinehead.trim();
+				this.strLegacy = true;
+			}
 			this.hasStringHead = true;
-			return;
-		}
-		if(isboolean)
-		{
-			this.bhead = Boolean.parseBoolean(str.toLowerCase());
-			this.hasbhead = true;
 			return;
 		}
 		if(str.contains(".") && str.toLowerCase().endsWith("d") || str.toLowerCase().endsWith("d"))
@@ -115,8 +119,6 @@ public class LineItemStack extends LineItemStackBase{
 			this.haslhead = true;
 			return;
 		}
-		if(!isnum)
-			return;
 		if(str.endsWith("i"))
 			str = str.substring(0, str.length()-1);
 		int value = (int)Long.parseLong(str);
@@ -217,13 +219,17 @@ public class LineItemStack extends LineItemStackBase{
 		if(this.hasfhead)
 			return str + "F";
 		if(this.hasStringHead)
-			return "\"" + str + "\"";
+		{
+			String q = this.strLegacy ? "" : "" + this.quote;
+			return q + this.strhead + q;
+		}
 		if(this.hasbytehead)
 			return str + "B";
 		if(this.hasshorthead)
 			return str + "S";
 		if(this.haslhead)
 			return str + "L";
+		
 		return str;
 	}
 	

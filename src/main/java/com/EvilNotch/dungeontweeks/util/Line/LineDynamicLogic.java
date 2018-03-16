@@ -3,34 +3,28 @@ package com.EvilNotch.dungeontweeks.util.Line;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class LineDynamicLogic {
+import net.minecraft.util.ResourceLocation;
+
+public class LineDynamicLogic implements ILine{
     public HashMap<Integer,ArrayList<LineBase> > lineLogic = new HashMap();
-    public LineBase base = null;
     
     public LineDynamicLogic(String s)
     {
-    	this(s,':','"','#');
+    	this(s,':','"','#',',');
     }
     /**
-     * Breaks up string into seperate lines and each index is one && || logic Doesn't need to extend line since it's an array of lines
+     * Breaks up string into separate lines and each index is one && || logic Doesn't need to extend line since it's an array of lines
      * @param s
      */
     public LineDynamicLogic(String s,char sep,char q,char...invalid)
     {
         this.lineLogic = new HashMap();//Initiates the array
-        
-        //instantiate base line if has one
-        String[] parts = new String[2];
-        if(s.contains("="))
-        {
-        	parts = s.split("=");
-            this.base = LineDynamicLogic.getLineFromString(parts[0],sep,q,invalid);
-        }
-        else
-            parts[1] = s;
-        //parse all lines
-        seperateLines(parts[1],sep,q,invalid);//Separates lines into parts based on || being each index
+        parse(s,sep,q,invalid);
     }
+    @Override
+	public void parse(String s, char sep, char q, char...invalid) {
+        seperateLines(s,sep,q,invalid);//Separates lines into parts based on || being each index
+	}
 
     /**
      * Breaks lines up based on && || logic where each index in the array represents one line{Current use is only for silk spawners}
@@ -43,33 +37,38 @@ public class LineDynamicLogic {
             int index = 0;
             for(String s : parts)
             {
-                String[] subs = s.split(",");
-                ArrayList<LineBase> lines = new ArrayList();
-                for(String sub : subs)
-                {
-                    if(!LineBase.toWhiteSpaced(sub).equals(""))
-                        lines.add(getLineFromString(sub,sep,q,invalid));
-                }
-                this.lineLogic.put(index,lines);
+            	populateLines(s,index,sep,q,invalid);
                 index++;
             }
         }
-        else{
-            ArrayList<LineBase> lines = new ArrayList();
-            lines.add(getLineFromString(str,sep,q,invalid));
-            lineLogic.put(0,lines);
-        }
+        else
+           populateLines(str,0,sep,q,invalid);
     }
-    public static LineBase getLineFromString(String s) 
+    protected void populateLines(String s, int index,char sep, char q, char...invalid) {
+        String[] subs = s.split(",");
+        ArrayList<LineBase> lines = new ArrayList();
+        for(String sub : subs)
+        {
+            if(!LineBase.toWhiteSpaced(sub).equals(""))
+                lines.add((LineBase)getLineFromString(sub,sep,q,invalid));
+        }
+        this.lineLogic.put(index,lines);
+	}
+    
+	public static ILine getLineFromString(String s) 
     {
     	return getLineFromString(s,':','"','#');
     }
+	
     /**
      * Returns the line from a string that is a line to be parsed
      * Doesn't check if line is possible string check that before expecting no exceptions
      */
-    public static LineBase getLineFromString(String s,char sep,char q, char...invalid) 
+    public static ILine getLineFromString(String s,char sep,char q, char...invalid) 
     {
+    	if(isPosibleDynamicLogic(s, sep, q))
+    		return new LineDynamicLogic(s,sep,q,invalid);
+    	
         LineItemStack stack = new LineItemStack(s,sep,q,invalid);
         if(stack.getHead() != null)
             return stack;
@@ -107,22 +106,27 @@ public class LineDynamicLogic {
     }
     public static boolean isPosibleDynamicLogic(String strline)
     {
-        boolean isLine = isStringPossibleLine(strline);
-        return isLine && strline.contains("\\|\\|") || isLine && strline.contains("||");
+    	return isPosibleDynamicLogic(strline,':','"');
+    }
+    public static boolean isPosibleDynamicLogic(String strline, char sep, char q)
+    {
+    	String w = LineBase.toWhiteSpaced(strline);
+        boolean isLine = w.contains("" + sep) || w.contains("" + q);
+        return isLine && strline.contains("\\|\\|") || isLine && strline.contains("||") || isLine && w.contains(",");
     }
     /**
-     * Used for display
-     * @return
+     * Used for display print out all values regardless of null for toString
      */
     public String getString()
     {
         String str = "";
-        if(this.base != null)
-            str += this.base.getString() + " = ";
         for(ArrayList<LineBase> list : this.lineLogic.values())
         {
             for(LineBase line : list)
-                    str += line.getString() + " || ";
+                str += line.getString() + ", ";
+            
+            str = str.substring(0, str.length()-2);//get rid of last comment after parsing row
+            str += " || ";//add possible next row
         }
         return this.lineLogic.size() > 0 ? str = str.substring(0, str.length()-4) : str;
     }
@@ -133,28 +137,27 @@ public class LineDynamicLogic {
     public String toString()
     {
         String str = "";
-        str += this.base + " = ";
         for(ArrayList<LineBase> list : this.lineLogic.values())
         {
             for(LineBase line : list)
-                    str += line.toString() + " || ";
+                    str += line.toString() + ", ";
+            str = str.substring(0, str.length()-2);//get rid of last comment after parsing row
+            str += " || ";
         }
         return this.lineLogic.size() > 0 ? str = str.substring(0, str.length()-4) : str;
     }
-    
     @Override
     public boolean equals(Object obj)
+    {
+    	return equals(obj,true);
+    }
+    public boolean equals(Object obj,boolean compareHeads)
     {
         if(!(obj instanceof LineDynamicLogic))
             return false;
         LineDynamicLogic dynamic = (LineDynamicLogic)obj;
         if(this.lineLogic.size() != dynamic.lineLogic.size() )
             return false;//If not same length return so no stressfull for loops
-        boolean bbase = true;
-        if(this.base == null)
-            bbase = dynamic.base == null;
-        else if(!this.base.equals(dynamic.base))
-            bbase = false;
         
         for(int i=0;i<this.lineLogic.size();i++)
         {
@@ -166,11 +169,40 @@ public class LineDynamicLogic {
             {
                 LineBase line1 = lines1.get(j);
                 LineBase line2 = lines2.get(j);
-                if(!line1.equals(line2))
+                if(!line1.equals(line2,compareHeads))
                     return false;
             }
         }
-        return true && bbase;
+        return true;
     }
+	@Override
+	public ResourceLocation getModPath() {
+		LineBase line = getFirstLine();
+		if(line != null)
+			return line.getModPath();
+		
+		return null;
+	}
+	protected LineBase getFirstLine() {
+		ArrayList<LineBase> list = this.lineLogic.get(0);
+		if(list == null || list.size() == 0)
+			return null;
+		return list.get(0);
+	}
+	@Override
+	public String getModid() {
+		LineBase line = getFirstLine();
+		if(line != null)
+			return line.modid;
+		return null;
+	}
+	@Override
+	public String getName() {
+		LineBase line = getFirstLine();
+		if(line != null)
+			return line.name;
+		return null;
+	}
+	
 
 }

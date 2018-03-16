@@ -3,7 +3,7 @@ package com.EvilNotch.dungeontweeks.util.Line;
 public class Comment {
     public int lineIndex = -1;
     public String comment = null;
-    public LineBase nearestLine = null;
+    public ILine nearestLine = null;
     public boolean isAttactched = false;
     public char start = '#';
     

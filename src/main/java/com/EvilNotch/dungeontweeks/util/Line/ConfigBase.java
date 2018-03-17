@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
-import com.EvilNotch.dungeontweeks.main.Config;
 import com.EvilNotch.dungeontweeks.util.JavaUtil;
 
 
@@ -161,7 +160,7 @@ public class ConfigBase {
                     
                     continue;
                 }
-                ILine line = LineDynamicLogic.getLineFromString(strline,this.lineSeperator,this.lineQuote,this.commentStart);
+                ILine line = this.getLine(strline);
                 lines.add(line);
                 //scan for attached comments on lines
                 if(enableComments)
@@ -177,8 +176,14 @@ public class ConfigBase {
         } catch (Exception e) {e.printStackTrace();}
         this.lineChecker = JavaUtil.copyArray(this.lines);
     }
-    
-    protected String getWrapper(boolean head)
+    /**
+     * Object oriented so people using this library can override with adding new lines easily
+     * returns in ConfigBase LineDynamicLogic.getLineFromString(...)
+     */
+    protected ILine getLine(String strline) {
+    	return LineDynamicLogic.getLineFromString(strline,this.lineSeperator,this.lineQuote,this.commentStart);
+	}
+	protected String getWrapper(boolean head)
     {
         if(head)
             return this.getLWrap() + this.header + this.headerRWrap;
@@ -210,7 +215,7 @@ public class ConfigBase {
     {
         for(int i=0;i<list.size();i++)
         {
-            ILine line = LineDynamicLogic.getLineFromString(list.get(i),this.lineSeperator,this.lineQuote,this.commentStart);
+            ILine line = this.getLine(list.get(i));
             boolean flag = false;
             if(index + i < this.lines.size() && !flag)
                 this.lines.set(index+i,line);
@@ -450,12 +455,11 @@ public class ConfigBase {
     }
     public void updateConfig(boolean alphabitize,boolean forceUpdate)
     {
+        if(alphabitize)
+            this.alphabetize();
         if(forceUpdate || !this.lines.equals(this.lineChecker))
         {
-        	//ignore alphabetical order when comparing or almost always will update the config
-        	if(alphabitize)
-        		this.alphabetize();
-        	System.out.print("CFG Updating:"  + this.cfgfile + "\n");
+        	System.out.print("CFG Updating:" + this.cfgfile);
         	this.updateConfig();
         }
     }

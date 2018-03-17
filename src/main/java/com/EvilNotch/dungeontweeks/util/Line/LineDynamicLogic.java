@@ -6,7 +6,7 @@ import java.util.HashMap;
 import net.minecraft.util.ResourceLocation;
 
 public class LineDynamicLogic implements ILine{
-    public HashMap<Integer,ArrayList<LineBase> > lineLogic = new HashMap();
+    public HashMap<Integer,ArrayList<ILine> > lineLogic = new HashMap();
     
     public LineDynamicLogic(String s)
     {
@@ -46,15 +46,20 @@ public class LineDynamicLogic implements ILine{
     }
     protected void populateLines(String s, int index,char sep, char q, char...invalid) {
         String[] subs = s.split(",");
-        ArrayList<LineBase> lines = new ArrayList();
+        ArrayList<ILine> lines = new ArrayList();
         for(String sub : subs)
         {
             if(!LineBase.toWhiteSpaced(sub).equals(""))
-                lines.add((LineBase)getLineFromString(sub,sep,q,invalid));
+                lines.add(getLine(sub,sep,q,invalid));
         }
         this.lineLogic.put(index,lines);
 	}
-    
+    /**
+     * Object oriented so people using this library can override with adding new lines easily
+     */
+	protected ILine getLine(String sub, char sep, char q, char...invalid) {
+		return getLineFromString(sub,sep,q,invalid);
+	}
 	public static ILine getLineFromString(String s) 
     {
     	return getLineFromString(s,':','"','#');
@@ -120,9 +125,9 @@ public class LineDynamicLogic implements ILine{
     public String getString()
     {
         String str = "";
-        for(ArrayList<LineBase> list : this.lineLogic.values())
+        for(ArrayList<ILine> list : this.lineLogic.values())
         {
-            for(LineBase line : list)
+            for(ILine line : list)
                 str += line.getString() + ", ";
             
             str = str.substring(0, str.length()-2);//get rid of last comment after parsing row
@@ -137,9 +142,9 @@ public class LineDynamicLogic implements ILine{
     public String toString()
     {
         String str = "";
-        for(ArrayList<LineBase> list : this.lineLogic.values())
+        for(ArrayList<ILine> list : this.lineLogic.values())
         {
-            for(LineBase line : list)
+            for(ILine line : list)
                     str += line.toString() + ", ";
             str = str.substring(0, str.length()-2);//get rid of last comment after parsing row
             str += " || ";
@@ -161,14 +166,14 @@ public class LineDynamicLogic implements ILine{
         
         for(int i=0;i<this.lineLogic.size();i++)
         {
-            ArrayList<LineBase> lines1 = this.lineLogic.get(i);
-            ArrayList<LineBase> lines2 = dynamic.lineLogic.get(i);
+            ArrayList<ILine> lines1 = this.lineLogic.get(i);
+            ArrayList<ILine> lines2 = dynamic.lineLogic.get(i);
             if(lines1.size() != lines2.size())
                 return false;
             for(int j=0;j<lines1.size();j++)
             {
-                LineBase line1 = lines1.get(j);
-                LineBase line2 = lines2.get(j);
+                ILine line1 = lines1.get(j);
+                ILine line2 = lines2.get(j);
                 if(!line1.equals(line2,compareHeads))
                     return false;
             }
@@ -177,14 +182,14 @@ public class LineDynamicLogic implements ILine{
     }
 	@Override
 	public ResourceLocation getModPath() {
-		LineBase line = getFirstLine();
+		ILine line = getFirstLine();
 		if(line != null)
 			return line.getModPath();
 		
 		return null;
 	}
-	protected LineBase getFirstLine() {
-		ArrayList<LineBase> list = this.lineLogic.get(0);
+	protected ILine getFirstLine() {
+		ArrayList<ILine> list = this.lineLogic.get(0);
 		if(list == null || list.size() == 0)
 			return null;
 		return list.get(0);
@@ -214,9 +219,9 @@ public class LineDynamicLogic implements ILine{
 	
 	public ArrayList<ResourceLocation> getResourceLocations(int position,boolean grabStringHead)
 	{
-		ArrayList<LineBase> lines = this.lineLogic.get(position);
+		ArrayList<ILine> lines = this.lineLogic.get(position);
 		ArrayList<ResourceLocation> list = new ArrayList();
-		for(LineBase line : lines)
+		for(ILine line : lines)
 		{
 			list.add(line.getModPath());
 			if(line.getHead() instanceof String && grabStringHead)

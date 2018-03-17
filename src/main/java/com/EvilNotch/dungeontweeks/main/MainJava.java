@@ -13,11 +13,13 @@ import com.EvilNotch.dungeontweeks.main.Attatchments.Storage;
 import com.EvilNotch.dungeontweeks.main.EventHandlers.DungeonHandler;
 import com.EvilNotch.dungeontweeks.main.EventHandlers.ReplaceGen;
 import com.EvilNotch.dungeontweeks.main.EventHandlers.TileEntityExtendedProperties;
+import com.EvilNotch.dungeontweeks.main.Events.EventDungeon.Type;
 import com.EvilNotch.dungeontweeks.main.commands.CmdReload;
 import com.EvilNotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
 import com.EvilNotch.dungeontweeks.main.world.worldgen.mobs.MappingEntry;
 
 import net.minecraft.block.Block;
+import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.gen.ChunkGeneratorOverworld;
 import net.minecraftforge.common.MinecraftForge;

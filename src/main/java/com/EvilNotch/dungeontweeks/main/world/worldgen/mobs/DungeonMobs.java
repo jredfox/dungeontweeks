@@ -204,10 +204,13 @@ public class DungeonMobs {
 		if(Config.validateGeneratedEntries)
 		for(ConfigBase cfg : configs.values())
 		{
-			for(ILine line : cfg.lines)
+			for(int i=0;i<cfg.lines.size();i++)
 			{
+				ILine line = cfg.lines.get(i);
 				if(!list.contains(line.getModPath()) || !line.getModid().equals(getFileTrueDisplayName(cfg.cfgfile) )) 
 				{
+					if(i != cfg.lines.size()-1)
+						i--;//prevents it from skipping an index because all ones above it go to the end
 					cfg.deleteLine(line);
 					System.out.println("Not Valid Entry! LineBase Removed:" + line + " " + cfg.cfgfile);
 					System.out.println("Domanin Not Valid:" + (!line.getModid().equals(getFileTrueDisplayName(cfg.cfgfile)) ) );
@@ -394,7 +397,7 @@ public class DungeonMobs {
         ArrayList<DungeonMobEntry> list = getList(type);
         for (DungeonMobEntry mob :  list)
         {
-            if (entry.equals(mob))
+            if (entry.equals(mob) && mob.equals(entry))
                 return mob.itemWeight += rarity;
         }
         list.add(entry);

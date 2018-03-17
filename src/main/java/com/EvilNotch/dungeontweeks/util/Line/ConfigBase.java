@@ -181,7 +181,24 @@ public class ConfigBase {
      * returns in ConfigBase LineDynamicLogic.getLineFromString(...)
      */
     protected ILine getLine(String strline) {
+    	strline = removeComments(strline);
     	return LineDynamicLogic.getLineFromString(strline,this.lineSeperator,this.lineQuote,this.commentStart);
+	}
+    protected String removeComments(String strline) {
+		if(!strline.contains("" + this.commentStart))
+			return strline;//optimization
+		String str = "";
+		boolean insideQuote = false;
+		for(int i=0;i<strline.length();i++)
+		{
+			String s = strline.substring(i, i+1);
+			if(s.equals("" + this.lineQuote))
+				insideQuote = !insideQuote;//invert the boolean
+			if(!insideQuote && s.equals("" + this.commentStart))
+				break;//stop parsing if it's a comment that's not inside a quote
+			str += s;
+		}
+		return str;
 	}
 	protected String getWrapper(boolean head)
     {
@@ -391,10 +408,12 @@ public class ConfigBase {
         //make comments have nearest lines incase it later gets alphabetized
         if(this.enableComments)
             updateNearestCLines();
-        
+        boolean alphabitizeChecker = this.lines.equals(this.lineChecker);
         ArrayList<String> list = getStringLines();
         Collections.sort(list);
         this.setList(list, 0);
+        if(alphabitizeChecker)
+        	this.lineChecker = JavaUtil.copyArray(this.lines);//sync changes if and only if is the same list unmodified
         
         //re-organize comments to new locations
         if(this.enableComments)
@@ -454,12 +473,13 @@ public class ConfigBase {
     	updateConfig(alphabitize,false);
     }
     public void updateConfig(boolean alphabitize,boolean forceUpdate)
-    {
-        if(alphabitize)
-            this.alphabetize();
+    {   
+        //don't update for alphabetizate as it will screw up people using the cfg only do it if the config itself needs updating
         if(forceUpdate || !this.lines.equals(this.lineChecker))
         {
-        	System.out.print("CFG Updating:" + this.cfgfile);
+        	if(alphabitize)
+                this.alphabetize();
+        	System.out.print("CFG Updating:" + this.cfgfile + "\n");
         	this.updateConfig();
         }
     }

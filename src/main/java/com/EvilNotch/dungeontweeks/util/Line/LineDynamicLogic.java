@@ -115,10 +115,19 @@ public class LineDynamicLogic implements ILine{
     }
     public static boolean isPosibleDynamicLogic(String strline, char sep, char q)
     {
-    	String w = LineBase.toWhiteSpaced(strline);
+    	String w = removeNBT(LineBase.toWhiteSpaced(strline));
         boolean isLine = w.contains("" + sep) || w.contains("" + q);
         return isLine && strline.contains("\\|\\|") || isLine && strline.contains("||") || isLine && w.contains(",");
     }
+    public static String removeNBT(String whiteSpaced) {
+    	String str = whiteSpaced;
+    	while(str.contains("{"))
+    	{
+    		String nbt = str.substring(str.indexOf('{'), str.indexOf('}')+1);
+    		str = str.replace(nbt, "");
+    	}
+		return str;
+	}
     /**
      * Used for display print out all values regardless of null for toString
      */

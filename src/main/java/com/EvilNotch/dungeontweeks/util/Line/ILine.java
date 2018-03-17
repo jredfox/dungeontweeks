@@ -3,7 +3,7 @@ package com.EvilNotch.dungeontweeks.util.Line;
 import net.minecraft.util.ResourceLocation;
 
 public interface ILine {
-	public static final String lineLibraryVersion = "1.2";
+	public static final String lineLibraryVersion = "1.2.1";
 	public boolean equals(Object obj, boolean compareHead);
 	public String getString();
 	public ResourceLocation getModPath();

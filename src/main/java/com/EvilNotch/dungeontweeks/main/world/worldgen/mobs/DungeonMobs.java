@@ -71,7 +71,6 @@ public class DungeonMobs {
 		try{
 		Set<ResourceLocation> list = EntityList.getEntityNameList();
 		HashMap<File,ConfigBase> configs = new HashMap();
-		HashMap<ConfigBase,ArrayList<LineBase> > configChecks = new HashMap();
 		File dir_dungeon = new File(dir,"dungeon");
 		File dir_mineshaft = new File(dir,"mineshaft");
 		File dir_stronghold = new File(dir,"stronghold");
@@ -101,7 +100,6 @@ public class DungeonMobs {
 				
 				ConfigBase cfg = new ConfigBase(file, new ArrayList(),"DungeonMobs");
 				configs.put(file, cfg);
-				configChecks.put(cfg,JavaUtil.copyArray(cfg.lines) );
 			}
 			if(f.equals(dir_dungeon))
 			{
@@ -244,11 +242,6 @@ public class DungeonMobs {
 		while(it.hasNext())
 		{
 			ConfigBase cfg = it.next().getValue();
-			ArrayList<LineBase> initLines = configChecks.get(cfg);
-			
-			//optimized way of writing files if they have not been modified skip it config to always write all files
-			if(cfg.lines.equals(initLines) && Config.optimizedFileWriting)
-			    continue;
 			
 			ArrayList<Comment> strlist = new ArrayList();
             if(!Config.fancyConfig)
@@ -264,9 +257,7 @@ public class DungeonMobs {
             }
             
             cfg.setInit(strlist);
-			cfg.updateConfig(true);
-			if(Config.Debug)
-			    System.out.print("File Updated:" + cfg.cfgfile + "\n");
+			cfg.updateConfig(true,!Config.optimizedFileWriting);
 		}
 		
 		}catch(Exception ex){ex.printStackTrace();}
@@ -277,7 +268,8 @@ public class DungeonMobs {
 		
 	        ArrayList default_forge = new ArrayList();
 	        for(DungeonMobEntry entry : mob_dungeon)
-	            default_forge.add(new DungeonMob(entry.itemWeight,entry.type));
+	        	if(entry.nbt == null)
+	        		default_forge.add(new DungeonMob(entry.itemWeight,entry.type));
 	        
 	        ReflectionUtil.setObject(null, default_forge, DungeonHooks.class, "dungeonMobs");//empties forges list as it's no longer needed
 	}
@@ -315,7 +307,7 @@ public class DungeonMobs {
 				line = (LineItemStack)lineobj;
 			if(line == null || line.head <= 0)
 				continue;//skip invalid lines
-				list.add(new DungeonMobEntry(line.head,new ResourceLocation(line.modid + ":" + line.name),line.NBT) );	
+				list.add(new DungeonMobEntry(line.head,line.getModPath(),line.NBT) );	
 		}
 	}
 
@@ -358,7 +350,7 @@ public class DungeonMobs {
     		if(e != null)
     		{
     			if(e.list.size() > 0)
-    				return WeightedRandom.getRandomItem(rand, e.list );
+    				return WeightedRandom.getRandomItem(rand, e.list);
     		}
     	}
     	

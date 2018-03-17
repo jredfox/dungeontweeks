@@ -49,9 +49,9 @@ public class LineItemStack extends LineItemStackBase{
 		boolean isboolean = str.toLowerCase().contains("true") || str.toLowerCase().contains("false");
 		if(isboolean)
 		{
-			if(str.indexOf("true") == 0)
+			if(str.toLowerCase().indexOf("true") == 0)
 				str = "true";
-			else if(str.indexOf("false") == 0)
+			else if(str.toLowerCase().indexOf("false") == 0)
 				str = "false";
 			this.bhead = Boolean.parseBoolean(str);
 			this.hasbhead = true;
@@ -153,26 +153,6 @@ public class LineItemStack extends LineItemStackBase{
 			num = num.substring(0, num.length()-1);
 		return num;
 	}
-	@Override
-	public boolean equals(Object obj)
-	{
-		return super.equals(obj);
-	}
-	@Override
-	public boolean equals(Object obj,boolean compareHead)
-	{
-		if(!compareHead)
-			return this.equals(obj);
-		
-		if(!(obj instanceof LineItemStack))
-			return this.getHead() == null && super.equals(obj);
-		Object head = this.getHead();
-		Object otherhead = ((LineItemStack)obj).getHead();
-		if(head == null || otherhead == null)
-			return super.equals(obj) && head == null && otherhead == null;
-		
-		return super.equals(obj) && head.equals(otherhead);
-	}
 	
 	@Override
 	public String toString()
@@ -191,6 +171,7 @@ public class LineItemStack extends LineItemStackBase{
 	 * Returns one of the following[int,boolean,byte,short,long,float,double,String]
 	 * @return
 	 */
+	@Override
 	public Object getHead() 
 	{
 		if(this.hashead)

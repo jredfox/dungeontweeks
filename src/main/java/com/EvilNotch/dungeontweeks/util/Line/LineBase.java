@@ -5,7 +5,6 @@ import net.minecraft.util.ResourceLocation;
 
 public class LineBase implements ILine
 {
-	public static final String lineLibraryVersion = "1.109";
 	public String modid;
 	public String name;
 	protected String invalidParsingChars = "";
@@ -172,11 +171,18 @@ public class LineBase implements ILine
 	}
 	/**
 	 * if head != null should line compare head? Used for ConfigBase
-	 * @return
 	 */
+	@Override
 	public boolean equals(Object obj,boolean compareHead)
 	{
-		return this.equals(obj);
+		if(!(obj instanceof ILine) || !compareHead)
+			return this.equals(obj);
+		
+		Object head = ((ILine)obj).getHead();
+		if(this.getHead() == null)
+			return head == null && this.equals(obj);
+		
+		return this.getHead().equals(head) && this.equals(obj);
 	}
 	
 	@Override
@@ -228,7 +234,6 @@ public class LineBase implements ILine
 	{
 		return parseQuotes(s,index,"\"");
 	}
-	@Override
 	public ResourceLocation getModPath()
     {
 		String strname = "";
@@ -237,7 +242,6 @@ public class LineBase implements ILine
 			strname = "" + this.seperator + this.name;
 		return  new ResourceLocation(this.modid + strname);
     }
-
 	@Override
 	public String getModid() {
 		return this.modid;
@@ -246,6 +250,16 @@ public class LineBase implements ILine
 	@Override
 	public String getName() {
 		return this.name;
+	}
+
+	@Override
+	public ILine getLineBase() {
+		return this;
+	}
+
+	@Override
+	public Object getHead() {
+		return null;
 	}
 
 }

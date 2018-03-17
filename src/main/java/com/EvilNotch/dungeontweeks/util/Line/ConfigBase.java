@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
+import com.EvilNotch.dungeontweeks.main.Config;
+import com.EvilNotch.dungeontweeks.util.JavaUtil;
+
 
 public class ConfigBase {
     
@@ -30,9 +33,8 @@ public class ConfigBase {
     protected char headerSlash = '/';
     protected char lineSeperator = ':';
     protected char lineQuote = '"';
+    protected ArrayList<ILine> lineChecker;
     public boolean enableComments = true;
-    //version read only
-    public static final String version = "1.1-build-109";
     
     public ConfigBase(File file)
     {
@@ -173,7 +175,7 @@ public class ConfigBase {
                 index++;
             }
         } catch (Exception e) {e.printStackTrace();}
-        
+        this.lineChecker = JavaUtil.copyArray(this.lines);
     }
     
     protected String getWrapper(boolean head)
@@ -309,15 +311,19 @@ public class ConfigBase {
      */
     public void deleteLine(ILine line)
     {
-    	deleteILine(line,false);
+    	deleteILine(line,false,false,true);
     }
-    public void deleteILine(ILine line, boolean deleteAll)
+    public void deleteILine(ILine line, boolean deleteAll,boolean compareHead,boolean compareBase)
     {
+    	if(compareBase)
+    		line = line.getLineBase();
         Iterator<ILine> it = this.lines.iterator();
         while(it.hasNext())
         {
             ILine compare = it.next();
-            if(line.equals(compare,false))
+            if(compareBase)
+            	compare = compare.getLineBase();
+            if(isLineEqual(line,compare,compareHead) )
             {
                 it.remove();
                 if(!deleteAll)
@@ -325,14 +331,31 @@ public class ConfigBase {
             }
         }
     }
-    /**
+    public boolean isLineEqual(ILine line, ILine compare, boolean compareHead) {
+		return line.equals(compare,compareHead) && compare.equals(line, compareHead);
+	}
+	/**
      * Delete all instances of list of lines
      * @param list
      */
     public void deleteAllLines(ArrayList<ILine> list)
     {
         for(ILine line : list)
-        	deleteILine(line,true);
+        	deleteILine(line,true,false,true);
+    }
+    public boolean containsLine(ILine line,boolean compareHead,boolean compareBase)
+    {
+    	if(compareBase)
+    		line = line.getLineBase();
+    	for(ILine compare : this.lines)
+    	{
+    		if(compareBase)
+    			compare = compare.getLineBase();
+    		//let both lines have a rejection because line base isn't going to check for additions of lineitemstackbase etc...
+    		if(isLineEqual(line,compare,compareHead))
+                return true;//makes it compare the equals at the base level
+    	}
+        return false;
     }
     /**
      * Does this config contain this line?
@@ -341,10 +364,7 @@ public class ConfigBase {
      */
     public boolean containsLine(ILine line)
     {
-        for(ILine compare : this.lines)
-            if(line.equals(compare,false))
-                return true;
-        return false;
+        return containsLine(line,false,true);
     }
     
     /**
@@ -426,9 +446,18 @@ public class ConfigBase {
     }
     public void updateConfig(boolean alphabitize)
     {
-        if(alphabitize)
-            this.alphabetize();
-        this.updateConfig();
+    	updateConfig(alphabitize,false);
+    }
+    public void updateConfig(boolean alphabitize,boolean forceUpdate)
+    {
+        if(forceUpdate || !this.lines.equals(this.lineChecker))
+        {
+        	//ignore alphabetical order when comparing or almost always will update the config
+        	if(alphabitize)
+        		this.alphabetize();
+        	System.out.print("CFG Updating:"  + this.cfgfile + "\n");
+        	this.updateConfig();
+        }
     }
     /**
      * organize comments by numeric order

@@ -191,17 +191,38 @@ public class LineDynamicLogic implements ILine{
 	}
 	@Override
 	public String getModid() {
-		LineBase line = getFirstLine();
+		ILine line = getLineBase();
 		if(line != null)
-			return line.modid;
+			return line.getModid();
 		return null;
 	}
 	@Override
 	public String getName() {
-		LineBase line = getFirstLine();
+		ILine line = getLineBase();
 		if(line != null)
-			return line.name;
+			return line.getName();
 		return null;
+	}
+	@Override
+	public ILine getLineBase() {
+		return getFirstLine();
+	}
+	@Override
+	public Object getHead() {
+		return this.getLineBase().getHead();
+	}
+	
+	public ArrayList<ResourceLocation> getResourceLocations(int position,boolean grabStringHead)
+	{
+		ArrayList<LineBase> lines = this.lineLogic.get(position);
+		ArrayList<ResourceLocation> list = new ArrayList();
+		for(LineBase line : lines)
+		{
+			list.add(line.getModPath());
+			if(line.getHead() instanceof String && grabStringHead)
+				list.add(new ResourceLocation(line.getHead().toString()));
+		}
+		return list;
 	}
 	
 

@@ -397,7 +397,7 @@ public class DungeonMobs {
         ArrayList<DungeonMobEntry> list = getList(type);
         for (DungeonMobEntry mob :  list)
         {
-            if (entry.equals(mob) && mob.equals(entry))
+            if (entry.equals(mob))
                 return mob.itemWeight += rarity;
         }
         list.add(entry);

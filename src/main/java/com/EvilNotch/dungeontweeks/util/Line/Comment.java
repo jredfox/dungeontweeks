@@ -1,6 +1,8 @@
 package com.EvilNotch.dungeontweeks.util.Line;
 
-public class Comment {
+import com.EvilNotch.dungeontweeks.util.ICopy;
+
+public class Comment implements ICopy{
     public int lineIndex = -1;
     public String comment = null;
     public ILine nearestLine = null;
@@ -25,10 +27,16 @@ public class Comment {
     }
     public Comment(int index, String comment,boolean attatched,char c)
     {
+    	this(index,comment,attatched,c,null);
+    }
+    public Comment(int index, String comment,boolean attatched,char c,ILine nearLine)
+    {
         this.start = c;
         this.lineIndex = index;
         this.comment = comment.substring(comment.indexOf(c)+1, comment.length() );
         this.isAttactched = attatched;
+        if(nearLine != null)
+        	this.nearestLine = nearLine;//in case line changes keep memory location also more optimized
     }
     
     public boolean equals(Object obj,boolean compareIndex){
@@ -50,5 +58,9 @@ public class Comment {
     {
         return "" + this.start + this.comment + ":" + this.lineIndex;
     }
+	@Override
+	public ICopy copy() {
+		return new Comment(this.lineIndex,this.comment,this.isAttactched,this.start,this.nearestLine);
+	}
 
 }

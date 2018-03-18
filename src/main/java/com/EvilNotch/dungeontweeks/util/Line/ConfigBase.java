@@ -6,13 +6,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Scanner;
 import java.util.Set;
 
+import com.EvilNotch.dungeontweeks.util.ICopy;
 import com.EvilNotch.dungeontweeks.util.JavaUtil;
 
 
@@ -32,7 +31,7 @@ public class ConfigBase {
     protected char headerSlash = '/';
     protected char lineSeperator = ':';
     protected char lineQuote = '"';
-    protected ArrayList<ILine> lineChecker;
+    protected ArrayList<String> lineChecker;
     protected ArrayList<Comment> initChecker;
     protected ArrayList<Comment> commentChecker;
     public boolean enableComments = true;
@@ -57,7 +56,7 @@ public class ConfigBase {
     public ConfigBase(File file, ArrayList<Comment> initComments, String header,char commentStart,char lhwrap,char rhwrap,char hslash,boolean comments,char lsep,char lquote)
     {
         this.cfgfile = file;
-        this.lines = new ArrayList();
+        this.lines = new ArrayList<>();
         for(Comment c : initComments)
             c.start = commentStart;//fix comments
         this.init = initComments;
@@ -79,7 +78,7 @@ public class ConfigBase {
                 
             } catch (IOException e) {e.printStackTrace();}
             
-            this.writeFile(new ArrayList());
+            this.writeFile(new ArrayList<>());
         }
         this.readFile();//cache arrays
     }
@@ -106,7 +105,8 @@ public class ConfigBase {
             out.close();
         } catch (Exception e) {e.printStackTrace();}
     }
-    public void readFile()
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public void readFile()
     {
         this.lines = new ArrayList();
         this.comments = new ArrayList();
@@ -177,11 +177,11 @@ public class ConfigBase {
                 index++;
             }
         } catch (Exception e) {e.printStackTrace();}
-        this.lineChecker = JavaUtil.copyArray(this.lines);
+        this.lineChecker = getStringLines();
         if(this.enableComments)
         {
-        	this.initChecker = JavaUtil.copyArray(this.init);
-        	this.commentChecker =JavaUtil.copyArray(this.comments);
+        	this.initChecker = JavaUtil.copyArrayAndObjects((ArrayList)this.init);
+        	this.commentChecker = JavaUtil.copyArrayAndObjects((ArrayList)this.comments);
         }
         else{
         	this.initChecker = new ArrayList();
@@ -421,19 +421,21 @@ public class ConfigBase {
     /**
      * Re-Orders File to be alphabetized
      */
-    public void alphabetize()
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public void alphabetize()
     {
         //make comments have nearest lines incase it later gets alphabetized
         if(this.enableComments)
             updateNearestCLines();
-        boolean alphabitizeChecker = this.lines.equals(this.lineChecker);
+        ArrayList<String> linlist = this.getStringLines();
+        boolean alphabitizeChecker = linlist.equals(this.lineChecker);
         boolean alphaComments = this.comments.equals(this.commentChecker);
         
         ArrayList<String> list = getStringLines();
         Collections.sort(list);
         this.setList(list, 0);
         if(alphabitizeChecker)
-        	this.lineChecker = JavaUtil.copyArray(this.lines);//sync changes if and only if is the same list unmodified
+        	this.lineChecker = linlist;//sync changes if and only if is the same list unmodified
         
         //re-organize comments to new locations and sync checkers for updating the config
         if(this.enableComments)
@@ -452,7 +454,7 @@ public class ConfigBase {
         		}
         	}
         	if(alphaComments)
-        		this.commentChecker = JavaUtil.copyArray(this.comments);//sync index change since it's compared for equals()
+        		this.commentChecker = JavaUtil.copyArrayAndObjects((ArrayList)this.comments);//sync index change since it's compared for equals()
        	}
     }
     
@@ -506,7 +508,7 @@ public class ConfigBase {
     public void updateConfig(boolean alphabitize,boolean forceUpdate,boolean msg)
     {   
         //don't update for alphabetizate as it will screw up people using the cfg only do it if the config itself needs updating
-        if(forceUpdate || !this.lines.equals(this.lineChecker) || this.enableComments && !this.comments.equals(this.commentChecker) || this.enableComments && !this.init.equals(this.initChecker))
+        if(forceUpdate || !this.getStringLines().equals(this.lineChecker) || this.enableComments && !this.comments.equals(this.commentChecker) || this.enableComments && !this.init.equals(this.initChecker))
         {
         	if(alphabitize)
                 this.alphabetize();
@@ -543,7 +545,7 @@ public class ConfigBase {
         }
         this.comments = com;
     	if(alphaComment)
-    		this.commentChecker = JavaUtil.copyArray(this.comments);//sync re-organization
+    		this.commentChecker = JavaUtil.copyArrayAndObjects((ArrayList)this.comments);//sync re-organization
     }
     protected ArrayList<String> getStringLines() {
         ArrayList<String> list = new ArrayList();

@@ -1,5 +1,9 @@
 package com.EvilNotch.dungeontweeks.util.Line;
 
+import java.lang.reflect.Constructor;
+
+import com.EvilNotch.dungeontweeks.util.ICopy;
+
 import net.minecraft.util.ResourceLocation;
 
 public class LineBase implements ILine
@@ -258,6 +262,17 @@ public class LineBase implements ILine
 
 	@Override
 	public Object getHead() {
+		return null;
+	}
+
+	@Override
+	public ICopy copy() {
+		try {
+			Constructor constructor = this.getClass().getConstructor(String.class,char.class,char.class,char[].class);
+			return (ICopy)constructor.newInstance(this.getString(),this.seperator,this.quote,this.invalidParsingChars.toCharArray());
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 

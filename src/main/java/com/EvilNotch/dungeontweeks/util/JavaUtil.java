@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -348,11 +349,19 @@ public class JavaUtil {
 		list[1] = second;
 		return list;
 	}
-	public static ArrayList copyArray(ArrayList li) 
+	public static ArrayList copyArrays(ArrayList li) 
 	{
 		ArrayList list = new ArrayList();
-		for(Object obj : li)
-			list.add(obj);
+		for(Object object : li)
+			list.add(object);
+		return list;
+	}
+	public static ArrayList<ICopy> copyArrayAndObjects(ArrayList<ICopy> listings) 
+	{
+		ArrayList<ICopy> li = (ArrayList<ICopy>) listings;
+		ArrayList<ICopy> list = new ArrayList<ICopy>();
+		for(ICopy object : li)
+			list.add((ICopy)object.copy());
 		return list;
 	}
 	public static String reverseString(String s) 

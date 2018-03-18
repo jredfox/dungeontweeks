@@ -1,8 +1,10 @@
 package com.EvilNotch.dungeontweeks.util.Line;
 
+import com.EvilNotch.dungeontweeks.util.ICopy;
+
 import net.minecraft.util.ResourceLocation;
 
-public interface ILine {
+public interface ILine extends ICopy{
 	public static final String lineLibraryVersion = "1.2.2";
 	public boolean equals(Object obj, boolean compareHead);
 	public String getString();

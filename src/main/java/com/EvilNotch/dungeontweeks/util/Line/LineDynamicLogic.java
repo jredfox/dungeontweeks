@@ -1,12 +1,18 @@
 package com.EvilNotch.dungeontweeks.util.Line;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import com.EvilNotch.dungeontweeks.util.ICopy;
 
 import net.minecraft.util.ResourceLocation;
 
 public class LineDynamicLogic implements ILine{
     public HashMap<Integer,ArrayList<ILine> > lineLogic = new HashMap();
+    protected char seperator;
+    protected char quote;
+    protected char[] invalid;
     
     public LineDynamicLogic(String s)
     {
@@ -18,6 +24,9 @@ public class LineDynamicLogic implements ILine{
      */
     public LineDynamicLogic(String s,char sep,char q,char...invalid)
     {
+    	this.seperator = sep;
+    	this.quote = q;
+    	this.invalid = invalid;
         this.lineLogic = new HashMap();//Initiates the array
         parse(s,sep,q,invalid);
     }
@@ -270,6 +279,16 @@ public class LineDynamicLogic implements ILine{
 				list.add(new ResourceLocation(line.getHead().toString()));
 		}
 		return list;
+	}
+	@Override
+	public ICopy copy() {
+		try {
+			Constructor constructor = this.getClass().getConstructor(String.class,char.class,char.class,char[].class);
+			return (ICopy)constructor.newInstance(this.getString(),this.seperator,this.quote,this.invalid);
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 

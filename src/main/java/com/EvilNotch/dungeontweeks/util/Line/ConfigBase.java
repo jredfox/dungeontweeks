@@ -31,7 +31,7 @@ public class ConfigBase {
     protected char headerSlash = '/';
     protected char lineSeperator = ':';
     protected char lineQuote = '"';
-    protected ArrayList<String> lineChecker;
+    protected ArrayList<String> lineChecker;//optimized to only keep it as string and not reparse it
     protected ArrayList<Comment> initChecker;
     protected ArrayList<Comment> commentChecker;
     public boolean enableComments = true;

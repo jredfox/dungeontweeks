@@ -33,6 +33,8 @@ public class ConfigBase {
     protected char lineSeperator = ':';
     protected char lineQuote = '"';
     protected ArrayList<ILine> lineChecker;
+    protected ArrayList<Comment> initChecker;
+    protected ArrayList<Comment> commentChecker;
     public boolean enableComments = true;
     
     public ConfigBase(File file)
@@ -131,16 +133,17 @@ public class ConfigBase {
                     headerIndex = count;
                     break;
                 }
-                if(LineDynamicLogic.isStringPossibleLine(whitespaced, "" + this.commentStart,this.lineSeperator,this.lineQuote))
+                if(isStringPossibleLine(whitespaced, "" + this.commentStart,this.lineSeperator,this.lineQuote))
                 	break;//if is line stop trying to parse the header index
                 count++;
             }
             for(String strline : filelist)
             {
                 String whitespaced = LineBase.toWhiteSpaced(strline);
+//                System.out.println(whitespaced);
                 initPassed = actualIndex > headerIndex;
                 actualIndex++;//since only used for boolean at beginging no need to copy ten other places
-                if(!LineDynamicLogic.isStringPossibleLine(strline,"" + this.commentStart,wrapperHead,wrapperTail,this.lineSeperator,this.lineQuote) )
+                if(!isStringPossibleLine(strline,"" + this.commentStart,wrapperHead,wrapperTail,this.lineSeperator,this.lineQuote) )
                 {
                     if(!enableComments || whitespaced.equals(""))
                         continue;
@@ -175,8 +178,23 @@ public class ConfigBase {
             }
         } catch (Exception e) {e.printStackTrace();}
         this.lineChecker = JavaUtil.copyArray(this.lines);
+        if(this.enableComments)
+        {
+        	this.initChecker = JavaUtil.copyArray(this.init);
+        	this.commentChecker =JavaUtil.copyArray(this.comments);
+        }
+        else{
+        	this.initChecker = new ArrayList();
+        	this.commentChecker = new ArrayList();
+        }
     }
-    /**
+    protected boolean isStringPossibleLine(String strline, String comment, String wrapperH, String wrapperT,char sep, char q) {
+		return LineDynamicLogic.isStringPossibleLine(strline, comment, wrapperH, wrapperT, sep, q);
+	}
+	protected boolean isStringPossibleLine(String strline, String comment, char sep, char q) {
+		return LineDynamicLogic.isStringPossibleLine(strline, comment, sep, q);
+	}
+	/**
      * Object oriented so people using this library can override with adding new lines easily
      * returns in ConfigBase LineDynamicLogic.getLineFromString(...)
      */
@@ -409,27 +427,33 @@ public class ConfigBase {
         if(this.enableComments)
             updateNearestCLines();
         boolean alphabitizeChecker = this.lines.equals(this.lineChecker);
+        boolean alphaComments = this.comments.equals(this.commentChecker);
+        
         ArrayList<String> list = getStringLines();
         Collections.sort(list);
         this.setList(list, 0);
         if(alphabitizeChecker)
         	this.lineChecker = JavaUtil.copyArray(this.lines);//sync changes if and only if is the same list unmodified
         
-        //re-organize comments to new locations
+        //re-organize comments to new locations and sync checkers for updating the config
         if(this.enableComments)
-        for(Comment c : this.comments)
         {
-            int index = 0;
-            for(ILine line : this.lines)
-            {
-                if(line.equals(c.nearestLine,false) && line != null)
-                {
-                    c.lineIndex = index;
-                    break;
-                }
-                index++;
-            }
-        }
+        	for(Comment c : this.comments)
+        	{
+        		int index = 0;
+        		for(ILine line : this.lines)
+        		{
+        			if(line.equals(c.nearestLine,false) && line != null)
+        			{
+        				c.lineIndex = index;
+        				break;
+        			}
+        			index++;
+        		}
+        	}
+        	if(alphaComments)
+        		this.commentChecker = JavaUtil.copyArray(this.comments);//sync index change since it's compared for equals()
+       	}
     }
     
     protected void updateNearestCLines() {
@@ -473,13 +497,21 @@ public class ConfigBase {
     	updateConfig(alphabitize,false);
     }
     public void updateConfig(boolean alphabitize,boolean forceUpdate)
+    {
+    	updateConfig(alphabitize,false,false);
+    }
+    /**
+     * update if and only if data has been modified in memory
+     */
+    public void updateConfig(boolean alphabitize,boolean forceUpdate,boolean msg)
     {   
         //don't update for alphabetizate as it will screw up people using the cfg only do it if the config itself needs updating
-        if(forceUpdate || !this.lines.equals(this.lineChecker))
+        if(forceUpdate || !this.lines.equals(this.lineChecker) || this.enableComments && !this.comments.equals(this.commentChecker) || this.enableComments && !this.init.equals(this.initChecker))
         {
         	if(alphabitize)
                 this.alphabetize();
-        	System.out.print("CFG Updating:" + this.cfgfile + "\n");
+        	if(msg)
+        		System.out.print("CFG Updating:" + this.cfgfile + "\n");
         	this.updateConfig();
         }
     }
@@ -487,6 +519,7 @@ public class ConfigBase {
      * organize comments by numeric order
      */
     public void reorganizeComments() {
+        boolean alphaComment = this.comments.equals(this.commentChecker);
         ArrayList<Integer> ints = new ArrayList();
         for(Comment c : this.comments)
             ints.add(c.lineIndex);
@@ -509,6 +542,8 @@ public class ConfigBase {
             }
         }
         this.comments = com;
+    	if(alphaComment)
+    		this.commentChecker = JavaUtil.copyArray(this.comments);//sync re-organization
     }
     protected ArrayList<String> getStringLines() {
         ArrayList<String> list = new ArrayList();
@@ -516,6 +551,27 @@ public class ConfigBase {
             list.add(line.getString() );
         return list;
     }
+    /**
+     * Ignores the index parameter
+     */
+    public boolean hasHeaderComment(Comment comment){
+    	for(Comment c : this.init)
+    		if(c.equals(comment,false))
+    			return true;
+    	return false;
+    }
+    /**
+     * Ignores the index parameter
+     */
+    public boolean hasComment(Comment comment){
+    	for(Comment c : this.comments)
+    		if(c.equals(comment,false))
+    			return true;
+    	return false;
+    }
+    
+    public ArrayList<Comment> getComments(){return this.comments;}
+    public ArrayList<Comment> getInit(){return this.init;}
 
     @Override
     public String toString()
@@ -527,6 +583,5 @@ public class ConfigBase {
             s += line.toString() + "\n";
         return s + "</ConfigBase>\n";
     }
-    public ArrayList<Comment> getInit(){return this.init;}
     
 }

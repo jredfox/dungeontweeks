@@ -22,15 +22,7 @@ public class LineDynamicLogic implements ILine{
         parse(s,sep,q,invalid);
     }
     @Override
-	public void parse(String s, char sep, char q, char...invalid) {
-        seperateLines(s,sep,q,invalid);//Separates lines into parts based on || being each index
-	}
-
-    /**
-     * Breaks lines up based on && || logic where each index in the array represents one line{Current use is only for silk spawners}
-     */
-    protected void seperateLines(String str,char sep, char q,char...invalid) 
-    {
+	public void parse(String str, char sep, char q, char...invalid) {
         if(str.contains("\\|\\|") || str.contains("||"))
         {
             String[] parts = str.split("\\|\\|"); // split from the value of ||
@@ -43,9 +35,10 @@ public class LineDynamicLogic implements ILine{
         }
         else
            populateLines(str,0,sep,q,invalid);
-    }
+	}
+
     protected void populateLines(String s, int index,char sep, char q, char...invalid) {
-        String[] subs = s.split(",");
+        String[] subs = getSubs(s);
         ArrayList<ILine> lines = new ArrayList();
         for(String sub : subs)
         {
@@ -55,6 +48,29 @@ public class LineDynamicLogic implements ILine{
         this.lineLogic.put(index,lines);
 	}
     /**
+     * filters out all , with the copyright symbol if it's not in nbt
+     */
+    protected String[] getSubs(String line) {
+    	String str = "";
+    	for(int i=0;i<line.length();i++)
+    	{
+    		String ch = line.substring(i, i+1);
+    		//ignore nbt
+    		if(ch.equals("{"))
+    		{
+    			int rindex = getIndexRBracket(i, line);
+    			String nbt = line.substring(i, rindex+1);
+    			str += nbt;
+    			i = rindex;
+    			continue;//since using continue forces and index++ editing the variable it is index desired-1
+    		}
+    		if(ch.equals(","))
+    			ch = "\u00A9";
+    		str += ch;
+    	}
+		return str.split("\u00A9");
+	}
+	/**
      * Object oriented so people using this library can override with adding new lines easily
      */
 	protected ILine getLine(String sub, char sep, char q, char...invalid) {
@@ -119,16 +135,33 @@ public class LineDynamicLogic implements ILine{
         boolean isLine = w.contains("" + sep) || w.contains("" + q);
         return isLine && strline.contains("\\|\\|") || isLine && strline.contains("||") || isLine && w.contains(",");
     }
-    public static String removeNBT(String whiteSpaced) {
-    	String str = whiteSpaced;
-    	while(str.contains("{"))
-    	{
-    		String nbt = str.substring(str.indexOf('{'), str.indexOf('}')+1);
-    		str = str.replace(nbt, "");
-    	}
+    public static String removeNBT(String line) {
+    	if(!line.contains("{"))
+    		return line;
+    	String str = line;
+    	//isnt't looped currently since if more then one nbt then it has to be a possible line dynamic logic
+  		int lindex = str.indexOf('{');
+   		int rindex = getIndexRBracket(lindex,str);
+   		String nbt = str.substring(lindex, rindex+1);
+   		str = str.replace(nbt, "");
 		return str;
 	}
-    /**
+    protected static int getIndexRBracket(int lindex,String str) {
+    	int lb = 0;
+    	for(int i=lindex;i<str.length();i++)
+    	{
+    		String ch = str.substring(i, i+1);
+    		if(ch.equals("{"))
+    			lb++;
+    		else if(ch.equals("}"))
+    			lb--;
+    		str += ch;
+    		if(lb == 0)
+    			return i;
+    	}
+		return -1;
+	}
+	/**
      * Used for display print out all values regardless of null for toString
      */
     public String getString()

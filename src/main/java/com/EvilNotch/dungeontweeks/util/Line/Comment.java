@@ -9,11 +9,11 @@ public class Comment {
     
     public Comment(String comment)
     {
-        this(-1,comment);
+        this(0,comment);
     }
     public Comment(String comment,char c)
     {
-        this(-1,comment,false,c);
+        this(0,comment,false,c);
     }
     public Comment(int index, String comment)
     {
@@ -30,12 +30,19 @@ public class Comment {
         this.comment = comment.substring(comment.indexOf(c)+1, comment.length() );
         this.isAttactched = attatched;
     }
+    
+    public boolean equals(Object obj,boolean compareIndex){
+    	 if(!(obj instanceof Comment))
+             return false;
+         Comment c = (Comment)obj;
+         boolean index = true;
+         if(compareIndex)
+        	 index = this.lineIndex == c.lineIndex;
+         return index && this.comment.equals(c.comment) && this.start == c.start && this.isAttactched == c.isAttactched;
+    }
     @Override
     public boolean equals(Object obj){
-        if(!(obj instanceof Comment))
-            return false;
-        Comment c = (Comment)obj;
-        return this.lineIndex == c.lineIndex && this.comment.equals(c.comment) && this.start == c.start && this.isAttactched == c.isAttactched;
+       return this.equals(obj, true);
     }
     
     @Override

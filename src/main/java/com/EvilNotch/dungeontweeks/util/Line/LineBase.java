@@ -2,7 +2,6 @@ package com.EvilNotch.dungeontweeks.util.Line;
 
 import net.minecraft.util.ResourceLocation;
 
-
 public class LineBase implements ILine
 {
 	public String modid;

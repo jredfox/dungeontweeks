@@ -260,7 +260,7 @@ public class DungeonMobs {
             }
             
             cfg.setInit(strlist);
-			cfg.updateConfig(true,!Config.optimizedFileWriting);
+			cfg.updateConfig(true,!Config.optimizedFileWriting,true);
 		}
 		
 		}catch(Exception ex){ex.printStackTrace();}

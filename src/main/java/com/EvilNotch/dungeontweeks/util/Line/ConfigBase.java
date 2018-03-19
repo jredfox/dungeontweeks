@@ -21,6 +21,7 @@ public class ConfigBase {
     public final File cfgfile;
     public String header = "";
     public boolean first_launch = false;
+    public boolean enableComments = true;
     
     //comments and wrappers
     protected ArrayList<Comment> init;
@@ -34,7 +35,6 @@ public class ConfigBase {
     protected ArrayList<String> lineChecker;//optimized to only keep it as string and not reparse it
     protected ArrayList<Comment> initChecker;
     protected ArrayList<Comment> commentChecker;
-    public boolean enableComments = true;
     
     public ConfigBase(File file)
     {
@@ -82,7 +82,6 @@ public class ConfigBase {
         }
         this.readFile();//cache arrays
     }
-    public void setInit(ArrayList<Comment> list){this.init = list;}
 
     public void writeFile(ArrayList<String> list) 
     {
@@ -110,6 +109,7 @@ public class ConfigBase {
     {
         this.lines = new ArrayList();
         this.comments = new ArrayList();
+        this.init = new ArrayList();
         
         try {
             List<String> filelist = Files.readAllLines(this.cfgfile.toPath());
@@ -120,7 +120,6 @@ public class ConfigBase {
             int actualIndex = 0;
             boolean initPassed = false;
             
-            int initSize = this.init.size();
             int headerIndex = -1;
             
             //scan for header
@@ -140,13 +139,12 @@ public class ConfigBase {
             for(String strline : filelist)
             {
                 String whitespaced = LineBase.toWhiteSpaced(strline);
-//                System.out.println(whitespaced);
+                if(whitespaced.equals(""))
+                	continue;//optimization
                 initPassed = actualIndex > headerIndex;
                 actualIndex++;//since only used for boolean at beginging no need to copy ten other places
                 if(!isStringPossibleLine(strline,"" + this.commentStart,wrapperHead,wrapperTail,this.lineSeperator,this.lineQuote) )
                 {
-                    if(!enableComments || whitespaced.equals(""))
-                        continue;
                     //comment handling
                     if(whitespaced.indexOf(this.commentStart) == 0)
                     {
@@ -155,7 +153,7 @@ public class ConfigBase {
                         if(!initPassed)
                         {
                         	Comment initcomment = new Comment(strline,this.commentStart);
-                        	if(!this.init.contains(initcomment))
+                        	if(!this.hasHeaderComment(initcomment))
                         		this.init.add(initcomment);
                         }
                         cindex++;
@@ -166,7 +164,7 @@ public class ConfigBase {
                 ILine line = this.getLine(strline);
                 lines.add(line);
                 //scan for attached comments on lines
-                if(enableComments)
+                if(this.enableComments)
                 if(strline.contains("" + this.commentStart))
                 {
                     int hIndex = strline.indexOf(this.commentStart);
@@ -189,9 +187,13 @@ public class ConfigBase {
         }
     }
     protected boolean isStringPossibleLine(String strline, String comment, String wrapperH, String wrapperT,char sep, char q) {
+    	 if(!this.enableComments)
+             return false;
 		return LineDynamicLogic.isStringPossibleLine(strline, comment, wrapperH, wrapperT, sep, q);
 	}
 	protected boolean isStringPossibleLine(String strline, String comment, char sep, char q) {
+		 if(!this.enableComments)
+			 return false;
 		return LineDynamicLogic.isStringPossibleLine(strline, comment, sep, q);
 	}
 	/**
@@ -277,8 +279,7 @@ public class ConfigBase {
     public void addLineList(ArrayList<ILine> list)
     {
         for(ILine line : list)
-            if(!this.containsLine(line))
-                this.lines.add(line);
+            addLine(line);
     }
     
     /**
@@ -287,10 +288,8 @@ public class ConfigBase {
     public void addLineList(ArrayList<ILine> list, int index)
     {
         for(ILine line : list)
-            if(!this.containsLine(line))
-                this.lines.add(index++,line);
+        	addLine(line,index++);
     }
-    
     
     /**
      * Appends Line To end of file
@@ -431,7 +430,7 @@ public class ConfigBase {
         boolean alphabitizeChecker = linlist.equals(this.lineChecker);
         boolean alphaComments = this.comments.equals(this.commentChecker) && this.enableComments;
         
-        ArrayList<String> list = getStringLines();
+        ArrayList<String> list = this.getStringLines();
         Collections.sort(list);
         this.setList(list, 0);
         if(alphabitizeChecker)
@@ -582,6 +581,7 @@ public class ConfigBase {
     
     public ArrayList<Comment> getComments(){return this.comments;}
     public ArrayList<Comment> getInit(){return this.init;}
+    public void setInit(ArrayList<Comment> list){this.init = list;}
 
     @Override
     public String toString()

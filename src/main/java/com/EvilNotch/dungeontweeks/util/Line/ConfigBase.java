@@ -490,17 +490,15 @@ public class ConfigBase {
               }
            }
            catch(Exception e){e.printStackTrace();}
-        }
-        this.lineChecker = JavaUtil.copyArrays(list);//since is immutable don't worry about them getting modified
-        if(this.enableComments)
-        {
-        	this.initChecker = JavaUtil.copyArrayAndObjects((ArrayList)this.init);
-        	this.commentChecker = JavaUtil.copyArrayAndObjects((ArrayList)this.comments);
+          
+           this.initChecker = JavaUtil.copyArrayAndObjects((ArrayList)this.init);
+           this.commentChecker = JavaUtil.copyArrayAndObjects((ArrayList)this.comments);
         }
         else{
         	this.initChecker.clear();
         	this.commentChecker.clear();//not supported if not enabled
         }
+        this.lineChecker = JavaUtil.copyArrays(list);//since is immutable don't worry about them getting modified
         
         this.writeFile(list);
     }
@@ -510,7 +508,7 @@ public class ConfigBase {
     }
     public void updateConfig(boolean alphabitize,boolean forceUpdate)
     {
-    	updateConfig(alphabitize,false,false);
+    	updateConfig(alphabitize,forceUpdate,false);
     }
     /**
      * update if and only if data has been modified in memory

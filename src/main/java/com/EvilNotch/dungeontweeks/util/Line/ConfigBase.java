@@ -429,7 +429,7 @@ public class ConfigBase {
             updateNearestCLines();
         ArrayList<String> linlist = this.getStringLines();
         boolean alphabitizeChecker = linlist.equals(this.lineChecker);
-        boolean alphaComments = this.comments.equals(this.commentChecker);
+        boolean alphaComments = this.comments.equals(this.commentChecker) && this.enableComments;
         
         ArrayList<String> list = getStringLines();
         Collections.sort(list);
@@ -491,6 +491,16 @@ public class ConfigBase {
            }
            catch(Exception e){e.printStackTrace();}
         }
+        this.lineChecker = JavaUtil.copyArrays(list);//since is immutable don't worry about them getting modified
+        if(this.enableComments)
+        {
+        	this.initChecker = JavaUtil.copyArrayAndObjects((ArrayList)this.init);
+        	this.commentChecker = JavaUtil.copyArrayAndObjects((ArrayList)this.comments);
+        }
+        else{
+        	this.initChecker.clear();
+        	this.commentChecker.clear();//not supported if not enabled
+        }
         
         this.writeFile(list);
     }
@@ -521,7 +531,7 @@ public class ConfigBase {
      * organize comments by numeric order
      */
     public void reorganizeComments() {
-        boolean alphaComment = this.comments.equals(this.commentChecker);
+        boolean alphaComment = this.comments.equals(this.commentChecker) && this.enableComments;
         ArrayList<Integer> ints = new ArrayList();
         for(Comment c : this.comments)
             ints.add(c.lineIndex);

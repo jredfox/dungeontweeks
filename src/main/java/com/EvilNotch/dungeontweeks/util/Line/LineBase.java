@@ -74,7 +74,7 @@ public class LineBase implements ILine
 			compare = s.split("=")[0];//ensures it is to the left of the = sign
 		
 		String strid = null;
-		if(compare.contains("" + this.quote ))
+		if(containsQuote(s))
 		{
 			strid = parseQuotes(compare,0,"" + this.quote);
 			return getParts(strid, "" + this.seperator);
@@ -83,6 +83,18 @@ public class LineBase implements ILine
 			legacyParsed = true;
 			return getParts(parseLoosly(compare),"" + this.seperator);//old format supports no spacing however is easy to edit and create
 		}
+	}
+
+	protected boolean containsQuote(String s) {
+		for(int i=0;i<s.length();i++)
+		{
+			String chars = s.substring(i, i+1);
+			if(invalidParsingChars.contains(chars))
+				return false;
+			if(chars.equals("" + this.quote))
+				return true;
+		}
+		return false;
 	}
 
 	public String parseLoosly(String s) {
@@ -198,10 +210,21 @@ public class LineBase implements ILine
 	 * Gets lines string for configuration files overridden in LineItemStackBase
 	 * @return
 	 */
+	@Override
 	public String getString()
 	{
 	    String quote = this.legacyParsed ? "" : "" + this.quote;
 		return quote + getModPath().toString() + quote;
+	}
+	@Override
+	public String getComparible() {
+		String str = this.getString();
+		if(!this.legacyParsed)
+		{
+			str = str.replaceFirst("" + this.quote, "");
+			str = str.replaceFirst("" + this.quote, "");
+		}
+		return str;
 	}
 	public static boolean isDynamicLogic(String s)
 	{
@@ -264,7 +287,6 @@ public class LineBase implements ILine
 	public Object getHead() {
 		return null;
 	}
-
 	@Override
 	public ICopy copy() {
 		try {
@@ -274,6 +296,11 @@ public class LineBase implements ILine
 			e.printStackTrace();
 		}
 		return null;
+	}
+	@Override
+	public int compareTo(Object arg0) {
+		ILine line = (ILine)arg0;
+		return this.getComparible().compareTo(line.getComparible());
 	}
 
 }

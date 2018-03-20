@@ -9,9 +9,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
-import com.EvilNotch.dungeontweeks.util.ICopy;
 import com.EvilNotch.dungeontweeks.util.JavaUtil;
 
 
@@ -25,6 +25,7 @@ public class ConfigBase {
     
     //comments and wrappers
     protected ArrayList<Comment> init;
+    protected ArrayList<Comment> origin;
     protected ArrayList<Comment> comments;
     protected char commentStart = '#';
     protected char headerLWrap = '<';
@@ -60,6 +61,7 @@ public class ConfigBase {
         for(Comment c : initComments)
             c.start = commentStart;//fix comments
         this.init = initComments;
+        this.origin = JavaUtil.copyArrayAndObjects((ArrayList)initComments);
         this.header = header;
         this.commentStart  = commentStart;
         this.headerLWrap = lhwrap;
@@ -139,10 +141,10 @@ public class ConfigBase {
             for(String strline : filelist)
             {
                 String whitespaced = LineBase.toWhiteSpaced(strline);
-                if(whitespaced.equals(""))
-                	continue;//optimization
                 initPassed = actualIndex > headerIndex;
                 actualIndex++;//since only used for boolean at beginging no need to copy ten other places
+                if(whitespaced.equals(""))
+                	continue;//optimization
                 if(!isStringPossibleLine(strline,"" + this.commentStart,wrapperHead,wrapperTail,this.lineSeperator,this.lineQuote) )
                 {
                     //comment handling
@@ -180,6 +182,7 @@ public class ConfigBase {
         {
         	this.initChecker = JavaUtil.copyArrayAndObjects((ArrayList)this.init);
         	this.commentChecker = JavaUtil.copyArrayAndObjects((ArrayList)this.comments);
+        	updateNearestCLines();
         }
         else{
         	this.initChecker = new ArrayList();
@@ -262,6 +265,9 @@ public class ConfigBase {
             }
         }
     }
+    /**
+     * Add a line if and only if It Doesn't exist treats the ConfigBase like a Set[ILine] rather then ArrayList[ILine]
+     */
     public void addLine(ILine line){
         if(this.containsLine(line))
             return;
@@ -273,22 +279,44 @@ public class ConfigBase {
         this.appendLine(line,index);
     }
     /**
-     * Append List of lines
-     * @param list
+     * Add a line if and only if It Doesn't exist treats the ConfigBase like a Set[ILine] rather then ArrayList[ILine]
      */
-    public void addLineList(ArrayList<ILine> list)
+    public void addLine(ILine line,boolean compareBase){
+        if(this.containsLine(line,false,compareBase))
+            return;
+        this.appendLine(line);
+    }
+    public void addLine(ILine line, int index,boolean compareBase){
+        if(this.containsLine(line,false,compareBase))
+            return;
+        this.appendLine(line,index);
+    }
+    
+    /**
+     * Append List of lines if line itself isn't added
+     */
+    public void addLineList(ArrayList<ILine> list,boolean compareBase)
     {
         for(ILine line : list)
-            addLine(line);
+            addLine(line,compareBase);
     }
     
     /**
      * Append List of lines at starting index
      */
-    public void addLineList(ArrayList<ILine> list, int index)
+    public void addLineList(ArrayList<ILine> list, int index,boolean compareBase)
     {
         for(ILine line : list)
-        	addLine(line,index++);
+        	addLine(line,index++,compareBase);
+    }
+    
+    public void addLineList(ArrayList<ILine> list)
+    {
+    	addLineList(list,true);
+    }
+    public void addLineList(ArrayList<ILine> list, int index)
+    {
+    	addLineList(list,index,true);
     }
     
     /**
@@ -412,11 +440,65 @@ public class ConfigBase {
     public void resetConfig()
     {
         try {
-            Files.write(this.cfgfile.toPath(), new ArrayList() );
+        	setInit(this.origin);
+        	writeFile(new ArrayList());
             this.readFile();//makes arrays reset
-        } catch (IOException e) {e.printStackTrace();}
+        } catch(Exception e) {e.printStackTrace();}
     }
-    
+    /**
+     * shuffle entries on the config
+     */
+    public void shuffle()
+    {
+    	if(this.enableComments)
+    		this.updateNearestCLines();
+    	boolean changeComments = this.comments.equals(this.commentChecker) && this.enableComments;
+    	boolean changeLines = this.getStringLines().equals(this.lineChecker);
+    	
+    	Collections.shuffle(this.lines);
+    	if(changeLines)
+    		this.lineChecker = this.getStringLines();
+    	updateCommentIndexes(changeComments);
+    }
+    public void shuffle(int times){
+    	if(this.enableComments)
+    		this.updateNearestCLines();
+    	boolean changeComments = this.comments.equals(this.commentChecker) && this.enableComments;
+    	boolean changeLines = this.getStringLines().equals(this.lineChecker);
+    	
+    	for(int i=0;i<times;i++)
+    		Collections.shuffle(this.lines);
+    	
+    	if(changeLines)
+    		this.lineChecker = this.getStringLines();
+    	updateCommentIndexes(changeComments);
+    }
+    public void shuffle(Random rnd){
+    	if(this.enableComments)
+    		this.updateNearestCLines();
+    	boolean changeComments = this.comments.equals(this.commentChecker) && this.enableComments;
+    	boolean changeLines = this.getStringLines().equals(this.lineChecker);
+    	
+    	Collections.shuffle(this.lines, rnd);
+    	
+    	if(changeLines)
+    		this.lineChecker = this.getStringLines();
+    	updateCommentIndexes(changeComments);
+    }
+    public void shuffle(Random rnd, int times){
+    	if(this.enableComments)
+    		this.updateNearestCLines();
+    	boolean changeComments = this.comments.equals(this.commentChecker) && this.enableComments;
+    	boolean changeLines = this.getStringLines().equals(this.lineChecker);
+    	
+    	
+    	for(int i=0;i<times;i++)
+    		Collections.shuffle(this.lines, rnd);
+    	
+    	if(changeLines)
+    		this.lineChecker = this.getStringLines();
+    	updateCommentIndexes(changeComments);
+    }
     /**
      * Re-Orders File to be alphabetized
      */
@@ -426,17 +508,18 @@ public class ConfigBase {
         //make comments have nearest lines incase it later gets alphabetized
         if(this.enableComments)
             updateNearestCLines();
-        ArrayList<String> linlist = this.getStringLines();
-        boolean alphabitizeChecker = linlist.equals(this.lineChecker);
+        boolean alphabitizeChecker = this.getStringLines().equals(this.lineChecker);
         boolean alphaComments = this.comments.equals(this.commentChecker) && this.enableComments;
         
-        ArrayList<String> list = this.getStringLines();
-        Collections.sort(list);
-        this.setList(list, 0);
+        Collections.sort(this.lines);//ILine extends IObject which extends Comparable,ICopy so this is possible
         if(alphabitizeChecker)
-        	this.lineChecker = linlist;//sync changes if and only if is the same list unmodified
+        	this.lineChecker = this.getStringLines();//sync changes is called get lines again since lines have been alphabitized
         
-        //re-organize comments to new locations and sync checkers for updating the config
+       updateCommentIndexes(alphaComments);
+    }
+    
+    protected void updateCommentIndexes(boolean checker) {
+    	 //re-organize comments to new locations and sync checkers for updating the config
         if(this.enableComments)
         {
         	for(Comment c : this.comments)
@@ -444,7 +527,9 @@ public class ConfigBase {
         		int index = 0;
         		for(ILine line : this.lines)
         		{
-        			if(line.equals(c.nearestLine,false) && line != null)
+        			//enforces higherarchy to deny it's equal to also in case lines change values it compares the bases
+        			if(line != null && c.nearestLine != null)
+        			if(isLineEqual(line,c.nearestLine,false) )
         			{
         				c.lineIndex = index;
         				break;
@@ -452,14 +537,13 @@ public class ConfigBase {
         			index++;
         		}
         	}
-        	if(alphaComments)
+        	if(checker)
         		this.commentChecker = JavaUtil.copyArrayAndObjects((ArrayList)this.comments);//sync index change since it's compared for equals()
+        	updateNearestCLines();//unessary but, for error checking better to have debugged errors then untraceable ones
        	}
-    }
-    
-    protected void updateNearestCLines() {
+	}
+	protected void updateNearestCLines() {
         for(Comment c : this.comments)
-            if(c.lineIndex < this.lines.size() )
                 c.nearestLine = this.lines.get(c.lineIndex);
     }
 
@@ -529,28 +613,26 @@ public class ConfigBase {
      */
     public void reorganizeComments() {
         boolean alphaComment = this.comments.equals(this.commentChecker) && this.enableComments;
-        ArrayList<Integer> ints = new ArrayList();
+        ArrayList<Integer> initialArray = new ArrayList<>();
+        //add then sort
         for(Comment c : this.comments)
-            ints.add(c.lineIndex);
+        	initialArray.add(new Integer(c.lineIndex));
+        Set<Integer> set = new HashSet<Integer>(initialArray);
+        initialArray.clear();
+        for(Integer i : set)
+        	initialArray.add(i);
+        Collections.sort(initialArray);
         
-        //sort then clear any dupes
-        Collections.sort(ints);
-        Set<Integer> ints2 = new HashSet<Integer>(ints);
-        ints.clear();
-        for(Integer i : ints2)
-            ints.add(i);
-        
-        ArrayList<Comment> com = new ArrayList();
-        for(int i=0;i<ints.size();i++)
+        System.out.println(initialArray);
+        ArrayList<Comment> coms = new ArrayList<>();
+        for(Integer i : initialArray)
         {
-            int value = ints.get(i);
-            for(Comment c : comments)
-            {
-                if(c.lineIndex == value)
-                    com.add(c);
-            }
+        	for(Comment c : this.comments)
+        		if(c.lineIndex == i)
+        			coms.add(c);
         }
-        this.comments = com;
+        this.comments = coms;
+        
     	if(alphaComment)
     		this.commentChecker = JavaUtil.copyArrayAndObjects((ArrayList)this.comments);//sync re-organization
     }
@@ -581,6 +663,8 @@ public class ConfigBase {
     
     public ArrayList<Comment> getComments(){return this.comments;}
     public ArrayList<Comment> getInit(){return this.init;}
+    public ArrayList<Comment> getOrigin(){return this.origin;}
+    public void setOrigin(ArrayList<Comment> list){this.origin = list;}
     public void setInit(ArrayList<Comment> list){this.init = list;}
 
     @Override

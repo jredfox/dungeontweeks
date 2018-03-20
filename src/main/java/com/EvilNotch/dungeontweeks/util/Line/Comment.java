@@ -1,8 +1,9 @@
 package com.EvilNotch.dungeontweeks.util.Line;
 
 import com.EvilNotch.dungeontweeks.util.ICopy;
+import com.EvilNotch.dungeontweeks.util.IObject;
 
-public class Comment implements ICopy{
+public class Comment implements IObject{
     public int lineIndex = -1;
     public String comment = null;
     public ILine nearestLine = null;
@@ -56,11 +57,19 @@ public class Comment implements ICopy{
     @Override
     public String toString()
     {
-        return "" + this.start + this.comment + ":" + this.lineIndex;
+        return "" + this.start + this.comment + ":" + this.lineIndex + " attatched:" + this.isAttactched ;//+ " line:" + this.nearestLine;
     }
 	@Override
 	public ICopy copy() {
 		return new Comment(this.lineIndex,this.comment,this.isAttactched,this.start,this.nearestLine);
+	}
+	@Override
+	public int compareTo(Object arg0) {
+		Comment other = (Comment)arg0;
+		return this.getIndex().compareTo(other.getIndex());
+	}
+	protected Integer getIndex() {
+		return this.lineIndex;
 	}
 
 }

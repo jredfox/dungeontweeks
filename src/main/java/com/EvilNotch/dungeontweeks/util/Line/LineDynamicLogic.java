@@ -232,7 +232,7 @@ public class LineDynamicLogic implements ILine{
         return true;
     }
 	@Override
-	public ResourceLocation getModPath() {
+	public ResourceLocation	 getModPath() {
 		ILine line = getFirstLine();
 		if(line != null)
 			return line.getModPath();
@@ -268,6 +268,16 @@ public class LineDynamicLogic implements ILine{
 		return this.getLineBase().getHead();
 	}
 	
+	public ArrayList<ResourceLocation> getResourceLocationsFirstLogic()
+	{
+		return getResourceLocationsFirstLogic(true);
+	}
+	
+	public ArrayList<ResourceLocation> getResourceLocationsFirstLogic(boolean grabStringHead)
+	{
+		return getResourceLocations(0,grabStringHead);
+	}
+	
 	public ArrayList<ResourceLocation> getResourceLocations(int position,boolean grabStringHead)
 	{
 		ArrayList<ILine> lines = this.lineLogic.get(position);
@@ -280,7 +290,6 @@ public class LineDynamicLogic implements ILine{
 		}
 		return list;
 	}
-	@Override
 	public ICopy copy() {
 		try {
 			Constructor constructor = this.getClass().getConstructor(String.class,char.class,char.class,char[].class);
@@ -291,5 +300,23 @@ public class LineDynamicLogic implements ILine{
 		return null;
 	}
 	
+	@Override
+	public int compareTo(Object arg0) {
+		ILine line = (ILine)arg0;
+		return this.getComparible().compareTo(line.getComparible());
+	}
+	@Override
+	public String getComparible() {
+		 String str = "";
+	        for(ArrayList<ILine> list : this.lineLogic.values())
+	        {
+	            for(ILine line : list)
+	                str += line.getComparible() + ", ";
+	            
+	            str = str.substring(0, str.length()-2);//get rid of last comment after parsing row
+	            str += " || ";//add possible next row
+	        }
+	        return this.lineLogic.size() > 0 ? str = str.substring(0, str.length()-4) : str;
+	}
 
 }

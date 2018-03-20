@@ -1,13 +1,14 @@
 package com.EvilNotch.dungeontweeks.util.Line;
 
-import com.EvilNotch.dungeontweeks.util.ICopy;
+import com.EvilNotch.dungeontweeks.util.IObject;
 
 import net.minecraft.util.ResourceLocation;
 
-public interface ILine extends ICopy{
-	public static final String lineLibraryVersion = "1.2.2.01";
+public interface ILine extends IObject{
+	public static final String lineLibraryVersion = "1.2.2.02";
 	public boolean equals(Object obj, boolean compareHead);
 	public String getString();
+	public String getComparible();//gets the string without the quotes for comparison
 	public ResourceLocation getModPath();
 	public void parse(String string, char sep, char q, char... invalid);
 	public String getModid();

@@ -3,8 +3,8 @@ package com.EvilNotch.dungeontweeks.main;
 import java.io.File;
 import java.util.ArrayList;
 
-import com.EvilNotch.dungeontweeks.util.Line.LineBase;
-import com.EvilNotch.dungeontweeks.util.Line.LineItemStack;
+import com.EvilNotch.lib.util.Line.LineBase;
+import com.EvilNotch.lib.util.Line.LineItemStack;
 
 import net.minecraftforge.common.config.Configuration;
 

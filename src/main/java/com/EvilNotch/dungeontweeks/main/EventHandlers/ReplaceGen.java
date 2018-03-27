@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 
-import com.EvilNotch.dungeontweeks.Api.ReflectionUtil;
 import com.EvilNotch.dungeontweeks.main.Config;
 import com.EvilNotch.dungeontweeks.main.MainJava;
 import com.EvilNotch.dungeontweeks.main.Attatchments.CapInterface;
@@ -14,6 +13,7 @@ import com.EvilNotch.dungeontweeks.main.Events.EventDungeon;
 import com.EvilNotch.dungeontweeks.main.world.worldgen.DungeonMain;
 import com.EvilNotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
 import com.EvilNotch.dungeontweeks.main.world.worldgen.mobs.MappingEntry;
+import com.EvilNotch.lib.Api.ReflectionUtil;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -62,8 +62,6 @@ public class ReplaceGen {
 	public static Chunk getLoadedOrPopulatedChunk(World w, int x, int z)
 	{
 		Chunk c = w.getChunkProvider().getLoadedChunk(x, z);
-//		if(c == null)
-//			c = getPopulatedChunk(w,x,z,true);
 		return c;
 	}
 	public static Chunk getPopulatedChunk(World w, int x, int z,boolean isLoaded) {

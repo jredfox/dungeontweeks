@@ -6,7 +6,6 @@ import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
 
-import com.EvilNotch.dungeontweeks.Api.MCPMappings;
 import com.EvilNotch.dungeontweeks.main.Attatchments.CapInterface;
 import com.EvilNotch.dungeontweeks.main.Attatchments.CapObj;
 import com.EvilNotch.dungeontweeks.main.Attatchments.Storage;
@@ -17,6 +16,8 @@ import com.EvilNotch.dungeontweeks.main.Events.EventDungeon.Type;
 import com.EvilNotch.dungeontweeks.main.commands.CmdReload;
 import com.EvilNotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
 import com.EvilNotch.dungeontweeks.main.world.worldgen.mobs.MappingEntry;
+import com.EvilNotch.lib.Api.MCPMappings;
+import com.EvilNotch.lib.util.JavaUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.nbt.JsonToNBT;
@@ -31,19 +32,16 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
-@Mod(modid = MainJava.MODID,name = "Dungeon Tweeks", version = MainJava.VERSION,acceptableRemoteVersions = "*")
+@Mod(modid = MainJava.MODID,name = "Dungeon Tweeks", version = MainJava.VERSION,acceptableRemoteVersions = "*", dependencies = "required-after:evilnotchlib")
 public class MainJava {
 	public static final String MODID = "dungeontweaks";
-	public static final String VERSION = "1.2.4.3";
-	public static boolean isDeObfuscated = false;
+	public static final String VERSION = "1.2.4.7";
 	public static String chunkSettings = null;
 	
 	@Mod.EventHandler
 	public void preinit(FMLPreInitializationEvent e)
 	{
 		Config.loadConfig(e.getModConfigurationDirectory());
-		MCPMappings.CacheMCP(e.getModConfigurationDirectory());
-		isDeObfuscated = isDeObfucscated();
 		chunkSettings = MCPMappings.getField(ChunkGeneratorOverworld.class, "settings");//cache variables from mcp-api as it's a heavy process
 		CapabilityManager.INSTANCE.register(CapInterface.class, new Storage(), CapObj.class);
 	}
@@ -68,28 +66,5 @@ public class MainJava {
 	{
 		e.registerServerCommand(new CmdReload() );
 	}
-	
-	@SuppressWarnings("rawtypes")
-	public static void moveFileFromJar(Class clazz,String input,File output,boolean replace) {
-		if(output.exists() && !replace)
-			return;
-		try {
-			InputStream inputstream =  clazz.getResourceAsStream(input);
-			FileOutputStream outputstream = new FileOutputStream(output);
-			output.createNewFile();
-			IOUtils.copy(inputstream,outputstream);
-			inputstream.close();
-			outputstream.close();
-		} catch (Exception io) {io.printStackTrace();}
-	}
-	
-	public static boolean isDeObfucscated()
-    {
-    	try{
-    		ReflectionHelper.findField(Block.class, MCPMappings.getFieldOb(Block.class,"blockHardness"));
-    		return false;//return false since obfuscated field had no exceptions
-    	}
-    	catch(Exception e){return true;}
-    }
 
 }

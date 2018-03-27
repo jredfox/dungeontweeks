@@ -8,17 +8,17 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import com.EvilNotch.dungeontweeks.Api.ReflectionUtil;
 import com.EvilNotch.dungeontweeks.main.Config;
 import com.EvilNotch.dungeontweeks.main.Events.EventDungeon;
 import com.EvilNotch.dungeontweeks.main.Events.EventDungeon.Type;
-import com.EvilNotch.dungeontweeks.util.JavaUtil;
-import com.EvilNotch.dungeontweeks.util.Line.Comment;
-import com.EvilNotch.dungeontweeks.util.Line.ConfigBase;
-import com.EvilNotch.dungeontweeks.util.Line.ILine;
-import com.EvilNotch.dungeontweeks.util.Line.LineBase;
-import com.EvilNotch.dungeontweeks.util.Line.LineItemStack;
-import com.EvilNotch.dungeontweeks.util.Line.LineItemStackBase;
+import com.EvilNotch.lib.Api.ReflectionUtil;
+import com.EvilNotch.lib.util.JavaUtil;
+import com.EvilNotch.lib.util.Line.Comment;
+import com.EvilNotch.lib.util.Line.ConfigBase;
+import com.EvilNotch.lib.util.Line.ILine;
+import com.EvilNotch.lib.util.Line.LineBase;
+import com.EvilNotch.lib.util.Line.LineItemStack;
+import com.EvilNotch.lib.util.Line.LineItemStackBase;
 
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
@@ -65,7 +65,7 @@ public class DungeonMobs {
 			    strdim = "ANYDIM";
 			File file = new File(dir,"definitions/" + strdim  + "/" + line.modid + "/" + line.name.replaceAll(":", "/"));
 			dirs.add(file);
-			entries.add(new MappingEntry(new ResourceLocation(line.modid + ":" + line.name),new ArrayList(),dim,file,line.bhead) );
+			entries.add(new MappingEntry(line.getResourceLocation(),new ArrayList(),dim,file,line.bhead) );
 		}
 		
 		try{
@@ -104,35 +104,25 @@ public class DungeonMobs {
 			if(f.equals(dir_dungeon))
 			{
 				ArrayList<DungeonMob> forgemobs = (ArrayList<DungeonMob>) ReflectionUtil.getObject(null, DungeonHooks.class, "dungeonMobs");
-				if(forgemobs == null)
-					for(int i=0;i<20;i++)
-						System.out.println("Forge Dungeon Hooks List Empty Wrong Reflection Name");
-				else{
-					//import modded weights if added before considering default weight to be whatever user configured
-					for(DungeonMob d : forgemobs)
+				//import modded weights if added before considering default weight to be whatever user configured
+				for(DungeonMob d : forgemobs)
+				{
+					if(!Loader.isModLoaded(d.type.getResourceDomain()))
 					{
-						if(d.type.equals(new ResourceLocation("minecraft:blank_dungeon")))
-								continue;
-						if(!Loader.isModLoaded(d.type.getResourceDomain()))
-						{
-							System.out.println("Skipping ForgeHooks Entity:" + d.type + " as mod isn't loaded");
-							continue;//don't create config into memory for mods that are in the game
-						}
-						
-						File mod = new File(f,JavaUtil.toFileCharacters(d.type.getResourceDomain()) + ".txt");
-						ConfigBase cfg = configs.get(mod);
-						if(cfg == null)
-						{
-							configs.put(mod , new ConfigBase(mod,new ArrayList(),"DungeonMobs" ) );
-							cfg = configs.get(mod);
-						}
-						String str = "\"" + d.type.toString() + "\" + = " + d.itemWeight;
-						LineBase line = new LineItemStackBase(str);
-					
-						if(!cfg.containsLine(line))
-							cfg.appendLine(new LineItemStack(str + " = " + d.itemWeight));
+						System.out.println("Skipping ForgeHooks Entity:" + d.type + " as mod isn't loaded");
+						continue;//don't create config into memory for mods that are in the game
 					}
-				 }
+					
+					File mod = new File(f,JavaUtil.toFileCharacters(d.type.getResourceDomain()) + ".txt");
+					ConfigBase cfg = configs.get(mod);
+					if(cfg == null)
+					{
+						configs.put(mod , new ConfigBase(mod,new ArrayList(),"DungeonMobs" ) );
+						cfg = configs.get(mod);
+					}
+					String str = "\"" + d.type.toString() + "\" + = " + d.itemWeight;
+					cfg.addLine(new LineItemStack(str));
+				}
 			 }
 		}
 		
@@ -196,8 +186,7 @@ public class DungeonMobs {
 					if(name.equals("zombie") && dungeontype.indexOf("battletowers:") == 0)
                         weight = 120;
 				}
-				if(!cfg.containsLine(line))
-					cfg.appendLine(new LineItemStack("\"" + loc.toString() + "\"" +  " = " + weight) );
+				cfg.addLine(new LineItemStack("\"" + loc.toString() + "\"" +  " = " + weight) );
 			}
 		 }
 		//validate
@@ -207,7 +196,7 @@ public class DungeonMobs {
 			for(int i=0;i<cfg.lines.size();i++)
 			{
 				ILine line = cfg.lines.get(i);
-				if(!list.contains(line.getModPath()) || !line.getModid().equals(getFileTrueDisplayName(cfg.cfgfile) )) 
+				if(!list.contains(line.getResourceLocation()) || !line.getModid().equals(getFileTrueDisplayName(cfg.cfgfile) )) 
 				{
 					if(i != cfg.lines.size()-1)
 						i--;//prevents it from skipping an index because all ones above it go to the end
@@ -310,7 +299,7 @@ public class DungeonMobs {
 				line = (LineItemStack)lineobj;
 			if(line == null || line.head <= 0)
 				continue;//skip invalid lines
-				list.add(new DungeonMobEntry(line.head,line.getModPath(),line.NBT) );	
+				list.add(new DungeonMobEntry(line.head,line.getResourceLocation(),line.NBT) );	
 		}
 	}
 

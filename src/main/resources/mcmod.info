@@ -1,14 +1,14 @@
 [
 {
-  "modid": "evilnotchlib",
-  "name": "Evil Notch Lib",
-  "description": "An Api and Library for java and Minecraft By reflection and files",
-  "version": "1.1.3",
+  "modid": "dungeontweaks",
+  "name": "Dungeon Tweaks",
+  "description": "Configure Dungeon Mobs with nbt and jockie support",
+  "version": "1.2.4.5",
   "mcversion": "1.12.2",
   "url": "",
   "updateUrl": "",
   "authorList": ["jredfox"],
-  "credits": "The Forge and FML guys, for making this example",
+  "credits": "jredfox",
   "logoFile": "logo.png",
   "screenshots": [],
   "dependencies": []

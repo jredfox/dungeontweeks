@@ -19,12 +19,9 @@ public class Config {
 	public static File dir = null;
 	public static int default_weight = 0;
 	public static boolean validateGeneratedEntries = true;
-	public static boolean Debug = false;
 	public static List<LineArray> definitions = new ArrayList();
 	public static boolean blankSpawnerWhenBlank = true;
-	public static boolean legacyHooks = true;
     public static boolean fancyConfig = true;
-    public static boolean optimizedFileWriting = true;
 	
 	public static void loadConfig(File moddir)
 	{
@@ -41,9 +38,7 @@ public class Config {
 		radius_end = config.get("general", "radius_end", radius_end).getInt(radius_end);
 		default_weight = config.get("general", "default_weight", default_weight).getInt(default_weight);
 		validateGeneratedEntries = config.get("general", "validateGeneratedEntries", validateGeneratedEntries).getBoolean(validateGeneratedEntries);
-		Debug = config.get("general", "debug", false).getBoolean(false);
 		blankSpawnerWhenBlank = config.get("general","blankSpawnerWhenBlank",true).getBoolean(true);
-		legacyHooks = config.get("general","legacyHooksSupport",true).getBoolean(true);
 		config.save();
 	}
 	public static void loadDefinitionsDir(File dir){
@@ -63,7 +58,6 @@ public class Config {
 					definitions.add(line);
 			}
 		}
-		optimizedFileWriting = config.get("general", "optimizedFileWriting", true).getBoolean(true);
 		fancyConfig = config.get("general","fancyConfig",true).getBoolean(true);//so you don't have to keep going back and forth to debug or to look at the differences
 		config.save();
 	}

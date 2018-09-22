@@ -42,6 +42,14 @@ public class MainJava {
 		Config.loadConfig(e.getModConfigurationDirectory());
 		chunkSettings = MCPMappings.getField(ChunkGeneratorOverworld.class, "settings");//cache variables from mcp-api as it's a heavy process
 		CapRegHandler.registerRegistry(new CapSpawnerReg());
+		
+		//support vanilla
+		DungeonMobs.addDungeonMob(DungeonMobs.mansion, new ResourceLocation("minecraft:spider"), null, 150);
+		DungeonMobs.addDungeonMob(DungeonMobs.mineshaft, new ResourceLocation("minecraft:cave_spider"), null, 150);
+		DungeonMobs.addDungeonMob(DungeonMobs.netherfortress, new ResourceLocation("minecraft:blaze"), null, 150);
+		DungeonMobs.addDungeonMob(DungeonMobs.netherfortress, new ResourceLocation("minecraft:wither_skeleton"), null, 70);
+		DungeonMobs.addDungeonMob(DungeonMobs.stronghold, new ResourceLocation("minecraft:silverfish"), null, 150);
+		DungeonMobs.addDungeonMob(DungeonMobs.stronghold, new ResourceLocation("minecraft:silverfish"), null, 150);
 	}
 
 	@Mod.EventHandler

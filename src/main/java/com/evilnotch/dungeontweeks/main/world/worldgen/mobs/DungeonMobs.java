@@ -59,19 +59,8 @@ public class DungeonMobs {
 		
 		EntityUtil.cacheEnts();
 		cacheForge();
-		cacheVanilla();
 		loadDefinitions();
 		populateConfigs();
-	}
-
-	public static void cacheVanilla() 
-	{
-		addDungeonMob(mansion, new ResourceLocation("minecraft:spider"), null, 150);
-		addDungeonMob(mineshaft, new ResourceLocation("minecraft:cave_spider"), null, 150);
-		addDungeonMob(netherfortress, new ResourceLocation("minecraft:blaze"), null, 150);
-		addDungeonMob(netherfortress, new ResourceLocation("minecraft:wither_skeleton"), null, 70);
-		addDungeonMob(stronghold, new ResourceLocation("minecraft:silverfish"), null, 150);
-		addDungeonMob(stronghold, new ResourceLocation("minecraft:silverfish"), null, 150);
 	}
 
 	public static void populateConfigs() 
@@ -109,12 +98,16 @@ public class DungeonMobs {
 			File dir = map.baseDir;
 			for(ResourceLocation loc : list)
 			{
+				if(Config.validateGeneratedEntries && !Loader.isModLoaded(loc.getResourceDomain()))
+					continue;
 				String domain = loc.getResourceDomain();
 				File actual = new File(dir,domain + ".txt");
 				ConfigLine cfg = getConfig(cfgs,actual);
 				LineArray line = new LineArray(loc.toString() + " = " + Config.default_weight);
 				cfg.addLine(line);
 			}
+			//custom entries
+			ConfigLine cfg = getConfig(cfgs, new File(dir,"custom/custom.txt"));
 		}
 		for(ConfigLine cfg : cfgs.values())
 		{
@@ -125,7 +118,9 @@ public class DungeonMobs {
 		ConfigLine cfg = cfgs.get(actual);
 		if(cfg == null)
 		{
-			cfg = new ConfigLine(actual);
+			cfg = new ConfigLine(actual,JavaUtil.<String>asArray("Dungeon Tweaks for:" + JavaUtil.getFileTrueDisplayName(actual),"Format mobid:mobname { } = weight"));
+			if(Config.fancyConfig)
+				cfg.header = "DungeonMobs";
 			cfg.loadConfig();
 			cfgs.put(actual, cfg);
 		}
@@ -158,12 +153,7 @@ public class DungeonMobs {
 	 */
 	public static void addDungeonMob(DungeonLocation dungeonId, ResourceLocation entityId, @Nullable NBTTagCompound nbt,int itemWeight) 
 	{
-		DungeonEntry entry = getDungeonEntry(dungeonId,codedEntries);
-		if(entry == null)
-		{
-			registerDungeon(dungeonId);
-			entry = getDungeonEntry(dungeonId, codedEntries);
-		}
+		DungeonEntry entry = getOrRegDungeonEntry(dungeonId,codedEntries);
 		
 		DungeonMobNBT mob = new DungeonMobNBT(entityId,nbt,itemWeight);
 		for(DungeonMobNBT rndMob : entry.list)
@@ -175,6 +165,26 @@ public class DungeonMobs {
 			}
 		}
 		entry.list.add(mob);
+	}
+	/**
+	 * remove entry in code. All mobs are still configurable in dungeon tweaks but, the initial code weight will be removed
+	 * or if it's NBT/Sub mob the extra meta line won't exist
+	 */
+	public static void removeDungeonMob(DungeonLocation dungeonId, ResourceLocation entityId, @Nullable NBTTagCompound nbt)
+	{
+		DungeonEntry entry = getOrRegDungeonEntry(dungeonId,codedEntries);
+		entry.list.remove(new DungeonMobNBT(entityId,nbt,-1));
+	}
+
+	public static DungeonEntry getOrRegDungeonEntry(DungeonLocation dungeonId, List<DungeonEntry> list) 
+	{
+		DungeonEntry entry = getDungeonEntry(dungeonId,list);
+		if(entry == null)
+		{
+			registerDungeon(dungeonId);
+			entry = getDungeonEntry(dungeonId, codedEntries);
+		}
+		return entry;
 	}
 
 	public static DungeonEntry getDungeonEntry(DungeonLocation dungeonId,List<DungeonEntry> entries) 

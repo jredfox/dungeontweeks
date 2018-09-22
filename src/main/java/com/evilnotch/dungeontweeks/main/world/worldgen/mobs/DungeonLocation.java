@@ -64,5 +64,10 @@ public class DungeonLocation extends ResourceLocation{
     {
     	return this.toString().hashCode();
     }
+    
+    public ResourceLocation toResourceLocation()
+    {
+    	return new ResourceLocation(super.toString());
+    }
 
 }

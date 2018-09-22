@@ -3,7 +3,6 @@ package com.evilnotch.dungeontweeks.main.world.worldgen;
 import java.util.Random;
 
 import com.evilnotch.dungeontweeks.main.events.EventDungeon;
-import com.evilnotch.dungeontweeks.main.events.EventDungeon.Type;
 import com.evilnotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
 
 import net.minecraft.block.material.Material;
@@ -140,10 +139,10 @@ public class DungeonMain extends WorldGenDungeons{
 
             if (tileentity instanceof TileEntityMobSpawner)
             {
-            	EventDungeon pre = new EventDungeon.Pre(tileentity, position, EventDungeon.Type.DUNGEON,rand,null,worldIn);
+            	EventDungeon pre = new EventDungeon.Pre(tileentity, position,rand,DungeonMobs.dungeon,worldIn);
             	MinecraftForge.EVENT_BUS.post(pre);
             	
-                EventDungeon post = new EventDungeon.Post(tileentity, position, EventDungeon.Type.DUNGEON,rand,null,worldIn);
+                EventDungeon post = new EventDungeon.Post(tileentity, position,rand,DungeonMobs.dungeon,worldIn);
             	MinecraftForge.EVENT_BUS.post(post);
             }
 

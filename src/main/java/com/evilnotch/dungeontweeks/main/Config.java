@@ -54,8 +54,7 @@ public class Config {
 			{
 				LineArray line = new LineArray(s);
 				line.setHead(true);
-				if(!definitions.contains(line))
-					definitions.add(line);
+			    definitions.add(line);
 			}
 		}
 		fancyConfig = config.get("general","fancyConfig",true).getBoolean(true);//so you don't have to keep going back and forth to debug or to look at the differences

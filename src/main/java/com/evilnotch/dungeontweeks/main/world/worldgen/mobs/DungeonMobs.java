@@ -14,7 +14,6 @@ import javax.annotation.Nullable;
 
 import com.evilnotch.dungeontweeks.main.Config;
 import com.evilnotch.dungeontweeks.main.events.EventDungeon;
-import com.evilnotch.dungeontweeks.main.events.EventDungeon.Type;
 import com.evilnotch.lib.api.ReflectionUtil;
 import com.evilnotch.lib.minecraft.EntityUtil;
 import com.evilnotch.lib.util.JavaUtil;
@@ -76,7 +75,7 @@ public class DungeonMobs {
 			for(DungeonMob mob : map.list)
 			{
 				File actual = new File(dir,mob.type.getResourceDomain() + ".txt");
-				ConfigBase config = getConfig(cfgs,actual);
+				ConfigBase config = getConfig(e,cfgs,actual);
 				LineArray line = null;
 				if(mob instanceof DungeonMobNBT)
 				{
@@ -102,19 +101,23 @@ public class DungeonMobs {
 					continue;
 				String domain = loc.getResourceDomain();
 				File actual = new File(dir,domain + ".txt");
-				ConfigLine cfg = getConfig(cfgs,actual);
+				ConfigLine cfg = getConfig(map,cfgs,actual);
 				LineArray line = new LineArray(loc.toString() + " = " + Config.default_weight);
 				cfg.addLine(line);
 			}
 			//custom entries
-			ConfigLine cfg = getConfig(cfgs, new File(dir,"custom/custom.txt"));
+			if(map.loc.dungeonSubType.equals(DungeonLocation.anyDim))
+				getConfig(map,cfgs, new File(dir,"custom/custom.txt"));
+			
+			map.parseConfigs();
 		}
+		//save configs
 		for(ConfigLine cfg : cfgs.values())
 		{
-			cfg.saveConfig(true, false, true);
+			cfg.saveConfig(true);
 		}
 	}
-	public static ConfigLine getConfig(HashMap<File, ConfigLine> cfgs, File actual) {
+	public static ConfigLine getConfig(DungeonEntry map,HashMap<File, ConfigLine> cfgs, File actual) {
 		ConfigLine cfg = cfgs.get(actual);
 		if(cfg == null)
 		{
@@ -123,6 +126,7 @@ public class DungeonMobs {
 				cfg.header = "DungeonMobs";
 			cfg.loadConfig();
 			cfgs.put(actual, cfg);
+			map.addConfig(cfg);
 		}
 		return cfg;
 	}
@@ -147,6 +151,10 @@ public class DungeonMobs {
 				cachedForgeHooks = true;
 			}
 		}
+	}
+	public static void addDungeonMob(DungeonLocation dungeonId, ResourceLocation entityId,int itemWeight) 
+	{
+		addDungeonMob(dungeonId,entityId,null,itemWeight);
 	}
 	/**
 	 * use this for coders adding custom weights pre-defined users will still be able to configure them using this mod
@@ -185,6 +193,15 @@ public class DungeonMobs {
 			entry = getDungeonEntry(dungeonId, codedEntries);
 		}
 		return entry;
+	}
+	public static DungeonEntry getDungeonEntry(ResourceLocation dungeonId,int dim,ResourceLocation biome)
+	{
+		DungeonEntry e = getDungeonEntry(new DungeonLocation(dungeonId,biome),entries);
+		if(e == null)
+			e = getDungeonEntry(new DungeonLocation(dungeonId,dim),entries);
+		if(e == null)
+			e = getDungeonEntry(new DungeonLocation(dungeonId),entries);
+		return e;
 	}
 
 	public static DungeonEntry getDungeonEntry(DungeonLocation dungeonId,List<DungeonEntry> entries) 

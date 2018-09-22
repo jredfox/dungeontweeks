@@ -8,11 +8,18 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import com.evilnotch.lib.util.line.ILine;
+import com.evilnotch.lib.util.line.LineArray;
+import com.evilnotch.lib.util.line.config.ConfigLine;
+
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 
 public class DungeonEntry {
 	public List<DungeonMobNBT> list = new ArrayList();
 	public DungeonLocation loc = null;
+	public List<ConfigLine> cfgs = new ArrayList();
+	
 	/**
 	 * will be null if used for coding list rather then actual configurable lists
 	 */
@@ -64,6 +71,33 @@ public class DungeonEntry {
 	public String toString()
 	{
 	    return this.loc.toString() + this.list.toString(); 
+	}
+
+	public void addConfig(ConfigLine config) {
+		this.cfgs.add(config);
+	}
+
+	public void parseConfigs() 
+	{
+		for(ConfigLine cfg : this.cfgs)
+		{
+			for(ILine l : cfg.lines)
+			{
+				LineArray line = (LineArray)l;
+				int head = line.getInt();
+				if(head == 0)
+					continue;
+				this.addDungeonMob(line.getResourceLocation(),line.nbt,head);
+			}
+		}
+		this.cfgs.clear();
+	}
+	/**
+	 * add a new dungeon mob to the entry
+	 */
+	public void addDungeonMob(ResourceLocation loc, NBTTagCompound nbt, int head) 
+	{
+		this.list.add(new DungeonMobNBT(loc,nbt,head));
 	}
 
 }

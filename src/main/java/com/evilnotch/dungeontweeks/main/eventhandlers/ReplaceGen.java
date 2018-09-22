@@ -11,7 +11,7 @@ import com.evilnotch.dungeontweeks.main.caps.CapSpawnerReg;
 import com.evilnotch.dungeontweeks.main.events.EventDungeon;
 import com.evilnotch.dungeontweeks.main.world.worldgen.DungeonMain;
 import com.evilnotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
-import com.evilnotch.dungeontweeks.main.world.worldgen.mobs.MappingEntry;
+import com.evilnotch.dungeontweeks.main.world.worldgen.mobs.DungeonEntry;
 import com.evilnotch.lib.api.ReflectionUtil;
 import com.evilnotch.lib.minecraft.content.capabilites.primitive.CapBoolean;
 import com.evilnotch.lib.minecraft.content.capabilites.registry.CapContainer;

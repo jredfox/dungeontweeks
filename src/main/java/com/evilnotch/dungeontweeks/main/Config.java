@@ -49,7 +49,7 @@ public class Config {
 	public static void loadDefinitionsDir(File dir){
 		Configuration config = new Configuration(new File(dir,"config.cfg"));
 		config.load();
-		String[] list = config.getStringList("definitions", "userdefinitions", new String[]{"\"battletowers:cobblestone\"","\"battletowers:cobblestonemossy\"","\"battletowers:sandstone\"","\"battletowers:ice\"","\"battletowers:smoothstone\"","\"battletowers:netherrack\"","\"battletowers:jungle\"","\"quark:dungeon\" <0>"}, "define dungeons based on mobid and dimension in this format \"modid:dungeonname\" <dimensiondid> dimension is optional without it it will work in any dimension");
+		String[] list = config.getStringList("definitions", "userdefinitions", new String[]{"minecraft:dungeon","minecraft:mansion","minecraft:mineshaft","minecraft:netherfortress","minecraft:stronghold","battletowers:cobblestone","battletowers:cobblestonemossy","battletowers:sandstone","battletowers:ice","battletowers:smoothstone","battletowers:netherrack","battletowers:jungle","quark:dungeon <0>"}, "define dungeons based on mobid and dimension in this format modid:dungeonname <dimensiondid> dimension is optional without it it will work in any dimension");
 		for(String s : list)
 		{
 			String wspaced = JavaUtil.toWhiteSpaced(s);

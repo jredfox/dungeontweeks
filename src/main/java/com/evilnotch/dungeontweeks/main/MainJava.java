@@ -12,7 +12,7 @@ import com.evilnotch.dungeontweeks.main.eventhandlers.DungeonHandler;
 import com.evilnotch.dungeontweeks.main.eventhandlers.ReplaceGen;
 import com.evilnotch.dungeontweeks.main.events.EventDungeon.Type;
 import com.evilnotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
-import com.evilnotch.dungeontweeks.main.world.worldgen.mobs.MappingEntry;
+import com.evilnotch.dungeontweeks.main.world.worldgen.mobs.DungeonEntry;
 import com.evilnotch.lib.api.MCPMappings;
 import com.evilnotch.lib.minecraft.content.capabilites.registry.CapRegHandler;
 import com.evilnotch.lib.util.JavaUtil;

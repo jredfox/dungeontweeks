@@ -15,8 +15,8 @@ public class EventDungeon extends Event{
 	public TileEntity tile;
 	public BlockPos pos;
 	public Random rnd;
-	public ResourceLocation loc;
-	public World w;
+	public ResourceLocation dungeonId;
+	public World world;
 	
 	public EventDungeon(TileEntity tile,BlockPos pos,Random rnd,ResourceLocation loc,World w)
 	{
@@ -25,8 +25,16 @@ public class EventDungeon extends Event{
 		this.tile = tile;
 		this.pos = pos;
 		this.rnd = rnd;
-		this.loc = loc;
-		this.w = w;
+		this.dungeonId = loc;
+		this.world = w;
 	}
+	/**
+	 * getters
+	 */
+	public TileEntity getTileEntity(){return this.tile;}
+	public BlockPos getPos(){return this.pos;}
+	public Random getRandom(){return this.rnd;}
+	public ResourceLocation getDungeonId(){return this.dungeonId;}
+	public World getWorld(){return this.world;}
 	
 }

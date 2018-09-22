@@ -151,7 +151,6 @@ public class ReplaceGen {
 					  ResourceLocation type = mineshaft ? DungeonMobs.mineshaft : stronghold ? DungeonMobs.stronghold : mansion ? DungeonMobs.mansion : netherfortress ? DungeonMobs.netherfortress : loc;
 					  EventDungeon d = new EventDungeon(tile,pos,e.getRand(),type,e.getWorld());
 					  MinecraftForge.EVENT_BUS.post(d);
-				      cap.value = true;
 				   }
 			  }
 		   }

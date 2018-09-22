@@ -50,7 +50,6 @@ public class MainJava {
 		DungeonMobs.addDungeonMob(DungeonMobs.netherfortress, new ResourceLocation("minecraft:blaze"), 150);
 		DungeonMobs.addDungeonMob(DungeonMobs.netherfortress, new ResourceLocation("minecraft:wither_skeleton"), 70);
 		DungeonMobs.addDungeonMob(DungeonMobs.stronghold, new ResourceLocation("minecraft:silverfish"), 150);
-		DungeonMobs.addDungeonMob(DungeonMobs.stronghold, new ResourceLocation("minecraft:silverfish"), 150);
 	}
 
 	@Mod.EventHandler

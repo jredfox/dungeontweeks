@@ -28,10 +28,14 @@ import com.evilnotch.lib.util.line.config.ConfigLine;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.WeightedRandom;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.common.DungeonHooks;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.DungeonHooks.DungeonMob;
 import net.minecraftforge.fml.common.Loader;
 
@@ -50,7 +54,8 @@ public class DungeonMobs {
 	public static final DungeonLocation netherfortress = new DungeonLocation (new ResourceLocation("netherfortress"));
 	public static final DungeonLocation stronghold = new DungeonLocation(new ResourceLocation("stronghold"));
 	
-	public static final DungeonMobNBT blank_mob = new DungeonMobNBT(new ResourceLocation("blank"),-1);
+	public static final ResourceLocation blank = new ResourceLocation("blank");
+	public static final DungeonMobNBT blank_mob = new DungeonMobNBT(blank,-1);
 	public static final DungeonMobNBT pig = new DungeonMobNBT(new ResourceLocation("pig"),-1);
 	
 	public static void cacheMobs()
@@ -100,8 +105,6 @@ public class DungeonMobs {
 			File dir = map.baseDir;
 			for(ResourceLocation loc : list)
 			{
-				if(Config.validateGeneratedEntries && !Loader.isModLoaded(loc.getResourceDomain()))
-					continue;
 				String domain = loc.getResourceDomain();
 				File actual = new File(dir,domain + ".txt");
 				ConfigLine cfg = getConfig(map,cfgs,actual);
@@ -112,7 +115,7 @@ public class DungeonMobs {
 			if(map.loc.dungeonSubType.equals(DungeonLocation.anyDim))
 				getConfig(map,cfgs, new File(dir,"custom/custom.txt"));
 			
-			map.parseConfigs();
+			map.parseConfigs(list);
 		}
 		//save configs
 		for(ConfigLine cfg : cfgs.values())
@@ -281,6 +284,14 @@ public class DungeonMobs {
 			return Config.blankSpawnerWhenBlank ? blank_mob : pig;
 		DungeonMobNBT mob = WeightedRandom.getRandomItem(rnd, e.list);
 		return mob;
+	}
+	/**
+	 * other mods call this to fire via reflection/dependancy
+	 */
+	public static void fireDungeonTweaks(ResourceLocation dungeonId,TileEntity tile,BlockPos pos,Random rnd,World w)
+	{
+		EventDungeon event = new EventDungeon(tile, pos, rnd, dungeonId, w);
+		MinecraftForge.EVENT_BUS.post(event);
 	}
 
 }

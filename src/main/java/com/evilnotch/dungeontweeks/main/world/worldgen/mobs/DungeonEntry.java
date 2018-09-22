@@ -8,12 +8,14 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import com.evilnotch.dungeontweeks.main.Config;
 import com.evilnotch.lib.util.line.ILine;
 import com.evilnotch.lib.util.line.LineArray;
 import com.evilnotch.lib.util.line.config.ConfigLine;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.Loader;
 
 public class DungeonEntry {
 	public List<DungeonMobNBT> list = new ArrayList();
@@ -77,17 +79,23 @@ public class DungeonEntry {
 		this.cfgs.add(config);
 	}
 
-	public void parseConfigs() 
+	public void parseConfigs(Set<ResourceLocation> locs) 
 	{
 		for(ConfigLine cfg : this.cfgs)
 		{
 			for(ILine l : cfg.lines)
 			{
+				ResourceLocation loc = l.getResourceLocation();
+				if(Config.validateGeneratedEntries && !Loader.isModLoaded(loc.getResourceDomain()) || Config.validateGeneratedEntries && !locs.contains(loc) && !loc.equals(DungeonMobs.blank))
+				{
+					System.out.println("skipping:" + loc + " in " + cfg.file.getName());
+					continue;
+				}
 				LineArray line = (LineArray)l;
 				int head = line.getInt();
 				if(head == 0)
 					continue;
-				this.addDungeonMob(line.getResourceLocation(),line.nbt,head);
+				this.addDungeonMob(loc,line.nbt,head);
 			}
 		}
 		this.cfgs.clear();

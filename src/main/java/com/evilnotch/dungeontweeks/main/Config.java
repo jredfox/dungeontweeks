@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.evilnotch.lib.util.JavaUtil;
+import com.evilnotch.lib.util.line.ILine;
 import com.evilnotch.lib.util.line.LineArray;
 import com.evilnotch.lib.util.line.LineMeta;
+import com.evilnotch.lib.util.line.config.ConfigLine;
 
 import net.minecraftforge.common.config.Configuration;
 
@@ -45,6 +47,7 @@ public class Config {
 		Configuration config = new Configuration(new File(dir,"config.cfg"));
 		config.load();
 		String[] list = config.getStringList("definitions", "userdefinitions", new String[]{"minecraft:dungeon","minecraft:mansion","minecraft:mineshaft","minecraft:netherfortress","minecraft:stronghold","battletowers:cobblestone","battletowers:cobblestonemossy","battletowers:sandstone","battletowers:ice","battletowers:smoothstone","battletowers:netherrack","battletowers:jungle","quark:dungeon <0>"}, "define dungeons based on mobid and dimension in this format modid:dungeonname <dimensiondid> dimension is optional without it it will work in any dimension");
+		ConfigLine linecfg = new ConfigLine();
 		for(String s : list)
 		{
 			String wspaced = JavaUtil.toWhiteSpaced(s);
@@ -54,9 +57,12 @@ public class Config {
 			{
 				LineArray line = new LineArray(s);
 				line.setHead(true);
-			    definitions.add(line);
+				linecfg.addLine(line);
 			}
 		}
+		for(ILine l : linecfg.lines)
+			definitions.add((LineArray)l);
+		
 		fancyConfig = config.get("general","fancyConfig",true).getBoolean(true);//so you don't have to keep going back and forth to debug or to look at the differences
 		config.save();
 	}

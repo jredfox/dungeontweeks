@@ -22,7 +22,7 @@ public class DungeonHandler {
 		e.tile.writeToNBT(nbt);
 		nbt.removeTag("SpawnPotentials");
 		
-		DungeonMobNBT entry = DungeonMobs.pickMobSpawner(e.rnd,e.loc,e.w.provider.getDimension(),e.w.getBiome(e.pos).getRegistryName() );
+		DungeonMobNBT entry = DungeonMobs.pickMobSpawner(e.rnd,e.dungeonId,e.world.provider.getDimension(),e.world.getBiome(e.pos).getRegistryName() );
 		
 		NBTTagCompound data = entry.nbt == null ? new NBTTagCompound() : entry.nbt.copy();
 		data.setString("id",entry.type.toString());

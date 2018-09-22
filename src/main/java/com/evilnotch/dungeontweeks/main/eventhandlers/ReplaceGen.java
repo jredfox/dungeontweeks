@@ -138,16 +138,18 @@ public class ReplaceGen {
 				  tile.writeToNBT(nbt);
 				  String name = nbt.getCompoundTag("SpawnData").getString("id");
 				  ResourceLocation loc = new ResourceLocation(name);
-				  DungeonEntry entry =  DungeonMobs.getDungeonEntry(loc,w.provider.getDimension(),w.getBiome(tile.getPos()).getRegistryName() );
+				  
+				  boolean entry = DungeonMobs.containsDungeonEntry(loc,w.provider.getDimension(),w.getBiome(tile.getPos()).getRegistryName());
+				  
 				  //if entry isn't null it means it's a defined spawner for this dimension fire the event
-				  if(!mineshaft && !stronghold && !mansion && !netherfortress && entry == null)
+				  if(!mineshaft && !stronghold && !mansion && !netherfortress && !entry)
 					  continue;
 				   CapBoolean cap = (CapBoolean) CapRegHandler.getCapability(tile,CapSpawnerReg.hasScanned);
 				   boolean scanned = cap.value;
 				   if(!scanned)
 				   {
 					  ResourceLocation type = mineshaft ? DungeonMobs.mineshaft : stronghold ? DungeonMobs.stronghold : mansion ? DungeonMobs.mansion : netherfortress ? DungeonMobs.netherfortress : loc;
-					  EventDungeon.Post d = new EventDungeon.Post(tile,pos,e.getRand(),loc,e.getWorld());
+					  EventDungeon d = new EventDungeon(tile,pos,e.getRand(),type,e.getWorld());
 					  MinecraftForge.EVENT_BUS.post(d);
 				      cap.value = true;
 				   }

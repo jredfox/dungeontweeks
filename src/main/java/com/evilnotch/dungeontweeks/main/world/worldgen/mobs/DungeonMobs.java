@@ -50,6 +50,9 @@ public class DungeonMobs {
 	public static final DungeonLocation netherfortress = new DungeonLocation (new ResourceLocation("netherfortress"));
 	public static final DungeonLocation stronghold = new DungeonLocation(new ResourceLocation("stronghold"));
 	
+	public static final DungeonMobNBT blank_mob = new DungeonMobNBT(new ResourceLocation("blank"),-1);
+	public static final DungeonMobNBT pig = new DungeonMobNBT(new ResourceLocation("pig"),-1);
+	
 	public static void cacheMobs()
 	{
 		entries.clear();
@@ -194,6 +197,10 @@ public class DungeonMobs {
 		}
 		return entry;
 	}
+	public static boolean containsDungeonEntry(ResourceLocation dungeonId,int dimension, ResourceLocation biome)
+	{
+		return getDungeonEntry(dungeonId,dimension,biome) != null;
+	}
 	public static DungeonEntry getDungeonEntry(ResourceLocation dungeonId,int dim,ResourceLocation biome)
 	{
 		DungeonEntry e = getDungeonEntry(new DungeonLocation(dungeonId,biome),entries);
@@ -263,6 +270,17 @@ public class DungeonMobs {
 			return;
 		String biomePath = biome.toString().replaceAll(":", "/");
 		entries.add(new DungeonEntry(loc,new File(f,loc.toString().replaceAll(":", "/") + "/BIOME/" + biomePath),biome));
+	}
+	/**
+	 * get a random spawner mob from a dungeon
+	 */
+	public static DungeonMobNBT pickMobSpawner(Random rnd, ResourceLocation dungeonId, int dim,ResourceLocation biome) 
+	{
+		DungeonEntry e = getDungeonEntry(dungeonId, dim, biome);
+		if(e.list.isEmpty())
+			return Config.blankSpawnerWhenBlank ? blank_mob : pig;
+		DungeonMobNBT mob = WeightedRandom.getRandomItem(rnd, e.list);
+		return mob;
 	}
 
 }

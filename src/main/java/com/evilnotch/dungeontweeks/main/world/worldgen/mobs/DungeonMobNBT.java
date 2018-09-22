@@ -6,6 +6,10 @@ import net.minecraftforge.common.DungeonHooks;
 
 public class DungeonMobNBT extends DungeonHooks.DungeonMob{
 	public NBTTagCompound nbt;
+	
+	public DungeonMobNBT(ResourceLocation type,int weight) {
+		this(type,null,weight);
+	}
 
 	public DungeonMobNBT(ResourceLocation type,NBTTagCompound nbt,int weight) {
 		super(weight, type);

@@ -18,7 +18,7 @@ public class EventDungeon extends Event{
 	public ResourceLocation loc;
 	public World w;
 	
-	protected EventDungeon(TileEntity tile,BlockPos pos,Random rnd,ResourceLocation loc,World w)
+	public EventDungeon(TileEntity tile,BlockPos pos,Random rnd,ResourceLocation loc,World w)
 	{
 		if(loc instanceof DungeonLocation)
 			loc = ((DungeonLocation)loc).toResourceLocation();
@@ -27,25 +27,6 @@ public class EventDungeon extends Event{
 		this.rnd = rnd;
 		this.loc = loc;
 		this.w = w;
-	}
-	
-	public static class Pre extends EventDungeon
-	{
-		public Pre(TileEntity tile, BlockPos pos,Random rnd,ResourceLocation loc,World w) {
-			super(tile, pos,rnd,loc,w);
-		}
-		@Override
-		public boolean isCancelable()
-		{
-		  return true;
-		}
-	}
-	
-	public static class Post extends EventDungeon
-	{
-		public Post(TileEntity tile, BlockPos pos,Random rnd,ResourceLocation loc,World w) {
-			super(tile, pos,rnd,loc,w);
-		}
 	}
 	
 }

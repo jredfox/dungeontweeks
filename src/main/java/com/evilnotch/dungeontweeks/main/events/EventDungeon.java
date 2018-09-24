@@ -4,7 +4,6 @@ import java.util.Random;
 
 import com.evilnotch.dungeontweeks.main.world.worldgen.mobs.DungeonLocation;
 
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;

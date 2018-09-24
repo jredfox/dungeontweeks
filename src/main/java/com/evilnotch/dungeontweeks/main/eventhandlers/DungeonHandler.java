@@ -4,13 +4,11 @@ import com.evilnotch.dungeontweeks.main.caps.CapSpawnerReg;
 import com.evilnotch.dungeontweeks.main.events.EventDungeon;
 import com.evilnotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobNBT;
 import com.evilnotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
-import com.evilnotch.lib.minecraft.TileEntityUtil;
-import com.evilnotch.lib.minecraft.content.capabilites.primitive.CapBoolean;
-import com.evilnotch.lib.minecraft.content.capabilites.registry.CapRegHandler;
+import com.evilnotch.lib.minecraft.content.capability.primitive.CapBoolean;
+import com.evilnotch.lib.minecraft.content.capability.registry.CapRegHandler;
+import com.evilnotch.lib.minecraft.util.TileEntityUtil;
 
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 

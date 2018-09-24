@@ -3,10 +3,7 @@ package com.evilnotch.dungeontweeks.main.world.worldgen.mobs;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -15,18 +12,12 @@ import javax.annotation.Nullable;
 import com.evilnotch.dungeontweeks.main.Config;
 import com.evilnotch.dungeontweeks.main.events.EventDungeon;
 import com.evilnotch.lib.api.ReflectionUtil;
-import com.evilnotch.lib.minecraft.EntityUtil;
+import com.evilnotch.lib.minecraft.util.EntityUtil;
 import com.evilnotch.lib.util.JavaUtil;
-import com.evilnotch.lib.util.line.ILine;
-import com.evilnotch.lib.util.line.Line;
 import com.evilnotch.lib.util.line.LineArray;
-import com.evilnotch.lib.util.line.comment.Comment;
-import com.evilnotch.lib.util.line.comment.IComment;
 import com.evilnotch.lib.util.line.config.ConfigBase;
 import com.evilnotch.lib.util.line.config.ConfigLine;
 
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
@@ -34,9 +25,8 @@ import net.minecraft.util.WeightedRandom;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DungeonHooks;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.DungeonHooks.DungeonMob;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Loader;
 
 public class DungeonMobs {
@@ -79,6 +69,8 @@ public class DungeonMobs {
 		for(DungeonEntry map : codedEntries)
 		{
 			DungeonEntry e = getDungeonEntry(map.loc, entries);
+			if(e == null)
+				continue;
 			File dir = e.baseDir;
 			for(DungeonMob mob : map.list)
 			{
@@ -112,8 +104,7 @@ public class DungeonMobs {
 				cfg.addLine(line);
 			}
 			//custom entries
-			if(map.loc.dungeonSubType.equals(DungeonLocation.anyDim))
-				getConfig(map,cfgs, new File(dir,"custom/custom.txt"));
+			getConfig(map,cfgs, new File(dir,"custom/custom.txt"));
 			
 			map.parseConfigs(list);
 		}
@@ -280,7 +271,7 @@ public class DungeonMobs {
 	public static DungeonMobNBT pickMobSpawner(Random rnd, ResourceLocation dungeonId, int dim,ResourceLocation biome) 
 	{
 		DungeonEntry e = getDungeonEntry(dungeonId, dim, biome);
-		if(e.list.isEmpty())
+		if(e == null || e.list.isEmpty())
 			return Config.blankSpawnerWhenBlank ? blank_mob : pig;
 		DungeonMobNBT mob = WeightedRandom.getRandomItem(rnd, e.list);
 		return mob;

@@ -106,15 +106,15 @@ public class DungeonMobs {
 			//custom entries
 			getConfig(map,cfgs, new File(dir,"custom/custom.txt"));
 			
+			//parse & save
 			map.parseConfigs(list);
-		}
-		//save configs
-		for(ConfigLine cfg : cfgs.values())
-		{
-			cfg.saveConfig(true);
+			map.saveConfigs();
+			map.clearConfigs();
 		}
 	}
-	public static ConfigLine getConfig(DungeonEntry map,HashMap<File, ConfigLine> cfgs, File actual) {
+	
+	public static ConfigLine getConfig(DungeonEntry map,HashMap<File, ConfigLine> cfgs, File actual) 
+	{
 		ConfigLine cfg = cfgs.get(actual);
 		if(cfg == null)
 		{
@@ -127,6 +127,7 @@ public class DungeonMobs {
 		}
 		return cfg;
 	}
+	
 	/**
 	 * set to stop the cache from re-instantiating itself over and over again when adding compat to forge
 	 */
@@ -149,10 +150,31 @@ public class DungeonMobs {
 			}
 		}
 	}
+	/**
+	 * use this for any dim and or reflection
+	 */
+	public static void addDungeonMob(ResourceLocation dungeonId, ResourceLocation entityId,int itemWeight) 
+	{
+		addDungeonMob(dungeonId,entityId,null,itemWeight);
+	}
+	public static void addDungeonMob(ResourceLocation dungeonId, ResourceLocation entityId, @Nullable NBTTagCompound nbt,int itemWeight) 
+	{
+		addDungeonMob(new DungeonLocation(dungeonId),entityId, nbt, itemWeight);
+	}
+	public static void addDungeonMob(ResourceLocation dungeonId,DungeonMob mob)
+	{
+		addDungeonMob(new DungeonLocation(dungeonId),mob);
+	}
+	
 	public static void addDungeonMob(DungeonLocation dungeonId, ResourceLocation entityId,int itemWeight) 
 	{
 		addDungeonMob(dungeonId,entityId,null,itemWeight);
 	}
+	public static void addDungeonMob(DungeonLocation dungeonId,DungeonMob mob)
+	{
+		addDungeonMob(dungeonId,mob.type,mob instanceof DungeonMobNBT ? ((DungeonMobNBT)mob).nbt : null, mob.itemWeight);
+	}
+
 	/**
 	 * use this for coders adding custom weights pre-defined users will still be able to configure them using this mod
 	 */
@@ -171,6 +193,17 @@ public class DungeonMobs {
 		}
 		entry.list.add(mob);
 	}
+	
+	public static List<? extends DungeonMob> getDungeonList(ResourceLocation loc, boolean coded)
+	{
+		return getDungeonList(new DungeonLocation(loc),coded);
+	}
+	
+	public static List<? extends DungeonMob> getDungeonList(DungeonLocation loc, boolean coded)
+	{
+		return getOrRegDungeonEntry(loc, coded ? DungeonMobs.codedEntries : DungeonMobs.entries).list;
+	}
+	
 	/**
 	 * remove entry in code. All mobs are still configurable in dungeon tweaks but, the initial code weight will be removed
 	 * or if it's NBT/Sub mob the extra meta line won't exist
@@ -279,9 +312,9 @@ public class DungeonMobs {
 	/**
 	 * other mods call this to fire via reflection/dependancy
 	 */
-	public static void fireDungeonTweaks(ResourceLocation dungeonId,TileEntity tile,BlockPos pos,Random rnd,World w)
+	public static void fireDungeonTweaks(ResourceLocation dungeonId,TileEntity tile,Random rnd,World w)
 	{
-		EventDungeon event = new EventDungeon(tile, pos, rnd, dungeonId, w);
+		EventDungeon event = new EventDungeon(tile, rnd, dungeonId, w);
 		MinecraftForge.EVENT_BUS.post(event);
 	}
 

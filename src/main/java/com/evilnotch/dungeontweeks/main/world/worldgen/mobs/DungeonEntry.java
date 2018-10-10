@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import com.evilnotch.dungeontweeks.main.Config;
 import com.evilnotch.lib.util.line.ILine;
 import com.evilnotch.lib.util.line.LineArray;
+import com.evilnotch.lib.util.line.config.ConfigBase;
 import com.evilnotch.lib.util.line.config.ConfigLine;
 
 import net.minecraft.nbt.NBTTagCompound;
@@ -97,14 +98,27 @@ public class DungeonEntry {
 				this.addDungeonMob(loc,line.nbt,head);
 			}
 		}
-		this.cfgs.clear();
 	}
+	
 	/**
 	 * add a new dungeon mob to the entry
 	 */
 	public void addDungeonMob(ResourceLocation loc, NBTTagCompound nbt, int head) 
 	{
 		this.list.add(new DungeonMobNBT(loc,nbt,head));
+	}
+
+	public void saveConfigs() 
+	{
+		for(ConfigBase base : this.cfgs)
+			base.saveConfig(true, false, true);
+	}
+	/**
+	 * to preserve memory as they are no longer needed
+	 */
+	public void clearConfigs()
+	{
+		this.cfgs.clear();
 	}
 
 }

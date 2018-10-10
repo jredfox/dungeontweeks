@@ -18,12 +18,12 @@ public class EventDungeon extends Event{
 	public ResourceLocation dungeonId;
 	public World world;
 	
-	public EventDungeon(TileEntity tile,BlockPos pos,Random rnd,ResourceLocation loc,World w)
+	public EventDungeon(TileEntity tile,Random rnd,ResourceLocation loc,World w)
 	{
 		if(loc instanceof DungeonLocation)
 			loc = ((DungeonLocation)loc).toResourceLocation();
 		this.tile = tile;
-		this.pos = pos;
+		this.pos = tile.getPos();
 		this.rnd = rnd;
 		this.dungeonId = loc;
 		this.world = w;

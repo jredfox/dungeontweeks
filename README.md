@@ -1,8 +1,12 @@
 # dungeontweeks
-overrides default vanilla dungeon,mineshaft,netherfortress,stronghold,and mansion spawners<br/>
-supports modded structures that are defined in config with anyDimension and dimension specific override support<br/>
-allows users to config custom entries with nbt support<br/>
+overrides default vanilla dungeon with configurable files<br/>
+supports:<br/>
+mineshaft<br/>
+netherfortress<br/>
+stronghold<br/>
+mansion spawners<br/>
+modded structures that are defined in config with anyDim,Dimension specific and Biome Overrides<br/>
 
-out of beta:<br/>
+possible future:<br/>
 floor,wall and celing per mob configured<br/>
 spawner nbt override mode<br/>

@@ -1,5 +1,5 @@
-Version:<br/>
-Issue:<br/>
-Steps to reproduce:<br/>
-CrashReport/Log: users always have logs even if it doesn't crash<br/>
+Version:
+Issue:
+Steps to reproduce:
+CrashReport/Log: users always have logs even if it doesn't crash
 ModPack/ModList: pastebin.com/example_file.txt

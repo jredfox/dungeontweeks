@@ -201,7 +201,12 @@ public class DungeonMobs {
 	
 	public static List<? extends DungeonMob> getDungeonList(DungeonLocation loc, boolean coded)
 	{
-		return getOrRegDungeonEntry(loc, coded ? DungeonMobs.codedEntries : DungeonMobs.entries).list;
+		DungeonEntry e = coded ? getOrRegDungeonEntry(loc, codedEntries) : getDungeonEntry(loc, entries);
+		if(e == null)
+		{
+			return null;
+		}
+		return e.list;
 	}
 	
 	/**

@@ -1,11 +1,14 @@
 # dungeontweeks
-overrides default vanilla dungeon with configurable files<br/>
-`supports:`<br/>
-`mineshaft`<br/>
-`netherfortress`<br/>
-`stronghold`<br/>
-`mansion spawners<br/>
-modded structures that are defined in config with anyDim,Dimension specific and Biome Overrides`<br/>
+overrides default vanilla dungeon with configurable files 
+
+supports:
+```
+mineshaft
+netherfortress
+stronghold
+mansion spawners
+modded structures that are defined in config with anyDim,Dimension specific and Biome Overrides
+```
 
 possible future:<br/>
 floor,wall and celing per mob configured<br/>

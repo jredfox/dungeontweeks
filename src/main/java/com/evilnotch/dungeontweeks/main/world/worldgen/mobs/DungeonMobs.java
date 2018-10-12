@@ -58,6 +58,7 @@ public class DungeonMobs {
 		cacheForge();
 		loadDefinitions();
 		populateConfigs();
+		printDungeons();
 	}
 
 	public static void populateConfigs() 
@@ -321,6 +322,14 @@ public class DungeonMobs {
 	{
 		EventDungeon event = new EventDungeon(tile, rnd, dungeonId, w);
 		MinecraftForge.EVENT_BUS.post(event);
+	}
+	/**
+	 * useful for debugging purposes
+	 */
+	public static void printDungeons()
+	{
+		for(DungeonEntry e : entries)
+			System.out.println(e);
 	}
 
 }

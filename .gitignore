@@ -1,0 +1,4 @@
+
+src/main/java/net/minecraft/network/play/server/SPacketUpdateTileEntity.java
+src/main/java/net/minecraft/tileentity/MobSpawnerBaseLogic.java
+src/main/java/net/minecraft/tileentity/WeightedSpawnerEntry.java

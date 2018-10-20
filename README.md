@@ -12,4 +12,5 @@ modded structures that are defined in config with anyDim,Dimension specific and 
 
 possible future:<br/>
 floor,wall and celing per mob configured<br/>
-spawner nbt override mode<br/>
+dynamic sizes
+custimized loot<br/>

@@ -17,7 +17,7 @@ public class CapSpawnerReg extends CapRegTileEntity{
 	public void register(TileEntity object, CapContainer c) 
 	{
 		if(object instanceof TileEntityMobSpawner)
-			c.registerCapability(hasScanned, new CapBoolean<TileEntity>(hasScanned.toString()));
+			c.registerCapability(hasScanned, new CapBoolean<TileEntityMobSpawner>(hasScanned.toString()));
 	}
 
 }

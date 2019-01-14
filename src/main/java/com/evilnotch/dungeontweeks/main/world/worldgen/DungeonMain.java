@@ -138,7 +138,8 @@ public class DungeonMain extends WorldGenDungeons{
 
             if (tileentity instanceof TileEntityMobSpawner)
             {	
-                DungeonMobs.fireDungeonTweaks(DungeonMobs.dungeon, tileentity, rand, worldIn);
+                EventDungeon post = new EventDungeon(tileentity,rand,DungeonMobs.dungeon,worldIn);
+            	MinecraftForge.EVENT_BUS.post(post);
             }
 
             return true;

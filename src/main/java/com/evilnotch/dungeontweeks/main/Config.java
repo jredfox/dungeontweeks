@@ -1,8 +1,10 @@
 package com.evilnotch.dungeontweeks.main;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.evilnotch.lib.util.JavaUtil;
 import com.evilnotch.lib.util.line.ILine;
@@ -20,7 +22,8 @@ public class Config {
 	public static File dir = null;
 	public static int default_weight = 0;
 	public static boolean validateGeneratedEntries = true;
-	public static List<LineArray> definitions = new ArrayList();
+	public static ConfigLine def = new ConfigLine();
+	public static Set<LineArray> codedDef = new LinkedHashSet<LineArray>();
 	public static boolean blankSpawnerWhenBlank = true;
     public static boolean fancyConfig = true;
 	
@@ -42,11 +45,18 @@ public class Config {
 		blankSpawnerWhenBlank = config.get("general","blankSpawnerWhenBlank",true).getBoolean(true);
 		config.save();
 	}
-	public static void loadDefinitionsDir(File dir){
+	
+	public static void loadDefinitionsDir(File dir)
+	{	
+		//parse the config
+		def.lines.clear();
+		
+		for(ILine l : codedDef)
+			def.addLine(l);
+		
 		Configuration config = new Configuration(new File(dir,"config.cfg"));
 		config.load();
-		String[] list = config.getStringList("dungeons", "definitions", new String[]{"minecraft:dungeon","minecraft:mansion","minecraft:mineshaft","minecraft:netherfortress","minecraft:stronghold","battletowers:cobblestone","battletowers:cobblestonemossy","battletowers:sandstone","battletowers:ice","battletowers:smoothstone","battletowers:netherrack","battletowers:jungle","quark:dungeon"}, "define dungeons based on mobid and dimension in this format modid:dungeonname <dimensiond-id/\"biomeid\"> dimension is optional without it it will work in any dimension");
-		ConfigLine linecfg = new ConfigLine();
+		String[] list = config.getStringList("dungeons", "definitions", new String[]{}, "");
 		for(String s : list)
 		{
 			String wspaced = JavaUtil.toWhiteSpaced(s);
@@ -55,12 +65,19 @@ public class Config {
 			else
 			{
 				LineArray line = new LineArray(s);
-				line.setHead(true);
-				linecfg.addLine(line);
+				def.addLine(line);
 			}
 		}
-		for(ILine l : linecfg.lines)
-			definitions.add((LineArray)l);
+		//save the config definitions that get programatically in here
+		list = new String[def.lines.size()];
+		int index = 0;
+		for(ILine l : def.lines)
+		{
+			list[index] = l.toString();
+			index++;
+		}
+		config.addCustomCategoryComment("definitions", "define dungeons based on mobid and dimension in this format \"modid:dungeonname <dimensiond-id/\"biomeid\"> = enabled\" dimension is optional without it it will work in any dimension");
+		config.get("definitions", "dungeons", new String[]{}).set(list);
 		
 		fancyConfig = config.get("general","fancyConfig",true).getBoolean(true);//so you don't have to keep going back and forth to debug or to look at the differences
 		config.save();

@@ -14,6 +14,7 @@ import com.evilnotch.dungeontweeks.main.events.EventDungeon;
 import com.evilnotch.lib.api.ReflectionUtil;
 import com.evilnotch.lib.minecraft.util.EntityUtil;
 import com.evilnotch.lib.util.JavaUtil;
+import com.evilnotch.lib.util.line.ILine;
 import com.evilnotch.lib.util.line.LineArray;
 import com.evilnotch.lib.util.line.config.ConfigBase;
 import com.evilnotch.lib.util.line.config.ConfigLine;
@@ -51,14 +52,13 @@ public class DungeonMobs {
 	public static void cacheMobs()
 	{
 		entries.clear();
-		Config.definitions.clear();
+//		Config.definitions.clear();
 		baseDir = new File(Config.dir,"entries");
 		
 		EntityUtil.cacheEnts();
 		cacheForge();
 		loadDefinitions();
 		populateConfigs();
-		printDungeons();
 	}
 
 	public static void populateConfigs() 
@@ -260,8 +260,14 @@ public class DungeonMobs {
 	{	
 		//input user definitions
 		Config.loadDefinitionsDir(Config.dir);
-		for(LineArray line : Config.definitions)
+		for(ILine l : Config.def.lines)
 		{
+			LineArray line = (LineArray)l;
+			if(!line.getBoolean())
+			{
+				System.out.println("Skipping:" + line);
+				continue;
+			}
 			ResourceLocation loc = line.getResourceLocation();
 			if(line.hasMetaDataNum())
 			{
@@ -324,12 +330,13 @@ public class DungeonMobs {
 		MinecraftForge.EVENT_BUS.post(event);
 	}
 	/**
-	 * useful for debugging purposes
+	 * add your dungeon location to dungeon tweaks programmatically without user input. 
+	 * and enabled param being do you want this enabled by default
 	 */
-	public static void printDungeons()
+	public static void addDefinition(ResourceLocation dungeonId, boolean enabled)
 	{
-		for(DungeonEntry e : entries)
-			System.out.println(e);
+		LineArray l = new LineArray(dungeonId.toString() + " = " + enabled);
+		Config.codedDef.add(l);
 	}
 
 }

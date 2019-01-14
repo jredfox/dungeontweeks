@@ -5,17 +5,14 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.DungeonHooks;
 
 public class DungeonMobNBT extends DungeonHooks.DungeonMob{
-	
 	public NBTTagCompound nbt;
 	public boolean advanced = false;
 	
-	public DungeonMobNBT(ResourceLocation type,int weight) 
-	{
+	public DungeonMobNBT(ResourceLocation type,int weight) {
 		this(type,null,weight);
 	}
 
-	public DungeonMobNBT(ResourceLocation type,NBTTagCompound nbt,int weight) 
-	{
+	public DungeonMobNBT(ResourceLocation type,NBTTagCompound nbt,int weight) {
 		super(weight, type);
 		this.nbt = nbt;
 		if(this.nbt != null)
@@ -45,8 +42,7 @@ public class DungeonMobNBT extends DungeonHooks.DungeonMob{
 		return this.nbt.equals(entry.nbt) && this.type.equals(entry.type);
 	}
 
-	public boolean hasNBT() 
-	{
+	public boolean hasNBT() {
 		return this.nbt != null;
 	}
 

@@ -75,7 +75,7 @@ public class Config {
 				actual.setHead(line.getBoolean());
 			}
 		}
-		System.out.println(def);
+		
 		//save the config definitions that get programatically in here
 		list = new String[def.lines.size()];
 		int index = 0;

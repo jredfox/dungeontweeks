@@ -65,9 +65,17 @@ public class Config {
 			else
 			{
 				LineArray line = new LineArray(s);
+				if(!s.contains("="))
+				{
+					System.out.println("legacy format found:" + line);
+					line.setHead(true);
+				}
 				def.addLine(line);
+				LineArray actual = (LineArray) def.getUpdatedLine(line);
+				actual.setHead(line.getBoolean());
 			}
 		}
+		System.out.println(def);
 		//save the config definitions that get programatically in here
 		list = new String[def.lines.size()];
 		int index = 0;

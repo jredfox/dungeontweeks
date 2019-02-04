@@ -1,3 +1,0 @@
-dungeons seeed 2:
--167 32 -57 > forest dim 0
-134 20 385 > plains dim 0

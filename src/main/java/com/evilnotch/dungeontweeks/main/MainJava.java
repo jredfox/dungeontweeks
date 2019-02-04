@@ -5,7 +5,7 @@ import com.evilnotch.dungeontweeks.main.commands.CmdReload;
 import com.evilnotch.dungeontweeks.main.eventhandlers.DungeonHandler;
 import com.evilnotch.dungeontweeks.main.eventhandlers.ReplaceGen;
 import com.evilnotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
-import com.evilnotch.lib.api.MCPMappings;
+import com.evilnotch.lib.api.mcp.MCPMappings;
 import com.evilnotch.lib.minecraft.content.capability.registry.CapRegHandler;
 import com.evilnotch.lib.minecraft.registry.GeneralRegistry;
 

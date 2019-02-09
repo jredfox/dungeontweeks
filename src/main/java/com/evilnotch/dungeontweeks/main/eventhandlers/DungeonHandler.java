@@ -37,7 +37,7 @@ public class DungeonHandler {
 		CapBoolean cap = (CapBoolean) CapRegHandler.getCapability(e.tile, CapSpawnerReg.hasScanned);
 		cap.value = true;
 		IBlockState state = e.world.getBlockState(e.pos);
-		TileEntityUtil.setTileNBT(e.world, e.tile, nbt, false);
+		TileEntityUtil.setTileNBT(e.tile, nbt);
 	}
 
 }

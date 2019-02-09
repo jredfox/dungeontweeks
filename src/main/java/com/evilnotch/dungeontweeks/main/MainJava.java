@@ -20,6 +20,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 @Mod(modid = MainJava.MODID,name = "Dungeon Tweeks", version = MainJava.VERSION,acceptableRemoteVersions = "*", dependencies = "required-after:evilnotchlib@[1.2.3]")
 public class MainJava {
+	
 	public static final String MODID = "dungeontweaks";
 	public static final String VERSION = "1.2.6";
 	public static String chunkSettings = null;
@@ -55,11 +56,13 @@ public class MainJava {
 		MinecraftForge.EVENT_BUS.register(new ReplaceGen() );
 		MinecraftForge.EVENT_BUS.register(new DungeonHandler() );
 	}
+	
 	@Mod.EventHandler
 	public void post(FMLPostInitializationEvent e)
 	{
 		DungeonMobs.cacheMobs();
 	}
+	
 	/**
 	 * supports battle towers and quark adds the definitions automatically to the configuration file
 	 */

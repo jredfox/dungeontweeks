@@ -8,12 +8,11 @@ import java.util.Random;
 import com.evilnotch.dungeontweeks.main.Config;
 import com.evilnotch.dungeontweeks.main.MainJava;
 import com.evilnotch.dungeontweeks.main.caps.CapSpawnerReg;
-import com.evilnotch.dungeontweeks.main.events.EventDungeon;
 import com.evilnotch.dungeontweeks.main.world.worldgen.DungeonMain;
 import com.evilnotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
 import com.evilnotch.lib.api.ReflectionUtil;
-import com.evilnotch.lib.minecraft.content.capability.primitive.CapBoolean;
-import com.evilnotch.lib.minecraft.content.capability.registry.CapRegHandler;
+import com.evilnotch.lib.minecraft.capability.primitive.CapBoolean;
+import com.evilnotch.lib.minecraft.capability.registry.CapabilityRegistry;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -27,7 +26,6 @@ import net.minecraft.world.gen.ChunkGeneratorHell;
 import net.minecraft.world.gen.ChunkGeneratorOverworld;
 import net.minecraft.world.gen.ChunkGeneratorSettings;
 import net.minecraft.world.gen.IChunkGenerator;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -140,7 +138,7 @@ public class ReplaceGen {
 				  //if entry isn't null it means it's a defined spawner for this dimension fire the event
 				  if(!mineshaft && !stronghold && !mansion && !netherfortress && !entry)
 					  continue;
-				   CapBoolean cap = (CapBoolean) CapRegHandler.getCapability(tile,CapSpawnerReg.hasScanned);
+				   CapBoolean cap = (CapBoolean) CapabilityRegistry.getCapability(tile,CapSpawnerReg.hasScanned);
 				   boolean scanned = cap.value;
 				   if(!scanned)
 				   {

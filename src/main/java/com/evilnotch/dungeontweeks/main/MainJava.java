@@ -5,12 +5,11 @@ import com.evilnotch.dungeontweeks.main.commands.CmdReload;
 import com.evilnotch.dungeontweeks.main.eventhandlers.DungeonHandler;
 import com.evilnotch.dungeontweeks.main.eventhandlers.ReplaceGen;
 import com.evilnotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
-import com.evilnotch.lib.api.mcp.MCPMappings;
-import com.evilnotch.lib.minecraft.content.capability.registry.CapRegHandler;
+import com.evilnotch.lib.api.mcp.MCPSidedString;
+import com.evilnotch.lib.minecraft.capability.registry.CapabilityRegistry;
 import com.evilnotch.lib.minecraft.registry.GeneralRegistry;
 
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.gen.ChunkGeneratorOverworld;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
@@ -29,8 +28,8 @@ public class MainJava {
 	public void preinit(FMLPreInitializationEvent e)
 	{
 		Config.loadConfig(e.getModConfigurationDirectory());
-		chunkSettings = MCPMappings.getField(ChunkGeneratorOverworld.class, "settings");//cache variables from mcp-api as it's a heavy process
-		CapRegHandler.registerRegistry(new CapSpawnerReg());
+		chunkSettings = new MCPSidedString("settings", "field_186000_s").toString();//cache variables from mcp-api as it's a heavy process
+		CapabilityRegistry.registerRegistry(new CapSpawnerReg());
 		GeneralRegistry.registerCommand(new CmdReload() );
 		
 		DungeonMobs.addDefinition(DungeonMobs.dungeon.toResourceLocation(), true);

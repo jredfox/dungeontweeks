@@ -4,8 +4,8 @@ import com.evilnotch.dungeontweeks.main.caps.CapSpawnerReg;
 import com.evilnotch.dungeontweeks.main.events.EventDungeon;
 import com.evilnotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobNBT;
 import com.evilnotch.dungeontweeks.main.world.worldgen.mobs.DungeonMobs;
-import com.evilnotch.lib.minecraft.content.capability.primitive.CapBoolean;
-import com.evilnotch.lib.minecraft.content.capability.registry.CapRegHandler;
+import com.evilnotch.lib.minecraft.capability.primitive.CapBoolean;
+import com.evilnotch.lib.minecraft.capability.registry.CapabilityRegistry;
 import com.evilnotch.lib.minecraft.util.TileEntityUtil;
 
 import net.minecraft.block.state.IBlockState;
@@ -34,7 +34,7 @@ public class DungeonHandler {
 		else
 			nbt = data;
 		
-		CapBoolean cap = (CapBoolean) CapRegHandler.getCapability(e.tile, CapSpawnerReg.hasScanned);
+		CapBoolean cap = (CapBoolean) CapabilityRegistry.getCapability(e.tile, CapSpawnerReg.hasScanned);
 		cap.value = true;
 		IBlockState state = e.world.getBlockState(e.pos);
 		TileEntityUtil.setTileNBT(e.tile, nbt);

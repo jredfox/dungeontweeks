@@ -147,8 +147,8 @@ public class DungeonMobs {
 				if(mob instanceof DungeonMobNBT)
 					nbt = ((DungeonMobNBT)mob).nbt;
 				addDungeonMob(dungeon,mob.type,nbt,mob.itemWeight);
-				cachedForgeHooks = true;
 			}
+			cachedForgeHooks = true;
 		}
 	}
 	/**
